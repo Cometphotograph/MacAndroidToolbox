@@ -2,11 +2,12 @@
 
 **English** | [简体中文](README.md)
 
-[![Version](https://img.shields.io/badge/Version-v1.2.0-blue.svg?style=flat)](https://github.com)
+[![Version](https://img.shields.io/badge/Version-v1.2.2-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
 [![Author](https://img.shields.io/badge/Author-bilibili%40EchoIM__-pink.svg?style=flat&logo=bilibili)](https://space.bilibili.com/432147890?spm_id_from=333.337.0.0)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717.svg?style=flat&logo=github)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Design](https://img.shields.io/badge/Design-Liquid%20Glass-purple.svg)](https://developer.apple.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -119,11 +120,12 @@ MacAndroidToolbox includes a comprehensive built-in internationalization archite
 * 繁體中文 (Traditional Chinese)
 * 简体中文 (Simplified Chinese)
 * English
-* 日本語 (Japanese)
 * Français (French)
+* 日本語 (Japanese)
 * Español (Spanish)
 * 한국어 (Korean)
 * Русский (Russian)
+* Українська (Ukrainian)
 
 ---
 
@@ -153,21 +155,21 @@ MacAndroidToolbox includes a comprehensive built-in internationalization archite
 ## 📥 Download & Installation
 
 ### Option 1: 💿 DMG Disk Image (Recommended)
-1. Download `MacAndroidToolbox_v1.2.0.dmg` from the [Releases](../../releases) page.
+1. Download `MacAndroidToolbox_v1.2.2.dmg` from the [Releases](../../releases) page.
 2. Double-click to mount the DMG.
 3. Drag `MacAndroidToolbox.app` into the `Applications` shortcut folder.
 
 ### Option 2: 🛠️ Build from Source
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/MacAndroidToolbox.git
+git clone https://github.com/Cometphotograph/MacAndroidToolbox.git
 cd MacAndroidToolbox
 
 # 2. Run automated release build (outputs .app and .dmg to releases/ folder)
 ./build_app.sh
 
 # 3. Launch the built application
-open "releases/MacAndroidToolbox_v1.2.0.app"
+open "releases/MacAndroidToolbox_v1.2.2.app"
 ```
 
 ---

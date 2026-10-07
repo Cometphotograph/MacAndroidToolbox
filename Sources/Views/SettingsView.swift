@@ -247,6 +247,22 @@ public struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         
+                        Link(destination: URL(string: "https://github.com/Cometphotograph/MacAndroidToolbox")!) {
+                            HStack(spacing: 5) {
+                                Image(systemName: "arrow.triangle.branch")
+                                    .font(.caption)
+                                Text("GitHub")
+                                    .font(.system(size: 12, weight: .bold))
+                            }
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 3.5)
+                            .background(Color.primary.opacity(0.08))
+                            .foregroundColor(.primary)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color.primary.opacity(0.2), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        
                         Button {
                             showSponsorSheet = true
                         } label: {
@@ -340,6 +356,22 @@ public struct SettingsView: View {
                             .foregroundColor(.pink)
                             .clipShape(Capsule())
                             .overlay(Capsule().stroke(Color.pink.opacity(0.3), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        
+                        Link(destination: URL(string: "https://github.com/Cometphotograph/MacAndroidToolbox")!) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.triangle.branch")
+                                    .font(.system(size: 10))
+                                Text("GitHub")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color.primary.opacity(0.08))
+                            .foregroundColor(.primary)
+                            .clipShape(Capsule())
+                            .overlay(Capsule().stroke(Color.primary.opacity(0.2), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
                     }
