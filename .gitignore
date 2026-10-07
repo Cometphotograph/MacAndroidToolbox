@@ -1,0 +1,45 @@
+# ==========================================
+# macOS System Files
+# ==========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon\r
+._*
+.Spotlight-V100
+.Trashes
+
+# ==========================================
+# Swift Package Manager & Xcode
+# ==========================================
+.build/
+Packages/
+Package.resolved
+*.xcodeproj
+*.xcworkspace
+!Package.swift
+xcuserdata/
+DerivedData/
+.swiftpm/
+*.xcuserstate
+*.xcbkptlist
+
+# ==========================================
+# Build Artifacts & Packages
+# ==========================================
+*.app/
+*.dmg
+*.pkg
+*.ipa
+*.dSYM/
+*.dSYM.zip
+dmg_staging*/
+releases/
+
+# ==========================================
+# Temporary Files & Logs
+# ==========================================
+*.log
+*.tmp
+.scratch/
+scratch/

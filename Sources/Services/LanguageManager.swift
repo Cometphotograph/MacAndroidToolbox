@@ -1,0 +1,3202 @@
+import Foundation
+import SwiftUI
+import Combine
+
+public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
+    case zhHant = "zh_Hant"
+    case zhHans = "zh_Hans"
+    case en = "en"
+    case ja = "ja"
+    case es = "es"
+    case ko = "ko"
+    case ru = "ru"
+    case uk = "uk"
+    
+    public var id: String { rawValue }
+    
+    public var displayName: String {
+        switch self {
+        case .zhHant: return "繁體中文（台灣）"
+        case .zhHans: return "简体中文"
+        case .en: return "English"
+        case .ja: return "日本語"
+        case .es: return "Español"
+        case .ko: return "한국어"
+        case .ru: return "Русский"
+        case .uk: return "Українська"
+        }
+    }
+}
+
+@MainActor
+public final class LanguageManager: ObservableObject {
+    public static let shared = LanguageManager()
+    
+    public let appVersion = "v1.2.0"
+    public let appBuild = "20261007_120"
+    
+    private let kSelectedLanguageKey = "kSelectedAppLanguage"
+    
+    @Published public var currentLanguage: AppLanguage {
+        didSet {
+            UserDefaults.standard.set(currentLanguage.rawValue, forKey: kSelectedLanguageKey)
+        }
+    }
+    
+    private init() {
+        if let saved = UserDefaults.standard.string(forKey: kSelectedLanguageKey),
+           let lang = AppLanguage(rawValue: saved) {
+            self.currentLanguage = lang
+        } else {
+            self.currentLanguage = .zhHant
+        }
+    }
+    
+    public func setLanguage(_ language: AppLanguage) {
+        self.currentLanguage = language
+    }
+    
+    public func localized(_ key: String) -> String {
+        return translations[key]?[currentLanguage] ?? translations[key]?[.zhHant] ?? key
+    }
+    
+    // Comprehensive translations dictionary for all 8 supported languages
+    private let translations: [String: [AppLanguage: String]] = [
+        "app_already_running_desc": [
+            .zhHant: "為確保設備通訊穩定並避免資料衝突，軟體已啟用禁止重複開啟保護。已自動為您切換至當前正在運行的視窗。",
+            .zhHans: "为确保设备通讯稳定并避免数据冲突，软件已启用禁止重复开启保护。已自动为您切换至当前正在运行的窗口。",
+            .en: "To ensure stable device communication and prevent data conflicts, single-instance enforcement is active. Switched to the currently running window.",
+            .ja: "デバイス通信の安定性を確保しデータの競合を防ぐため、重複起動防止機能が有効になっています。現在実行中のウィンドウに切り替えました。",
+            .es: "Para garantizar una comunicación estable y evitar conflictos de datos, la protección de instancia única está activa. Se ha cambiado a la ventana en ejecución.",
+            .ko: "기기 통신의 안정성을 확보하고 데이터 충돌을 방지하기 위해 중복 실행 방지 기능이 활성화되었습니다. 실행 중인 창으로 전환되었습니다.",
+            .ru: "Для обеспечения стабильной связи с устройством и предотвращения конфликтов данных включена защита от повторного запуска. Выполнен переход к активному окну.",
+            .uk: "Для стабільного зв'язку з пристроєм та уникнення конфліктів даних увімкнено захист від повторного запуску. Здійснено перехід до активного вікна."
+        ],
+        "app_already_running_title": [
+            .zhHant: "麥安工具箱已在運行中",
+            .zhHans: "麦安工具箱已在运行中",
+            .en: "MacAndroidToolbox is Already Running",
+            .ja: "麦安ツールボックスは既に起動しています",
+            .es: "MacAndroidToolbox ya está en ejecución",
+            .ko: "MacAndroidToolbox가 이미 실행 중입니다",
+            .ru: "MacAndroidToolbox уже запущен",
+            .uk: "MacAndroidToolbox вже запущено"
+        ],
+        "app_browse_apk": [
+            .zhHant: "瀏覽 APK...",
+            .zhHans: "浏览 APK...",
+            .en: "Browse APK...",
+            .ja: "APK を選択...",
+            .es: "Examinar APK...",
+            .ko: "APK 찾아보기...",
+            .ru: "Обзор APK...",
+            .uk: "Огляд APK..."
+        ],
+        "app_build_info": [
+            .zhHant: "組建號",
+            .zhHans: "构建版本",
+            .en: "Build",
+            .ja: "ビルド",
+            .es: "Compilación",
+            .ko: "빌드 번호",
+            .ru: "Сборка",
+            .uk: "Збірка"
+        ],
+        "app_clear_data": [
+            .zhHant: "清除快取與資料",
+            .zhHans: "清除缓存与数据",
+            .en: "Clear Data",
+            .ja: "データ消去",
+            .es: "Borrar datos",
+            .ko: "데이터 삭제",
+            .ru: "Очистить данные",
+            .uk: "Очистити дані"
+        ],
+        "app_confirm_uninstall_btn": [
+            .zhHant: "確定解除安裝",
+            .zhHans: "确定卸载",
+            .en: "Uninstall",
+            .ja: "アンインストール",
+            .es: "Desinstalar",
+            .ko: "삭제 확인",
+            .ru: "Удалить",
+            .uk: "Видалити"
+        ],
+        "app_copyright": [
+            .zhHant: "© 2026 麥安工具箱. 遵循 MIT 開源協議。",
+            .zhHans: "© 2026 麦安工具箱. 遵循 MIT 开源协议。",
+            .en: "© 2026 MacAndroidToolbox. Released under the MIT License.",
+            .ja: "© 2026 MacAndroidToolbox. MIT ライセンスに基づいて公開。",
+            .es: "© 2026 MacAndroidToolbox. Publicado bajo licencia MIT.",
+            .ko: "© 2026 MacAndroidToolbox. MIT 라이선스에 따라 배포됨.",
+            .ru: "© 2026 MacAndroidToolbox. Распространяется под лицензией MIT.",
+            .uk: "© 2026 MacAndroidToolbox. Розповсюджується під ліцензією MIT."
+        ],
+        "app_downgrade": [
+            .zhHant: "允許降級安裝 (-d)",
+            .zhHans: "允许降级安装 (-d)",
+            .en: "Allow Downgrade (-d)",
+            .ja: "ダウングレードを許可 (-d)",
+            .es: "Permitir degradación de versión (-d)",
+            .ko: "다운그레이드 허용 (-d)",
+            .ru: "Разрешить даунгрейд (-d)",
+            .uk: "Дозволити даунгрейд (-d)"
+        ],
+        "app_empty_hint_adb": [
+            .zhHant: "點擊「重新整理」以獲取應用清單",
+            .zhHans: "点击“刷新”以获取应用列表",
+            .en: "Click 'Refresh' to load app list",
+            .ja: "「更新」をクリックしてアプリ一覧を取得",
+            .es: "Haga clic en 'Actualizar' para cargar la lista de apps",
+            .ko: "'새로고침'을 클릭하여 앱 목록을 불러옵니다",
+            .ru: "Нажмите «Обновить» для загрузки списка приложений",
+            .uk: "Натисніть «Оновити» для завантаження списку додатків"
+        ],
+        "app_empty_hint_no_adb": [
+            .zhHant: "此功能需要設備處於 ADB 模式",
+            .zhHans: "此功能需要设备处于 ADB 模式",
+            .en: "This feature requires ADB mode",
+            .ja: "この機能にはADBモードが必要です",
+            .es: "Esta función requiere que el dispositivo esté en modo ADB",
+            .ko: "이 기능은 기기가 ADB 모드여야 합니다",
+            .ru: "Для этой функции требуется режим ADB",
+            .uk: "Для цієї функції потрібен режим ADB"
+        ],
+        "app_extract": [
+            .zhHant: "導出 APK 至 Mac",
+            .zhHans: "导出 APK 至 Mac",
+            .en: "Export APK to Mac",
+            .ja: "APK を Mac に書き出し",
+            .es: "Exportar APK al Mac",
+            .ko: "Mac으로 APK 추출",
+            .ru: "Экспорт APK на Mac",
+            .uk: "Експорт APK на Mac"
+        ],
+        "app_filter_all": [
+            .zhHant: "全部應用",
+            .zhHans: "全部应用",
+            .en: "All Apps",
+            .ja: "すべてのアプリ",
+            .es: "Todas",
+            .ko: "모든 앱",
+            .ru: "Все приложения",
+            .uk: "Всі додатки"
+        ],
+        "app_filter_disabled": [
+            .zhHant: "已停用 / 凍結",
+            .zhHans: "已停用 / 冻结",
+            .en: "Disabled / Frozen",
+            .ja: "無効 / 凍結",
+            .es: "Inhabilitadas",
+            .ko: "비활성화됨 / 동결됨",
+            .ru: "Отключенные",
+            .uk: "Вимкнені"
+        ],
+        "app_filter_system": [
+            .zhHant: "系統預裝",
+            .zhHans: "系统预装",
+            .en: "System",
+            .ja: "システム",
+            .es: "Del sistema",
+            .ko: "시스템 기본",
+            .ru: "Системные",
+            .uk: "Системні"
+        ],
+        "app_filter_third_party": [
+            .zhHant: "第三方應用",
+            .zhHans: "第三方应用",
+            .en: "User Apps",
+            .ja: "サードパーティ",
+            .es: "De usuario",
+            .ko: "사용자 앱",
+            .ru: "Сторонние",
+            .uk: "Сторонні"
+        ],
+        "app_force_stop": [
+            .zhHant: "強制停止",
+            .zhHans: "强制停止",
+            .en: "Force Stop",
+            .ja: "強制停止",
+            .es: "Forzar detención",
+            .ko: "강제 종료",
+            .ru: "Остановить",
+            .uk: "Зупинити"
+        ],
+        "app_freeze": [
+            .zhHant: "凍結/停用應用",
+            .zhHans: "冻结/禁用应用",
+            .en: "Freeze App",
+            .ja: "アプリを無効化",
+            .es: "Inhabilitar",
+            .ko: "앱 비활성화 (동결)",
+            .ru: "Отключить",
+            .uk: "Вимкнути"
+        ],
+        "app_grant_perms": [
+            .zhHant: "自動授權所有執行權限 (-g)",
+            .zhHans: "自动授予所有运行时权限 (-g)",
+            .en: "Grant Runtime Permissions (-g)",
+            .ja: "全権限を自動付与 (-g)",
+            .es: "Conceder todos los permisos (-g)",
+            .ko: "모든 런타임 권한 부여 (-g)",
+            .ru: "Предоставить все разрешения (-g)",
+            .uk: "Надати всі дозволи (-g)"
+        ],
+        "app_install_btn": [
+            .zhHant: "安裝至手機",
+            .zhHans: "安装至手机",
+            .en: "Install to Device",
+            .ja: "端末にインストール",
+            .es: "Instalar en dispositivo",
+            .ko: "기기에 설치",
+            .ru: "Установить на устройство",
+            .uk: "Встановити на пристрій"
+        ],
+        "app_install_card": [
+            .zhHant: "安裝應用程式 (Install APK)",
+            .zhHans: "安装应用程序 (Install APK)",
+            .en: "Install Application (APK)",
+            .ja: "アプリケーションのインストール (APK)",
+            .es: "Instalar aplicación (APK)",
+            .ko: "애플리케이션 설치 (APK)",
+            .ru: "Установка приложения (APK)",
+            .uk: "Встановлення додатку (APK)"
+        ],
+        "app_install_placeholder": [
+            .zhHant: "請選擇或貼上 .apk 檔案路徑",
+            .zhHans: "请选择或粘贴 .apk 文件路径",
+            .en: "Select or paste .apk file path",
+            .ja: ".apk ファイルパスを選択または入力",
+            .es: "Seleccione o pegue la ruta del archivo .apk",
+            .ko: ".apk 파일 경로를 선택하거나 붙여넣기",
+            .ru: "Выберите или вставьте путь к файлу .apk",
+            .uk: "Виберіть або вставте шлях до файлу .apk"
+        ],
+        "app_launch": [
+            .zhHant: "啟動應用",
+            .zhHans: "启动应用",
+            .en: "Launch App",
+            .ja: "アプリを起動",
+            .es: "Abrir app",
+            .ko: "앱 실행",
+            .ru: "Запустить",
+            .uk: "Запустити"
+        ],
+        "app_load_btn": [
+            .zhHant: "讀取應用清單",
+            .zhHans: "读取应用列表",
+            .en: "Load Apps",
+            .ja: "アプリ一覧を読み込む",
+            .es: "Cargar apps",
+            .ko: "앱 목록 불러오기",
+            .ru: "Загрузить приложения",
+            .uk: "Завантажити додатки"
+        ],
+        "app_name": [
+            .zhHant: "麥安工具箱",
+            .zhHans: "麦安工具箱",
+            .en: "MacAndroidToolbox",
+            .ja: "麦安ツールボックス",
+            .es: "MacAndroidToolbox",
+            .ko: "맥안드로이드 툴박스",
+            .ru: "MacAndroidToolbox",
+            .uk: "MacAndroidToolbox"
+        ],
+        "app_replace": [
+            .zhHant: "覆蓋安裝 (-r)",
+            .zhHans: "覆盖安装 (-r)",
+            .en: "Replace Existing (-r)",
+            .ja: "上書きインストール (-r)",
+            .es: "Reemplazar existente (-r)",
+            .ko: "기존 앱 덮어쓰기 (-r)",
+            .ru: "Переустановить существующее (-r)",
+            .uk: "Перевстановити існуюче (-r)"
+        ],
+        "app_search_placeholder": [
+            .zhHant: "搜尋套件名稱 (Package)...",
+            .zhHans: "搜索包名 (Package)...",
+            .en: "Search package name...",
+            .ja: "パッケージ名を検索...",
+            .es: "Buscar nombre de paquete...",
+            .ko: "패키지명 검색...",
+            .ru: "Поиск по имени пакета...",
+            .uk: "Пошук за назвою пакета..."
+        ],
+        "app_subtitle": [
+            .zhHant: "macOS 原生 Android 刷機與除錯工具",
+            .zhHans: "macOS 原生 Android 刷机与调试工具",
+            .en: "Native Android Flasher & Toolbox for macOS",
+            .ja: "macOS ネイティブ Android フラッシュ & ツールボックス",
+            .es: "Herramienta nativa de flasheo y depuración Android para macOS",
+            .ko: "macOS용 네이티브 Android 플래시 및 디버깅 도구",
+            .ru: "Нативный инструмент прошивки и отладки Android для macOS",
+            .uk: "Нативний інструмент прошивки та налагодження Android для macOS"
+        ],
+        "app_system_tag": [
+            .zhHant: "系統",
+            .zhHans: "系统",
+            .en: "SYSTEM",
+            .ja: "システム",
+            .es: "SISTEMA",
+            .ko: "시스템",
+            .ru: "СИСТЕМА",
+            .uk: "СИСТЕМА"
+        ],
+        "app_unfreeze": [
+            .zhHant: "解凍/啟用應用",
+            .zhHans: "解冻/启用应用",
+            .en: "Unfreeze App",
+            .ja: "アプリを有効化",
+            .es: "Habilitar",
+            .ko: "앱 활성화 (동결 해제)",
+            .ru: "Включить",
+            .uk: "Увімкнути"
+        ],
+        "app_uninstall": [
+            .zhHant: "解除安裝",
+            .zhHans: "卸载",
+            .en: "Uninstall",
+            .ja: "アンインストール",
+            .es: "Desinstalar",
+            .ko: "제거",
+            .ru: "Удалить",
+            .uk: "Видалити"
+        ],
+        "app_uninstall_confirm_msg": [
+            .zhHant: "解除安裝將從手機移除此應用程式。",
+            .zhHans: "卸载将从手机中移除此应用程序。",
+            .en: "Uninstalling will remove this app from your device.",
+            .ja: "アンインストールすると、端末からこのアプリが削除されます。",
+            .es: "La desinstalación eliminará esta app de su dispositivo.",
+            .ko: "앱을 제거하면 기기에서 완전히 삭제됩니다.",
+            .ru: "Удаление полностью сотрет приложение с вашего устройства.",
+            .uk: "Видалення повністю вилучить додаток з вашого пристрою."
+        ],
+        "app_uninstall_confirm_title": [
+            .zhHant: "確定要解除安裝 %@ 嗎？",
+            .zhHans: "确定要卸载 %@ 吗？",
+            .en: "Are you sure you want to uninstall %@?",
+            .ja: "%@ をアンインストールしてもよろしいですか？",
+            .es: "¿Seguro que desea desinstalar %@?",
+            .ko: "%@을(를) 정말 삭제하시겠습니까?",
+            .ru: "Удалить приложение %@?",
+            .uk: "Видалити додаток %@?"
+        ],
+        "app_version": [
+            .zhHant: "版本",
+            .zhHans: "版本",
+            .en: "Version",
+            .ja: "バージョン",
+            .es: "Versión",
+            .ko: "버전",
+            .ru: "Версия",
+            .uk: "Версія"
+        ],
+        "battery_charging": [
+            .zhHant: "充電中",
+            .zhHans: "充电中",
+            .en: "Charging",
+            .ja: "充電中",
+            .es: "Cargando",
+            .ko: "충전 중",
+            .ru: "Заряжается",
+            .uk: "Заряджається"
+        ],
+        "battery_discharging": [
+            .zhHant: "放電中",
+            .zhHans: "放电中",
+            .en: "Discharging",
+            .ja: "放電中",
+            .es: "Descargando",
+            .ko: "방전 중",
+            .ru: "Разряжается",
+            .uk: "Розряджається"
+        ],
+        "battery_full": [
+            .zhHant: "已充飽",
+            .zhHans: "已充满",
+            .en: "Full",
+            .ja: "満充電",
+            .es: "Carga completa",
+            .ko: "완충됨",
+            .ru: "Полный заряд",
+            .uk: "Повний заряд"
+        ],
+        "battery_normal": [
+            .zhHant: "正常",
+            .zhHans: "正常",
+            .en: "Normal",
+            .ja: "正常",
+            .es: "Normal",
+            .ko: "정상",
+            .ru: "В норме",
+            .uk: "В нормі"
+        ],
+        "battery_not_charging": [
+            .zhHant: "未充電",
+            .zhHans: "未充电",
+            .en: "Not Charging",
+            .ja: "充電停止",
+            .es: "Sin carga",
+            .ko: "충전 중지됨",
+            .ru: "Не заряжается",
+            .uk: "Не заряджається"
+        ],
+        "btn_ok": [
+            .zhHant: "確定",
+            .zhHans: "确定",
+            .en: "OK",
+            .ja: "OK",
+            .es: "Aceptar",
+            .ko: "확인",
+            .ru: "ОК",
+            .uk: "ОК"
+        ],
+        "common_alert": [
+            .zhHant: "提示",
+            .zhHans: "提示",
+            .en: "Notice",
+            .ja: "通知",
+            .es: "Aviso",
+            .ko: "알림",
+            .ru: "Уведомление",
+            .uk: "Сповіщення"
+        ],
+        "common_cancel": [
+            .zhHant: "取消",
+            .zhHans: "取消",
+            .en: "Cancel",
+            .ja: "キャンセル",
+            .es: "Cancelar",
+            .ko: "취소",
+            .ru: "Отмена",
+            .uk: "Скасувати"
+        ],
+        "common_ok": [
+            .zhHant: "好",
+            .zhHans: "确定",
+            .en: "OK",
+            .ja: "OK",
+            .es: "Aceptar",
+            .ko: "확인",
+            .ru: "ОК",
+            .uk: "ОК"
+        ],
+        "common_unknown": [
+            .zhHant: "未知",
+            .zhHans: "未知",
+            .en: "Unknown",
+            .ja: "不明",
+            .es: "Desconocido",
+            .ko: "알 수 없음",
+            .ru: "Неизвестно",
+            .uk: "Невідомо"
+        ],
+        "console_all_levels": [
+            .zhHant: "全部等級",
+            .zhHans: "全部等级",
+            .en: "All Levels",
+            .ja: "全レベル",
+            .es: "Todos los niveles",
+            .ko: "모든 레벨",
+            .ru: "Все уровни",
+            .uk: "Всі рівні"
+        ],
+        "console_auto_scroll": [
+            .zhHant: "自動滾動",
+            .zhHans: "自动滚动",
+            .en: "Auto-scroll",
+            .ja: "自動スクロール",
+            .es: "Desplazamiento automático",
+            .ko: "자동 스크롤",
+            .ru: "Автопрокрутка",
+            .uk: "Автопрокрутка"
+        ],
+        "console_clear": [
+            .zhHant: "清空日誌",
+            .zhHans: "清空日志",
+            .en: "Clear Logs",
+            .ja: "ログを消去",
+            .es: "Limpiar registros",
+            .ko: "로그 지우기",
+            .ru: "Очистить логи",
+            .uk: "Очистити логи"
+        ],
+        "console_copy_all": [
+            .zhHant: "複製所有日誌",
+            .zhHans: "复制所有日志",
+            .en: "Copy All Logs",
+            .ja: "すべてのログをコピー",
+            .es: "Copiar todos los registros",
+            .ko: "모든 로그 복사",
+            .ru: "Скопировать все логи",
+            .uk: "Скопіювати всі логи"
+        ],
+        "console_filter": [
+            .zhHant: "篩選日誌...",
+            .zhHans: "筛选日志...",
+            .en: "Filter logs...",
+            .ja: "ログを絞り込み...",
+            .es: "Filtrar registros...",
+            .ko: "로그 필터링...",
+            .ru: "Фильтр логов...",
+            .uk: "Фільтр логів..."
+        ],
+        "console_show_polling": [
+            .zhHant: "顯示輪詢日誌",
+            .zhHans: "显示轮询日志",
+            .en: "Show Polling Logs",
+            .ja: "ポーリングログを表示",
+            .es: "Mostrar registros de sondeo",
+            .ko: "폴링 로그 표시",
+            .ru: "Показывать логи опроса",
+            .uk: "Показувати логи опитування"
+        ],
+        "console_title": [
+            .zhHant: "終端日誌 (Terminal Logs)",
+            .zhHans: "终端日志 (Terminal Logs)",
+            .en: "Terminal Logs",
+            .ja: "ターミナルログ",
+            .es: "Registros de terminal",
+            .ko: "터미널 로그",
+            .ru: "Терминал логов",
+            .uk: "Термінал логів"
+        ],
+        "dash_android_version": [
+            .zhHant: "Android 版本",
+            .zhHans: "Android 版本",
+            .en: "Android Version",
+            .ja: "Android バージョン",
+            .es: "Versión de Android",
+            .ko: "Android 버전",
+            .ru: "Версия Android",
+            .uk: "Версія Android"
+        ],
+        "dash_battery_status": [
+            .zhHant: "電池狀態",
+            .zhHans: "电池状态",
+            .en: "Battery Status",
+            .ja: "バッテリー状態",
+            .es: "Batería",
+            .ko: "배터리 상태",
+            .ru: "Состояние батареи",
+            .uk: "Стан батареї"
+        ],
+        "dash_brand": [
+            .zhHant: "品牌:",
+            .zhHans: "品牌:",
+            .en: "Brand:",
+            .ja: "ブランド:",
+            .es: "Marca:",
+            .ko: "브랜드:",
+            .ru: "Бренд:",
+            .uk: "Бренд:"
+        ],
+        "dash_connect": [
+            .zhHant: "連接設備",
+            .zhHans: "连接设备",
+            .en: "Connect",
+            .ja: "接続",
+            .es: "Conectar",
+            .ko: "연결",
+            .ru: "Подключиться",
+            .uk: "Підключитися"
+        ],
+        "dash_connecting": [
+            .zhHant: "正在連接...",
+            .zhHans: "正在连接...",
+            .en: "Connecting...",
+            .ja: "接続中...",
+            .es: "Conectando...",
+            .ko: "연결 중...",
+            .ru: "Подключение...",
+            .uk: "Підключення..."
+        ],
+        "dash_current_slot": [
+            .zhHant: "當前槽位: Slot",
+            .zhHans: "当前槽位: Slot",
+            .en: "Active Slot: Slot",
+            .ja: "現在のスロット: Slot",
+            .es: "Ranura actual:",
+            .ko: "현재 슬롯:",
+            .ru: "Текущий слот:",
+            .uk: "Поточний слот:"
+        ],
+        "dash_enable_tcpip": [
+            .zhHant: "開啟手機 5555 連接埠 (需先插線)",
+            .zhHans: "开启手机 5555 端口 (需先插线)",
+            .en: "Enable Port 5555 (Requires USB)",
+            .ja: "ポート 5555 開放 (要USB接続)",
+            .es: "Habilitar TCP/IP",
+            .ko: "TCP/IP 활성화",
+            .ru: "Включить TCP/IP",
+            .uk: "Увімкнути TCP/IP"
+        ],
+        "dash_hardware_model": [
+            .zhHant: "硬體型號",
+            .zhHans: "硬件型号",
+            .en: "Hardware Model",
+            .ja: "ハードウェアモデル",
+            .es: "Modelo de hardware",
+            .ko: "하드웨어 모델",
+            .ru: "Модель устройства",
+            .uk: "Модель пристрою"
+        ],
+        "dash_ip_placeholder": [
+            .zhHant: "手機 IP (例如 192.168.1.100)",
+            .zhHans: "手机 IP (例如 192.168.1.100)",
+            .en: "Device IP (e.g. 192.168.1.100)",
+            .ja: "端末 IP (例: 192.168.1.100)",
+            .es: "IP del dispositivo (ej. 192.168.1.100)",
+            .ko: "기기 IP (예: 192.168.1.100)",
+            .ru: "IP устройства (напр. 192.168.1.100)",
+            .uk: "IP пристрою (напр. 192.168.1.100)"
+        ],
+        "dash_lan_ip": [
+            .zhHant: "局域網 IP",
+            .zhHans: "局域网 IP",
+            .en: "Local Network IP",
+            .ja: "ローカル IP",
+            .es: "IP de red local",
+            .ko: "로컬 LAN IP",
+            .ru: "Локальный IP",
+            .uk: "Локальний IP"
+        ],
+        "dash_network_ip": [
+            .zhHant: "連線網路",
+            .zhHans: "连接网络",
+            .en: "Connection",
+            .ja: "接続ネットワーク",
+            .es: "Dirección IP",
+            .ko: "네트워크 IP",
+            .ru: "Сетевой IP",
+            .uk: "Мережевий IP"
+        ],
+        "dash_no_device_desc": [
+            .zhHant: "請使用 USB 傳輸線連接 Android 設備，並開啟 USB 偵錯或處於 Fastboot 模式。",
+            .zhHans: "请使用 USB 数据线连接 Android 设备，并开启 USB 调试或处于 Fastboot 模式。",
+            .en: "Connect an Android device via USB with USB Debugging or Fastboot enabled.",
+            .ja: "USB デバッグまたは Fastboot が有効な Android 端末を USB ケーブルで接続してください。",
+            .es: "Conecte un dispositivo Android por USB con la depuración USB o Fastboot habilitada.",
+            .ko: "USB 케이블로 기기를 연결하고 USB 디버깅 또는 Fastboot 모드를 켜주세요.",
+            .ru: "Подключите устройство Android через USB с включенной отладкой по USB или в режиме Fastboot.",
+            .uk: "Підключіть пристрій Android через USB з увімкненим налагодженням по USB або в режимі Fastboot."
+        ],
+        "dash_no_device_guide": [
+            .zhHant: "請將 Android 設備透過 USB 連接線接上 Mac，並確認：\n\n1. 手機已開啟「開發人員選項」並啟用「USB 偵錯」\n2. 傳輸線已選擇「檔案傳輸」模式而非純充電\n3. 若要進行刷機，可將手機關機後按住「音量減 + 電源鍵」進入 Fastboot 模式",
+            .zhHans: "请将 Android 设备通过 USB 数据线连接至 Mac，并确认：\n\n1. 手机已开启“开发者选项”并启用“USB 调试”\n2. 数据线已选择“文件传输”模式而非纯充电\n3. 若要进行刷机，可将手机关机后长按“音量减 + 电源键”进入 Fastboot 模式",
+            .en: "Please connect your Android device to Mac with a USB cable and ensure:\n\n1. Developer Options and USB Debugging are enabled on device\n2. USB mode is set to File Transfer, not Charge Only\n3. For flashing, power off and hold Volume Down + Power to enter Fastboot",
+            .ja: "Android 端末を USB ケーブルで Mac に接続し、以下を確認してください:\n\n1. 開発者向けオプションと「USBデバッグ」が有効であること\n2. 接続モードが充電のみでなく「ファイル転送」であること\n3. フラッシュ時は電源オフ後に「音量下 + 電源ボタン」で Fastboot に入ること",
+            .es: "Conecte su dispositivo Android al Mac con un cable USB y asegúrese de:\n\n1. Habilitar Opciones de desarrollador y Depuración USB\n2. Configurar el modo USB en Transferencia de archivos\n3. Para flashear, apague y mantenga presionado Volumen Abajo + Encendido para entrar a Fastboot",
+            .ko: "USB 케이블로 Android 기기를 Mac에 연결하고 다음을 확인하세요:\n\n1. 기기에서 개발자 옵션 및 USB 디버깅 활성화\n2. USB 모드를 충전 전용이 아닌 파일 전송으로 설정\n3. 펌웨어 플래시 시 전원을 끄고 볼륨 하 + 전원 키를 눌러 Fastboot 진입",
+            .ru: "Подключите устройство Android к Mac через USB-кабель и убедитесь:\n\n1. Включены параметры разработчика и отладка по USB\n2. Режим USB переключен на передачу файлов (не только зарядка)\n3. Для прошивки выключите и зажмите Громкость вниз + Питание для входа в Fastboot",
+            .uk: "Підключіть пристрій Android до Mac через USB-кабель і переконайтеся:\n\n1. Увімкнено параметри розробника та налагодження по USB\n2. Режим USB перемкнуто на передачу файлів (не лише заряджання)\n3. Для прошивки вимкніть і затисніть Гучність вниз + Живлення для входу у Fastboot"
+        ],
+        "dash_no_device_title": [
+            .zhHant: "未檢測到連接的 Android 設備",
+            .zhHans: "未检测到连接的 Android 设备",
+            .en: "No Android Device Detected",
+            .ja: "接続された Android デバイスがありません",
+            .es: "Ningún dispositivo conectado",
+            .ko: "연결된 기기 없음",
+            .ru: "Устройства не подключены",
+            .uk: "Пристрої не підключені"
+        ],
+        "dash_physical_line": [
+            .zhHant: "實體線路",
+            .zhHans: "物理连线",
+            .en: "Physical Wire",
+            .ja: "物理接続",
+            .es: "Conexión por cable",
+            .ko: "유선 연결",
+            .ru: "Проводное подключение",
+            .uk: "Дротове підключення"
+        ],
+        "dash_power_off": [
+            .zhHant: "關閉設備電源 (Power Off)",
+            .zhHans: "关闭设备电源 (Power Off)",
+            .en: "Power Off Device",
+            .ja: "端末の電源を切る",
+            .es: "Apagar dispositivo",
+            .ko: "기기 끄기",
+            .ru: "Выключить устройство",
+            .uk: "Вимкнути пристрій"
+        ],
+        "dash_quick_reboot": [
+            .zhHant: "快速重啟與切換模式",
+            .zhHans: "快速重启与切换模式",
+            .en: "Quick Reboot & Modes",
+            .ja: "クイック再起動 & モード切替",
+            .es: "Reinicio rápido",
+            .ko: "빠른 재부팅",
+            .ru: "Быстрая перезагрузка",
+            .uk: "Швидке перезавантаження"
+        ],
+        "dash_quick_reboot_desc": [
+            .zhHant: "點擊以下選項將設備快速重啟至相應模式：",
+            .zhHans: "点击以下选项将设备快速重启至相应模式：",
+            .en: "Click an option below to reboot the device into that mode:",
+            .ja: "以下の項目をクリックしてデバイスを各モードに再起動します：",
+            .es: "Envía comandos de reinicio directos al dispositivo conectado.",
+            .ko: "현재 연결된 기기로 직접 재부팅 명령을 전송합니다.",
+            .ru: "Отправка команд перезагрузки на подключенное устройство.",
+            .uk: "Надсилання команд перезавантаження на підключений пристрій."
+        ],
+        "dash_reboot_actions": [
+            .zhHant: "快速重啟操作",
+            .zhHans: "快速重启操作",
+            .en: "Quick Reboot Actions",
+            .ja: "クイック再起動操作",
+            .es: "Acciones de reinicio rápido",
+            .ko: "빠른 재부팅",
+            .ru: "Быстрая перезагрузка",
+            .uk: "Швидке перезавантаження"
+        ],
+        "dash_reboot_bootloader": [
+            .zhHant: "重啟至 Bootloader (Fastboot)",
+            .zhHans: "重启至 Bootloader (Fastboot)",
+            .en: "Reboot to Bootloader",
+            .ja: "Bootloader に再起動",
+            .es: "Reiniciar a Bootloader",
+            .ko: "Bootloader로 재부팅",
+            .ru: "Перезагрузить в Bootloader",
+            .uk: "Перезавантажити в Bootloader"
+        ],
+        "dash_reboot_edl": [
+            .zhHant: "重啟至 EDL / 9008 (急救深刷)",
+            .zhHans: "重启至 EDL / 9008 (急救深刷)",
+            .en: "Reboot to EDL / 9008",
+            .ja: "EDL / 9008 に再起動",
+            .es: "Reiniciar a EDL / 9008",
+            .ko: "EDL / 9008로 재부팅",
+            .ru: "Перезагрузить в EDL / 9008",
+            .uk: "Перезавантажити в EDL / 9008"
+        ],
+        "dash_reboot_fastbootd": [
+            .zhHant: "重啟至 FastbootD (動態分區)",
+            .zhHans: "重启至 FastbootD (动态分区)",
+            .en: "Reboot to FastbootD",
+            .ja: "FastbootD に再起動",
+            .es: "Reiniciar a FastbootD",
+            .ko: "FastbootD로 재부팅",
+            .ru: "Перезагрузить в FastbootD",
+            .uk: "Перезавантажити в FastbootD"
+        ],
+        "dash_reboot_recovery": [
+            .zhHant: "重啟至 Recovery (恢復模式)",
+            .zhHans: "重启至 Recovery (恢复模式)",
+            .en: "Reboot to Recovery",
+            .ja: "Recovery に再起動",
+            .es: "Reiniciar a Recovery",
+            .ko: "Recovery로 재부팅",
+            .ru: "Перезагрузить в Recovery",
+            .uk: "Перезавантажити в Recovery"
+        ],
+        "dash_reboot_system": [
+            .zhHant: "重啟至系統 (System)",
+            .zhHans: "重启至系统 (System)",
+            .en: "Reboot to System",
+            .ja: "システムを再起動 (System)",
+            .es: "Reiniciar al sistema",
+            .ko: "시스템으로 재부팅",
+            .ru: "Перезагрузить в систему",
+            .uk: "Перезавантажити в систему"
+        ],
+        "dash_rooted": [
+            .zhHant: "已 ROOT",
+            .zhHans: "已 ROOT",
+            .en: "ROOTED",
+            .ja: "ROOT済み",
+            .es: "ROOT",
+            .ko: "루트됨",
+            .ru: "ROOT",
+            .uk: "ROOT"
+        ],
+        "dash_scan_manual": [
+            .zhHant: "手動掃描設備",
+            .zhHans: "手动扫描设备",
+            .en: "Scan Devices",
+            .ja: "デバイスを手動スキャン",
+            .es: "Escanear dispositivos",
+            .ko: "기기 다시 검색",
+            .ru: "Сканировать устройства",
+            .uk: "Сканувати пристрої"
+        ],
+        "dash_screen_specs": [
+            .zhHant: "螢幕規格",
+            .zhHans: "屏幕规格",
+            .en: "Display Specs",
+            .ja: "画面仕様",
+            .es: "Pantalla",
+            .ko: "화면 사양",
+            .ru: "Экран",
+            .uk: "Екран"
+        ],
+        "dash_security_level": [
+            .zhHant: "安全性更新等級",
+            .zhHans: "安全性更新级别",
+            .en: "Security Patch Level",
+            .ja: "セキュリティ更新レベル",
+            .es: "Nivel de seguridad",
+            .ko: "보안 레벨",
+            .ru: "Уровень безопасности",
+            .uk: "Рівень безпеки"
+        ],
+        "dash_security_patch": [
+            .zhHant: "安全修補程序",
+            .zhHans: "安全补丁程序",
+            .en: "Security Patch",
+            .ja: "セキュリティパッチ",
+            .es: "Parche de seguridad",
+            .ko: "보안 패치",
+            .ru: "Патч безопасности",
+            .uk: "Патч безпеки"
+        ],
+        "dash_serial": [
+            .zhHant: "序號:",
+            .zhHans: "序列号:",
+            .en: "Serial:",
+            .ja: "シリアル:",
+            .es: "Número de serie:",
+            .ko: "시리얼 번호:",
+            .ru: "Серийный номер:",
+            .uk: "Серійний номер:"
+        ],
+        "dash_unauthorized_desc": [
+            .zhHant: "請解鎖 Android 設備螢幕，在彈出的「允許 USB 偵錯？」對話框中勾選「一律允許」，並點擊「允許」。",
+            .zhHans: "请解锁 Android 设备屏幕，在弹出的“允许 USB 调试？”对话框中勾选“始终允许”，并点击“允许”。",
+            .en: "Please unlock your device and tap 'Allow USB debugging' on the screen, checking 'Always allow from this computer'.",
+            .ja: "端末のロックを解除し、画面に表示される「USBデバッグを許可しますか？」で「常に許可」をチェックして「許可」をタップしてください。",
+            .es: "Por favor, revise la pantalla de su dispositivo y pulse 'Permitir depuración USB'.",
+            .ko: "휴대폰 화면을 확인하고 'USB 디버깅 허용'을 탭하세요.",
+            .ru: "Пожалуйста, проверьте экран устройства и нажмите «Разрешить отладку по USB».",
+            .uk: "Будь ласка, перевірте екран пристрою та натисніть «Дозволити налагодження по USB»."
+        ],
+        "dash_unauthorized_title": [
+            .zhHant: "設備尚未授權調試 (Unauthorized)",
+            .zhHans: "设备尚未授权调试 (Unauthorized)",
+            .en: "Device Unauthorized",
+            .ja: "デバイス未認証 (Unauthorized)",
+            .es: "Dispositivo no autorizado",
+            .ko: "기기 미인증",
+            .ru: "Устройство не авторизовано",
+            .uk: "Пристрій не авторизовано"
+        ],
+        "dash_usb_cable": [
+            .zhHant: "USB 傳輸線連接",
+            .zhHans: "USB 数据线连接",
+            .en: "USB Cable Connected",
+            .ja: "USBケーブル接続",
+            .es: "Cable USB",
+            .ko: "USB 케이블",
+            .ru: "USB-кабель",
+            .uk: "USB-кабель"
+        ],
+        "dash_wireless_adb": [
+            .zhHant: "無線 ADB 調試 (Wi-Fi)",
+            .zhHans: "无线 ADB 调试 (Wi-Fi)",
+            .en: "Wireless ADB (Wi-Fi)",
+            .ja: "ワイヤレス ADB (Wi-Fi)",
+            .es: "Depuración inalámbrica ADB (Wi-Fi)",
+            .ko: "무선 ADB 디버깅 (Wi-Fi)",
+            .ru: "Беспроводная отладка ADB (Wi-Fi)",
+            .uk: "Бездротове налагодження ADB (Wi-Fi)"
+        ],
+        "dash_wireless_adb_desc": [
+            .zhHant: "無需 USB 連接線，透過局域網進行無線刷機與調試操作。",
+            .zhHans: "无需 USB 连接线，通过局域网进行无线刷机与调试操作。",
+            .en: "Debug and flash wirelessly over Wi-Fi without a USB cable.",
+            .ja: "USBケーブル不要で、ローカルネットワーク経由でワイヤレスデバッグを行います。",
+            .es: "Depure y flashee de forma inalámbrica por Wi-Fi sin cables USB.",
+            .ko: "USB 케이블 없이 Wi-Fi를 통해 무선으로 디버깅 및 작업할 수 있습니다.",
+            .ru: "Отладка и управление без проводов по Wi-Fi без кабеля USB.",
+            .uk: "Налагодження та керування без дротів по Wi-Fi без кабелю USB."
+        ],
+        "dash_wireless_desc": [
+            .zhHant: "透過 USB 開啟 TCP/IP 監聽模式後，即可拔除傳輸線並透過 Wi-Fi 進行無線除錯。",
+            .zhHans: "通过 USB 开启 TCP/IP 监听模式后，即可拔除数据线并通过 Wi-Fi 进行无线调试。",
+            .en: "Enable TCP/IP mode over USB, then unplug and connect over Wi-Fi.",
+            .ja: "USB 経由で TCP/IP モードを有効化し、ケーブルを外して Wi-Fi 経由で接続します。",
+            .es: "Habilite el modo TCP/IP por USB, luego desconecte el cable y conéctese por Wi-Fi.",
+            .ko: "USB로 TCP/IP 모드를 활성화한 후 케이블을 분리하고 Wi-Fi로 연결하세요.",
+            .ru: "Включите режим TCP/IP через USB, затем отключите кабель и подключитесь по Wi-Fi.",
+            .uk: "Увімкніть режим TCP/IP через USB, потім від'єднайте кабель та підключіться по Wi-Fi."
+        ],
+        "dash_wireless_step1": [
+            .zhHant: "第一步：開啟 TCP/IP 監聽 (Port 5555)",
+            .zhHans: "第一步：开启 TCP/IP 监听 (Port 5555)",
+            .en: "Step 1: Open TCP/IP Port 5555",
+            .ja: "ステップ 1: TCP/IP ポート 5555 を開く",
+            .es: "Paso 1: Abrir puerto TCP/IP 5555",
+            .ko: "1단계: TCP/IP 포트 5555 열기",
+            .ru: "Шаг 1: Открыть порт TCP/IP 5555",
+            .uk: "Крок 1: Відкрити порт TCP/IP 5555"
+        ],
+        "fb_bl_lock_btn": [
+            .zhHant: "鎖定 Bootloader (回鎖)",
+            .zhHans: "锁定 Bootloader (回锁)",
+            .en: "Lock Bootloader",
+            .ja: "ブートローダー再ロック",
+            .es: "Bloquear Bootloader",
+            .ko: "부트로더 다시 락 (Re-lock)",
+            .ru: "Заблокировать загрузчик",
+            .uk: "Заблокувати завантажувач"
+        ],
+        "fb_bl_status": [
+            .zhHant: "Bootloader 狀態:",
+            .zhHans: "Bootloader 状态:",
+            .en: "Bootloader Status:",
+            .ja: "ブートローダー状態:",
+            .es: "Estado del Bootloader:",
+            .ko: "부트로더 상태:",
+            .ru: "Статус загрузчика:",
+            .uk: "Статус завантажувача:"
+        ],
+        "fb_bl_unlock_btn": [
+            .zhHant: "解鎖 Bootloader",
+            .zhHans: "解锁 Bootloader",
+            .en: "Unlock Bootloader",
+            .ja: "ブートローダー解除",
+            .es: "Desbloquear Bootloader",
+            .ko: "부트로더 언락",
+            .ru: "Разблокировать загрузчик",
+            .uk: "Розблокувати завантажувач"
+        ],
+        "fb_bl_unlock_card": [
+            .zhHant: "Bootloader 解鎖 / 上鎖 (BL 鎖)",
+            .zhHans: "Bootloader 解锁 / 上锁 (BL 锁)",
+            .en: "Bootloader Unlock & Lock",
+            .ja: "ブートローダー アンロック / ロック",
+            .es: "Desbloqueo y bloqueo de Bootloader",
+            .ko: "부트로더 언락 및 락",
+            .ru: "Разблокировка и блокировка загрузчика",
+            .uk: "Розблокування та блокування завантажувача"
+        ],
+        "fb_bl_unlock_desc": [
+            .zhHant: "解鎖 Bootloader 允許刷入第三方韌體；上鎖 Bootloader 可還原安全狀態。",
+            .zhHans: "解锁 Bootloader 允许刷入第三方固件；锁定 Bootloader 可还原安全状态。",
+            .en: "Unlock Bootloader to flash custom images; lock Bootloader to restore factory verified state.",
+            .ja: "ブートローダーをアンロックしてカスタムROMをフラッシュするか、再ロックして工場出荷状態に戻します。",
+            .es: "Desbloquee el bootloader para flashear imágenes personalizadas; bloquéelo para restaurar el estado de fábrica.",
+            .ko: "커스텀 롬 플래시를 위해 부트로더를 언락하고, 공식 순정 복구를 위해 다시 락할 수 있습니다.",
+            .ru: "Разблокируйте загрузчик для прошивки кастомных образов; заблокируйте для возврата к заводскому состоянию.",
+            .uk: "Розблокуйте завантажувач для прошивки кастомних образів; заблокуйте для повернення до заводського стану."
+        ],
+        "fb_bl_unlock_official_tip": [
+            .zhHant: "提醒：請盡可能優先使用官方授權管道進行解鎖（特別是小米/HyperOS、OPPO、vivo 等第三方定制系統，未經授權的強制解鎖極易導致設備死機變磚或 TEE 永久受損）。",
+            .zhHans: "提示：请尽可能优先使用官方授权渠道进行解锁（特别是小米/HyperOS、OPPO、vivo 等第三方定制系统，未经授权的强制解锁极易导致设备死机变砖或 TEE 永久受损）。",
+            .en: "Warning: Please prioritize unlocking via official OEM channels (especially on customized OS like HyperOS/MIUI, ColorOS, OriginOS; unauthorized force unlocking can permanently brick the device or damage TEE security keystores).",
+            .ja: "注意: メーカー公式のアンロック手順を最優先してください（特に Xiaomi/HyperOS、OPPO、vivo などのカスタマイズ OS では、非公式の強制解除により文鎮化や TEE セキュリティチップの永久破損を引き起こす恐れがあります）。",
+            .es: "Advertencia: Priorice siempre el desbloqueo mediante los canales oficiales del fabricante (especialmente en capas personalizadas como HyperOS/MIUI, ColorOS, OriginOS; el desbloqueo no autorizado puede causar brick permanente o dañar TEE).",
+            .ko: "주의: 반드시 제조사 공식 승인 경로를 우선하여 언락하십시오 (특히 샤오미 HyperOS, OPPO, vivo 등 제조사 커스텀 OS의 경우, 비공식 강제 언락 시 기기가 영구 벽돌이 되거나 TEE 보안 영역이 손상될 수 있습니다).",
+            .ru: "Внимание: Настоятельно рекомендуется использовать официальные каналы разблокировки от производителя (особенно для систем HyperOS/MIUI, ColorOS, OriginOS; принудительная неофициальная разблокировка может привести к окирпичиванию и повреждению TEE).",
+            .uk: "Увага: Наполегливо рекомендується використовувати офіційні канали розблокування від виробника (особливо для систем HyperOS/MIUI, ColorOS, OriginOS; примусове неофіційне розблокування може призвести до перетворення на цеглину та пошкодження TEE)."
+        ],
+        "fb_browse": [
+            .zhHant: "瀏覽檔案...",
+            .zhHans: "浏览文件...",
+            .en: "Browse...",
+            .ja: "参照...",
+            .es: "Examinar...",
+            .ko: "찾아보기...",
+            .ru: "Обзор...",
+            .uk: "Огляд..."
+        ],
+        "fb_confirm_erase_btn": [
+            .zhHant: "確定抹除",
+            .zhHans: "确定抹除",
+            .en: "Erase Now",
+            .ja: "消去実行",
+            .es: "Borrar ahora",
+            .ko: "지금 지우기",
+            .ru: "Стереть сейчас",
+            .uk: "Стерти зараз"
+        ],
+        "fb_confirm_erase_msg": [
+            .zhHant: "警告：抹除或格式化分區（尤其是 userdata）將清空所有相關數據，此操作不可逆！",
+            .zhHans: "警告：抹除或格式化分区（尤其是 userdata）将清空所有相关数据，此操作不可逆！",
+            .en: "Warning: Erasing or formatting partitions (especially userdata) will wipe all data!",
+            .ja: "警告：パーティションの消去または初期化はすべてのデータを消去します。元に戻せません。",
+            .es: "Advertencia: Borrar o formatear particiones (especialmente userdata) borrará todos los datos. ¡Esta acción es irreversible!",
+            .ko: "경고: 파티션(특히 userdata)을 지우거나 포맷하면 모든 데이터가 삭제되며 복구할 수 없습니다!",
+            .ru: "Предупреждение: Очистка или форматирование разделов (особенно userdata) удалит все данные без возможности восстановления!",
+            .uk: "Попередження: Очищення або форматування розділів (особливо userdata) видалить усі дані без можливості відновлення!"
+        ],
+        "fb_confirm_erase_title": [
+            .zhHant: "確定要抹除/格式化 %@ 分區嗎？",
+            .zhHans: "确定要抹除/格式化 %@ 分区吗？",
+            .en: "Erase/Format partition %@?",
+            .ja: "%@ パーティションを消去/初期化しますか？",
+            .es: "¿Borrar/Formatear la partición %@?",
+            .ko: "%@ 파티션을 지우거나 포맷하시겠습니까?",
+            .ru: "Стереть/Форматировать раздел %@?",
+            .uk: "Стерти/Форматувати розділ %@?"
+        ],
+        "fb_confirm_flash_btn": [
+            .zhHant: "確定刷入",
+            .zhHans: "确定刷入",
+            .en: "Flash Now",
+            .ja: "フラッシュ実行",
+            .es: "Flashear ahora",
+            .ko: "지금 플래시",
+            .ru: "Прошить сейчас",
+            .uk: "Прошити зараз"
+        ],
+        "fb_confirm_flash_msg": [
+            .zhHant: "即將把映像檔寫入 %@ 分區。\n請確保該檔案與您的機型完全適配，否則可能導致無法開機。",
+            .zhHans: "即将把镜像文件写入 %@ 分区。\n请确保该文件与您的机型完全适配，否则可能导致无法开机。",
+            .en: "About to flash image to %@ partition.\nPlease ensure compatibility with your device model.",
+            .ja: "%@ パーティションにイメージを書き込みます。\n端末の機種と互換性があることを確認してください。",
+            .es: "A punto de flashear la imagen en la partición %@.\nAsegúrese de que el archivo sea totalmente compatible con su modelo.",
+            .ko: "%@ 파티션에 이미지를 씁니다.\n기기 모델과 완벽히 호환되는지 확인하세요. 그렇지 않으면 부팅이 되지 않을 수 있습니다.",
+            .ru: "Запись образа в раздел %@.\nУбедитесь, что файл полностью совместим с вашей моделью устройства.",
+            .uk: "Запис образу в розділ %@.\nПереконайтеся, що файл повністю сумісний з вашою моделлю пристрою."
+        ],
+        "fb_confirm_flash_title": [
+            .zhHant: "確定要刷寫 %@ 分區嗎？",
+            .zhHans: "确定要刷写 %@ 分区吗？",
+            .en: "Flash partition %@?",
+            .ja: "%@ パーティションをフラッシュしますか？",
+            .es: "¿Flashear la partición %@?",
+            .ko: "%@ 파티션을 플래시하시겠습니까?",
+            .ru: "Прошить раздел %@?",
+            .uk: "Прошити розділ %@?"
+        ],
+        "fb_confirm_lock_btn": [
+            .zhHant: "確認重新鎖定",
+            .zhHans: "确认重新锁定",
+            .en: "Confirm Re-lock",
+            .ja: "再ロック実行",
+            .es: "Confirmar bloqueo",
+            .ko: "재잠금 확인",
+            .ru: "Подтвердить блокировку",
+            .uk: "Підтвердити блокування"
+        ],
+        "fb_confirm_lock_msg": [
+            .zhHant: "警告：重新鎖定 Bootloader 前，請務必確認已刷回原廠官方系統與原廠 Recovery，若系統已被修改 (如 Root 或自訂 ROM)，回鎖會導致設備變磚無法開機！",
+            .zhHans: "警告：重新锁定 Bootloader 前，请务必确认已刷回原厂官方系统与原厂 Recovery，若系统已被修改 (如 Root 或自制 ROM)，回锁会导致设备变砖无法开机！",
+            .en: "Warning: Ensure stock ROM and stock recovery are restored before re-locking, otherwise the device may become bricked!",
+            .ja: "警告：再ロックする前に純正ROMおよびリカバリに戻してください。変更された状態での再ロックは文鎮化の原因になります！",
+            .es: "Advertencia: Asegúrese de haber restaurado la ROM y el Recovery oficiales de fábrica. Si el sistema está modificado, ¡el dispositivo puede quedar briqueado!",
+            .ko: "경고: 부트로더를 다시 잠그기 전에 반드시 공식 순정 롬과 리커버리로 복원되었는지 확인하세요. 시스템이 수정된 상태(Root 등)에서 잠그면 기기가 벽돌이 됩니다!",
+            .ru: "Предупреждение: Перед блокировкой убедитесь, что установлена официальная прошивка и рекавери. Блокировка измененной системы приведет к окирпичиванию!",
+            .uk: "Попередження: Перед блокуванням переконайтеся, що встановлена офіційна прошивка та рекавері. Блокування модифікованої системи призведе до окірпічування!"
+        ],
+        "fb_confirm_lock_title": [
+            .zhHant: "確定要鎖定 Bootloader (Re-lock) 嗎？",
+            .zhHans: "确定要锁定 Bootloader (Re-lock) 吗？",
+            .en: "Re-lock Bootloader?",
+            .ja: "ブートローダーを再ロックしますか？",
+            .es: "¿Bloquear Bootloader (Re-lock)?",
+            .ko: "부트로더를 다시 잠그시겠습니까 (Re-lock)?",
+            .ru: "Заблокировать загрузчик (Re-lock)?",
+            .uk: "Заблокувати завантажувач (Re-lock)?"
+        ],
+        "fb_confirm_unlock_btn": [
+            .zhHant: "確認執行解鎖",
+            .zhHans: "确认执行解锁",
+            .en: "Confirm Unlock",
+            .ja: "アンロック実行",
+            .es: "Confirmar desbloqueo",
+            .ko: "언락 실행 확인",
+            .ru: "Подтвердить разблокировку",
+            .uk: "Підтвердити розблокування"
+        ],
+        "fb_confirm_unlock_msg": [
+            .zhHant: "解鎖 Bootloader 將會清空手機上的所有使用者資料 (強制恢復原廠設定)，並可能使設備失去官方保固。請確保已備份手機資料。",
+            .zhHans: "解锁 Bootloader 将会清空手机上的所有用户数据 (强制恢复出厂设置)，并可能使设备失去官方保修。请确保已备份手机数据。",
+            .en: "Unlocking Bootloader will wipe all user data (factory reset) and may void warranty. Ensure backup.",
+            .ja: "ブートローダーのアンロックは端末の全データを初期化し、保証が無効になる可能性があります。バックアップを確認してください。",
+            .es: "Desbloquear el Bootloader borrará todos los datos del usuario (restablecimiento de fábrica) y puede anular la garantía.",
+            .ko: "부트로더를 언락하면 기기의 모든 사용자 데이터가 삭제(공장 초기화)되며 공식 보증이 무효화될 수 있습니다. 반드시 백업하세요.",
+            .ru: "Разблокировка загрузчика сотрет все данные пользователя (сброс до завода) и может аннулировать гарантию.",
+            .uk: "Розблокування завантажувача зітре всі дані користувача (заводське скидання) та може анулювати гарантію."
+        ],
+        "fb_confirm_unlock_title": [
+            .zhHant: "確定要解鎖 Bootloader 嗎？",
+            .zhHans: "确定要解锁 Bootloader 吗？",
+            .en: "Unlock Bootloader?",
+            .ja: "ブートローダーをアンロックしますか？",
+            .es: "¿Desbloquear Bootloader?",
+            .ko: "부트로더를 언락하시겠습니까?",
+            .ru: "Разблокировать загрузчик?",
+            .uk: "Розблокувати завантажувач?"
+        ],
+        "fb_current_slot": [
+            .zhHant: "當前槽位:",
+            .zhHans: "当前槽位:",
+            .en: "Active Slot:",
+            .ja: "現在のスロット:",
+            .es: "Ranura activa:",
+            .ko: "현재 슬롯:",
+            .ru: "Активный слот:",
+            .uk: "Активний слот:"
+        ],
+        "fb_custom_partition": [
+            .zhHant: "自訂分區名稱...",
+            .zhHans: "自定义分区名称...",
+            .en: "Custom partition name...",
+            .ja: "カスタムパーティション名...",
+            .es: "Nombre de partición personalizado...",
+            .ko: "사용자 지정 파티션 이름...",
+            .ru: "Пользовательский раздел...",
+            .uk: "Користувацький розділ..."
+        ],
+        "fb_custom_partition_prompt": [
+            .zhHant: "輸入自訂分區名稱 (例如: vendor_dlkm)",
+            .zhHans: "输入自定义分区名称 (例如: vendor_dlkm)",
+            .en: "Enter custom partition name (e.g. vendor_dlkm)",
+            .ja: "カスタム名を入力 (例: vendor_dlkm)",
+            .es: "Ingrese el nombre de la partición (ej. vendor_dlkm)",
+            .ko: "사용자 지정 파티션 이름 입력 (예: vendor_dlkm)",
+            .ru: "Введите имя раздела (напр. vendor_dlkm)",
+            .uk: "Введіть назву розділу (напр. vendor_dlkm)"
+        ],
+        "fb_disable_avb": [
+            .zhHant: "禁用 AVB / 簽名校驗 (--disable-verity --disable-verification)",
+            .zhHans: "禁用 AVB / 签名校验 (--disable-verity --disable-verification)",
+            .en: "Disable AVB / Verification (--disable-verity --disable-verification)",
+            .ja: "AVB / 署名検証を無効化 (--disable-verity --disable-verification)",
+            .es: "Desactivar AVB / Verificación (--disable-verity --disable-verification)",
+            .ko: "AVB / 검증 비활성화 (--disable-verity --disable-verification)",
+            .ru: "Отключить AVB / Проверку (--disable-verity --disable-verification)",
+            .uk: "Вимкнути AVB / Перевірку (--disable-verity --disable-verification)"
+        ],
+        "fb_erase_btn": [
+            .zhHant: "抹除分區 (Erase)",
+            .zhHans: "擦除分区 (Erase)",
+            .en: "Erase Partition",
+            .ja: "消去 (Erase)",
+            .es: "Borrar partición",
+            .ko: "파티션 지우기",
+            .ru: "Стереть раздел",
+            .uk: "Стерти розділ"
+        ],
+        "fb_erase_format": [
+            .zhHant: "分區抹除與格式化 (Erase / Format)",
+            .zhHans: "分区擦除与格式化 (Erase / Format)",
+            .en: "Erase & Format Partition",
+            .ja: "パーティション消去 & フォーマット",
+            .es: "Borrar y formatear partición",
+            .ko: "파티션 지우기 및 포맷",
+            .ru: "Стереть и форматировать раздел",
+            .uk: "Стерти та форматувати розділ"
+        ],
+        "fb_erase_format_desc": [
+            .zhHant: "清除指定分區的所有數據（例如重置使用者資料以救磚）。",
+            .zhHans: "清除指定分区的所有数据（例如重置用户数据以救砖）。",
+            .en: "Erase or format specified partitions (useful for unbricking and factory reset).",
+            .ja: "指定パーティションの全データを消去・初期化します（復旧用）。",
+            .es: "Borre o formatee particiones específicas (útil para desbriquear o restaurar de fábrica).",
+            .ko: "지정된 파티션을 지우거나 포맷합니다 (벽돌 복구 및 공장 초기화에 유용).",
+            .ru: "Очистка или форматирование разделов (полезно для раскирпичивания и сброса).",
+            .uk: "Очищення або форматування розділів (корисно для відновлення та скидання)."
+        ],
+        "fb_format_btn": [
+            .zhHant: "格式化分區 (Format)",
+            .zhHans: "格式化分区 (Format)",
+            .en: "Format Partition",
+            .ja: "初期化 (Format)",
+            .es: "Formatear partición",
+            .ko: "파티션 포맷",
+            .ru: "Форматировать раздел",
+            .uk: "Форматувати розділ"
+        ],
+        "fb_image_path": [
+            .zhHant: "映像檔路徑 (.img / .bin):",
+            .zhHans: "镜像文件路径 (.img / .bin):",
+            .en: "Image File Path (.img / .bin):",
+            .ja: "イメージファイルパス (.img / .bin):",
+            .es: "Ruta del archivo de imagen (.img / .bin):",
+            .ko: "이미지 파일 경로 (.img / .bin):",
+            .ru: "Путь к файлу образа (.img / .bin):",
+            .uk: "Шлях до файлу образу (.img / .bin):"
+        ],
+        "fb_image_placeholder": [
+            .zhHant: "請選擇或拖曳 .img 映像檔案",
+            .zhHans: "请选择或拖拽 .img 镜像文件",
+            .en: "Select or drop .img image file",
+            .ja: ".img ファイルを選択またはドラッグ",
+            .es: "Seleccione o arrastre un archivo de imagen .img",
+            .ko: ".img 이미지 파일을 선택하거나 드래그하세요",
+            .ru: "Выберите или перетащите файл .img",
+            .uk: "Виберіть або перетягніть файл .img"
+        ],
+        "fb_locked": [
+            .zhHant: "未解鎖 (Locked)",
+            .zhHans: "未解锁 (Locked)",
+            .en: "Locked",
+            .ja: "ロック中 (Locked)",
+            .es: "Bloqueado",
+            .ko: "잠김",
+            .ru: "Заблокирован",
+            .uk: "Заблоковано"
+        ],
+        "fb_not_in_fastboot": [
+            .zhHant: "當前設備未處於 Fastboot 模式",
+            .zhHans: "当前设备未处于 Fastboot 模式",
+            .en: "Device is not in Fastboot mode",
+            .ja: "デバイスが Fastboot モードではありません",
+            .es: "El dispositivo no está en modo Fastboot",
+            .ko: "기기가 Fastboot 모드가 아닙니다",
+            .ru: "Устройство не в режиме Fastboot",
+            .uk: "Пристрій не в режимі Fastboot"
+        ],
+        "fb_not_in_fastboot_desc": [
+            .zhHant: "分區刷寫、解鎖與槽位切換需要設備處於 Fastboot / Bootloader 模式。",
+            .zhHans: "分区刷写、解锁与槽位切换需要设备处于 Fastboot / Bootloader 模式。",
+            .en: "Partition flashing, unlocking, and slot switching require Fastboot / Bootloader mode.",
+            .ja: "パーティションフラッシュ、アンロック、スロット切替には Fastboot / Bootloader モードが必要です。",
+            .es: "El flasheo de particiones, desbloqueo y cambio de ranura requieren el modo Fastboot / Bootloader.",
+            .ko: "파티션 플래시, 부트로더 언락 및 슬롯 전환은 Fastboot / Bootloader 모드가 필요합니다.",
+            .ru: "Прошивка разделов, разблокировка и переключение слотов требуют режима Fastboot / Bootloader.",
+            .uk: "Прошивка розділів, розблокування та перемикання слотів потребують режиму Fastboot / Bootloader."
+        ],
+        "fb_part_boot": [
+            .zhHant: "boot (核心引導)",
+            .zhHans: "boot (内核引导)",
+            .en: "boot (Kernel Boot)",
+            .ja: "boot (カーネルブート)",
+            .es: "boot (Inicio del kernel)",
+            .ko: "boot (커널 부팅)",
+            .ru: "boot (Загрузочный раздел ядра)",
+            .uk: "boot (Завантажувальний розділ ядра)"
+        ],
+        "fb_part_cache": [
+            .zhHant: "cache (快取暫存)",
+            .zhHans: "cache (缓存分区)",
+            .en: "cache (Cache Partition)",
+            .ja: "cache (キャッシュパーティション)",
+            .es: "cache (Partición de caché)",
+            .ko: "cache (캐시 파티션)",
+            .ru: "cache (Раздел кэша)",
+            .uk: "cache (Розділ кешу)"
+        ],
+        "fb_part_metadata": [
+            .zhHant: "metadata (元數據)",
+            .zhHans: "metadata (元数据)",
+            .en: "metadata (Metadata Partition)",
+            .ja: "metadata (メタデータ)",
+            .es: "metadata (Metadatos)",
+            .ko: "metadata (메타데이터)",
+            .ru: "metadata (Метаданные)",
+            .uk: "metadata (Метадані)"
+        ],
+        "fb_part_recovery": [
+            .zhHant: "recovery (恢復分區)",
+            .zhHans: "recovery (恢复分区)",
+            .en: "recovery (Recovery Partition)",
+            .ja: "recovery (リカバリーパーティション)",
+            .es: "recovery (Partición de recuperación)",
+            .ko: "recovery (복구 파티션)",
+            .ru: "recovery (Раздел восстановления)",
+            .uk: "recovery (Розділ відновлення)"
+        ],
+        "fb_part_userdata": [
+            .zhHant: "userdata (使用者資料 / 恢復出廠)",
+            .zhHans: "userdata (用户数据 / 恢复出厂)",
+            .en: "userdata (User Data / Factory Reset)",
+            .ja: "userdata (ユーザーデータ / 初期化)",
+            .es: "userdata (Datos de usuario / Restablecimiento)",
+            .ko: "userdata (사용자 데이터 / 공장 초기화)",
+            .ru: "userdata (Пользовательские данные / Сброс)",
+            .uk: "userdata (Дані користувача / Скидання)"
+        ],
+        "fb_partition_flash": [
+            .zhHant: "分區映像檔刷寫 (Partition Flash)",
+            .zhHans: "分区镜像刷写 (Partition Flash)",
+            .en: "Flash Partition Image",
+            .ja: "パーティションイメージのフラッシュ",
+            .es: "Flashear imagen de partición",
+            .ko: "파티션 이미지 플래시",
+            .ru: "Прошивка образа раздела",
+            .uk: "Прошивка образу розділу"
+        ],
+        "fb_partition_flash_desc": [
+            .zhHant: "選擇目標分區與對應的映像檔 (.img / .bin)，點擊刷入按鈕將其寫入設備。",
+            .zhHans: "选择目标分区与对应的镜像文件 (.img / .bin)，点击刷入按钮将其写入设备。",
+            .en: "Select a partition and an image file (.img / .bin) to write to the device.",
+            .ja: "対象パーティションとイメージファイル (.img / .bin) を選択し、書き込みます。",
+            .es: "Seleccione una partición y un archivo de imagen (.img / .bin) para escribir en el dispositivo.",
+            .ko: "대상 파티션과 기기에 쓸 이미지 파일(.img / .bin)을 선택하세요.",
+            .ru: "Выберите раздел и файл образа (.img / .bin) для записи на устройство.",
+            .uk: "Виберіть розділ і файл образу (.img / .bin) для запису на пристрій."
+        ],
+        "fb_reboot_to_fastboot": [
+            .zhHant: "一鍵重啟進入 Fastboot",
+            .zhHans: "一键重启进入 Fastboot",
+            .en: "Reboot to Fastboot",
+            .ja: "Fastboot へ再起動",
+            .es: "Reiniciar a Fastboot",
+            .ko: "Fastboot으로 재부팅",
+            .ru: "Перезагрузить в Fastboot",
+            .uk: "Перезавантажити в Fastboot"
+        ],
+        "fb_slot_current_default": [
+            .zhHant: "當前槽位 (預設)",
+            .zhHans: "当前槽位 (默认)",
+            .en: "Current Slot (Default)",
+            .ja: "現在のスロット (標準)",
+            .es: "Ranura actual (Predeterminada)",
+            .ko: "현재 슬롯 (기본값)",
+            .ru: "Текущий слот (По умолчанию)",
+            .uk: "Поточний слот (За замовчуванням)"
+        ],
+        "fb_slot_unknown_or_non_ab": [
+            .zhHant: "未知 / 非 A/B",
+            .zhHans: "未知 / 非 A/B",
+            .en: "Unknown / Non-A/B",
+            .ja: "不明 / 非A/B",
+            .es: "Desconocido / No A/B",
+            .ko: "알 수 없음 / 비 A/B",
+            .ru: "Неизвестно / Не A/B",
+            .uk: "Невідомо / Не A/B"
+        ],
+        "fb_start_flash": [
+            .zhHant: "開始刷入分區",
+            .zhHans: "开始刷入分区",
+            .en: "Flash Partition",
+            .ja: "パーティションを書き込む",
+            .es: "Flashear partición",
+            .ko: "파티션 플래시 시작",
+            .ru: "Прошить раздел",
+            .uk: "Прошити розділ"
+        ],
+        "fb_status_slots": [
+            .zhHant: "Fastboot 狀態與 A/B 槽位切換",
+            .zhHans: "Fastboot 状态与 A/B 槽位切换",
+            .en: "Fastboot Status & A/B Slots",
+            .ja: "Fastboot 状態と A/B スロット切替",
+            .es: "Estado de Fastboot y ranuras A/B",
+            .ko: "Fastboot 상태 및 A/B 슬롯",
+            .ru: "Статус Fastboot и слоты A/B",
+            .uk: "Статус Fastboot та слоти A/B"
+        ],
+        "fb_status_unknown": [
+            .zhHant: "未知",
+            .zhHans: "未知",
+            .en: "Unknown",
+            .ja: "不明",
+            .es: "Desconocido",
+            .ko: "알 수 없음",
+            .ru: "Неизвестно",
+            .uk: "Невідомо"
+        ],
+        "fb_switch_slot_a": [
+            .zhHant: "切換至 Slot A",
+            .zhHans: "切换至 Slot A",
+            .en: "Switch to Slot A",
+            .ja: "Slot A に切替",
+            .es: "Cambiar a ranura A",
+            .ko: "슬롯 A로 전환",
+            .ru: "Переключить на слот A",
+            .uk: "Перемкнути на слот A"
+        ],
+        "fb_switch_slot_b": [
+            .zhHant: "切換至 Slot B",
+            .zhHans: "切换至 Slot B",
+            .en: "Switch to Slot B",
+            .ja: "Slot B に切替",
+            .es: "Cambiar a ranura B",
+            .ko: "슬롯 B로 전환",
+            .ru: "Переключить на слот B",
+            .uk: "Перемкнути на слот B"
+        ],
+        "fb_target_partition": [
+            .zhHant: "目標分區 (Partition):",
+            .zhHans: "目标分区 (Partition):",
+            .en: "Target Partition:",
+            .ja: "対象パーティション:",
+            .es: "Partición de destino:",
+            .ko: "대상 파티션:",
+            .ru: "Целевой раздел:",
+            .uk: "Цільовий розділ:"
+        ],
+        "fb_target_slot_picker": [
+            .zhHant: "寫入槽位",
+            .zhHans: "写入槽位",
+            .en: "Target Slot",
+            .ja: "書き込みスロット",
+            .es: "Ranura de destino",
+            .ko: "대상 슬롯",
+            .ru: "Целевой слот",
+            .uk: "Цільовий слот"
+        ],
+        "fb_temp_boot": [
+            .zhHant: "臨時引導映像檔 (Fastboot Boot - 不覆蓋寫入)",
+            .zhHans: "临时引导镜像 (Fastboot Boot - 不覆盖写入)",
+            .en: "Boot Temporary Image (fastboot boot)",
+            .ja: "一時起動イメージ (Fastboot Boot - 上書きなし)",
+            .es: "Iniciar imagen temporal (fastboot boot)",
+            .ko: "임시 이미지 부팅 (fastboot boot)",
+            .ru: "Временная загрузка образа (fastboot boot)",
+            .uk: "Тимчасове завантаження образу (fastboot boot)"
+        ],
+        "fb_temp_boot_action": [
+            .zhHant: "臨時引導開機",
+            .zhHans: "临时引导开机",
+            .en: "Boot Image",
+            .ja: "一時起動する",
+            .es: "Iniciar imagen",
+            .ko: "이미지 부팅",
+            .ru: "Загрузить образ",
+            .uk: "Завантажити образ"
+        ],
+        "fb_temp_boot_desc": [
+            .zhHant: "可臨時引導 TWRP Recovery 或 Magisk 修補核心以測試相容性，設備重啟後自動還原，不會修改硬碟分區。",
+            .zhHans: "可临时引导 TWRP Recovery 或 Magisk 修补内核以测试兼容性，设备重启后自动还原，不会修改硬盘分区。",
+            .en: "Temporarily boot TWRP or Magisk patched boot without writing to disk. Reverts upon reboot.",
+            .ja: "TWRP や Magisk パッチ済みカーネルを一時起動してテストできます。再起動で元に戻ります。",
+            .es: "Inicia temporalmente TWRP o un boot parchado con Magisk sin escribir en el disco. Se restaura al reiniciar.",
+            .ko: "디스크에 쓰지 않고 TWRP 또는 Magisk 패치 커널을 임시로 부팅합니다. 재부팅 시 원래대로 복구됩니다.",
+            .ru: "Временная загрузка TWRP или ядра Magisk без записи на диск. Сбрасывается при перезагрузке.",
+            .uk: "Тимчасове завантаження TWRP або ядра Magisk без запису на диск. Скидається при перезавантаженні."
+        ],
+        "fb_temp_boot_placeholder": [
+            .zhHant: "選擇臨時 Boot / Recovery 映像檔 (.img)",
+            .zhHans: "选择临时 Boot / Recovery 镜像文件 (.img)",
+            .en: "Select temporary boot/recovery image (.img)",
+            .ja: "一時 Boot / Recovery イメージ (.img) を選択",
+            .es: "Seleccione imagen temporal de boot/recovery (.img)",
+            .ko: "임시 부팅/복구 이미지(.img) 선택",
+            .ru: "Выберите временный образ загрузки/recovery (.img)",
+            .uk: "Виберіть тимчасовий образ завантаження/recovery (.img)"
+        ],
+        "fb_unlock_critical": [
+            .zhHant: "關鍵分區解鎖 (flashing unlock_critical)",
+            .zhHans: "关键分区解锁 (flashing unlock_critical)",
+            .en: "Critical Unlock (flashing unlock_critical)",
+            .ja: "クリティカルアンロック (flashing unlock_critical)",
+            .es: "Desbloqueo crítico (flashing unlock_critical)",
+            .ko: "중요 파티션 언락 (flashing unlock_critical)",
+            .ru: "Критическая разблокировка (flashing unlock_critical)",
+            .uk: "Критичне розблокування (flashing unlock_critical)"
+        ],
+        "fb_unlock_legacy_oem": [
+            .zhHant: "傳統 OEM 解鎖 (oem unlock)",
+            .zhHans: "传统 OEM 解锁 (oem unlock)",
+            .en: "Legacy OEM Unlock (oem unlock)",
+            .ja: "従来の OEM アンロック (oem unlock)",
+            .es: "Desbloqueo OEM clásico (oem unlock)",
+            .ko: "기존 OEM 언락 (oem unlock)",
+            .ru: "Классическая разблокировка OEM (oem unlock)",
+            .uk: "Класичне розблокування OEM (oem unlock)"
+        ],
+        "fb_unlock_standard": [
+            .zhHant: "現代標準解鎖 (flashing unlock)",
+            .zhHans: "现代标准解锁 (flashing unlock)",
+            .en: "Standard Unlock (flashing unlock)",
+            .ja: "標準アンロック (flashing unlock)",
+            .es: "Desbloqueo estándar (flashing unlock)",
+            .ko: "표준 언락 (flashing unlock)",
+            .ru: "Стандартная разблокировка (flashing unlock)",
+            .uk: "Стандартне розблокування (flashing unlock)"
+        ],
+        "fb_unlocked": [
+            .zhHant: "已解鎖 (Unlocked)",
+            .zhHans: "已解锁 (Unlocked)",
+            .en: "Unlocked",
+            .ja: "解除済み (Unlocked)",
+            .es: "Desbloqueado",
+            .ko: "언락됨",
+            .ru: "Разблокирован",
+            .uk: "Розблоковано"
+        ],
+        "fb_var_name": [
+            .zhHant: "變數名稱",
+            .zhHans: "变量名称",
+            .en: "Variable",
+            .ja: "変数名",
+            .es: "Variable",
+            .ko: "변수명",
+            .ru: "Переменная",
+            .uk: "Змінна"
+        ],
+        "fb_var_val": [
+            .zhHant: "數值",
+            .zhHans: "数值",
+            .en: "Value",
+            .ja: "値",
+            .es: "Valor",
+            .ko: "값",
+            .ru: "Значение",
+            .uk: "Значення"
+        ],
+        "fb_vars_card": [
+            .zhHant: "Fastboot 設備變數檢視器 (getvar all)",
+            .zhHans: "Fastboot 设备变量查看器 (getvar all)",
+            .en: "Fastboot Variables (getvar all)",
+            .ja: "Fastboot 変数ビューア (getvar all)",
+            .es: "Variables Fastboot (getvar all)",
+            .ko: "Fastboot 변수 목록 (getvar all)",
+            .ru: "Переменные Fastboot (getvar all)",
+            .uk: "Змінні Fastboot (getvar all)"
+        ],
+        "fb_vars_empty_hint": [
+            .zhHant: "點擊「載入變數清單」以讀取設備完整 bootloader 變數。",
+            .zhHans: "点击“载入变量清单”以读取设备完整 bootloader 变量。",
+            .en: "Click 'Load Variables' to read all bootloader variables.",
+            .ja: "「変数を読み込む」をクリックして、端末のBootloader変数を取得します。",
+            .es: "Haga clic en 'Cargar variables' para leer todas las variables del bootloader.",
+            .ko: "'변수 불러오기'를 클릭하여 부트로더의 전체 변수를 읽어옵니다.",
+            .ru: "Нажмите «Загрузить переменные», чтобы прочитать параметры загрузчика.",
+            .uk: "Натисніть «Завантажити змінні», щоб прочитати параметри завантажувача."
+        ],
+        "fb_vars_load": [
+            .zhHant: "載入變數清單",
+            .zhHans: "加载变量列表",
+            .en: "Load Variables",
+            .ja: "変数一覧を読み込む",
+            .es: "Cargar variables",
+            .ko: "변수 불러오기",
+            .ru: "Загрузить переменные",
+            .uk: "Завантажити змінні"
+        ],
+        "fb_vars_no_match": [
+            .zhHant: "沒有相符的變數。",
+            .zhHans: "没有匹配的变量。",
+            .en: "No matching variables.",
+            .ja: "一致する変数がありません。",
+            .es: "No hay variables coincidentes.",
+            .ko: "일치하는 변수가 없습니다.",
+            .ru: "Нет совпадающих переменных.",
+            .uk: "Немає відповідних змінних."
+        ],
+        "fb_vars_search": [
+            .zhHant: "搜尋變數名稱或數值...",
+            .zhHans: "搜索变量名称或数值...",
+            .en: "Search variable name or value...",
+            .ja: "変数名や値を検索...",
+            .es: "Buscar nombre o valor de variable...",
+            .ko: "변수 이름 또는 값 검색...",
+            .ru: "Поиск по имени или значению переменной...",
+            .uk: "Пошук за назвою або значенням змінної..."
+        ],
+        "file_browse_zip": [
+            .zhHant: "瀏覽 ZIP...",
+            .zhHans: "浏览 ZIP...",
+            .en: "Browse ZIP...",
+            .ja: "ZIP を参照...",
+            .es: "Examinar ZIP...",
+            .ko: "ZIP 찾아보기...",
+            .ru: "Обзор ZIP...",
+            .uk: "Огляд ZIP..."
+        ],
+        "file_copy_clipboard": [
+            .zhHant: "複製到剪貼板",
+            .zhHans: "复制到剪贴板",
+            .en: "Copy to Clipboard",
+            .ja: "クリップボードにコピー",
+            .es: "Copiar al portapapeles",
+            .ko: "클립보드에 복사",
+            .ru: "Копировать в буфер",
+            .uk: "Копіювати в буфер"
+        ],
+        "file_progress_current": [
+            .zhHant: "當前進度:",
+            .zhHans: "当前进度:",
+            .en: "Current Progress:",
+            .ja: "現在の進捗:",
+            .es: "Progreso actual:",
+            .ko: "현재 진행률:",
+            .ru: "Текущий прогресс:",
+            .uk: "Поточний прогрес:"
+        ],
+        "file_pull_btn": [
+            .zhHant: "選擇儲存位置並下載",
+            .zhHans: "选择保存位置并下载",
+            .en: "Save and Download",
+            .ja: "保存先を指定してダウンロード",
+            .es: "Guardar y descargar",
+            .ko: "저장 및 다운로드",
+            .ru: "Сохранить и скачать",
+            .uk: "Зберегти та завантажити"
+        ],
+        "file_pull_desc": [
+            .zhHant: "將手機內的檔案或備份資料複製下載到 Mac 電腦。",
+            .zhHans: "将手机内的文件或备份数据复制下载到 Mac 电脑。",
+            .en: "Download files or backups from device to your Mac.",
+            .ja: "端末内のファイルやバックアップを Mac にダウンロードします。",
+            .es: "Descargue archivos o copias de seguridad del dispositivo a su Mac.",
+            .ko: "기기 내부 파일 또는 백업을 Mac으로 다운로드합니다.",
+            .ru: "Скачивание файлов или резервных копий с устройства на Mac.",
+            .uk: "Завантаження файлів або резервних копій з пристрою на Mac."
+        ],
+        "file_pull_path_placeholder": [
+            .zhHant: "例如: /sdcard/Download/myfile.zip",
+            .zhHans: "例如: /sdcard/Download/myfile.zip",
+            .en: "e.g. /sdcard/Download/myfile.zip",
+            .ja: "例: /sdcard/Download/myfile.zip",
+            .es: "ej. /sdcard/Download/archivo.zip",
+            .ko: "예: /sdcard/Download/myfile.zip",
+            .ru: "напр. /sdcard/Download/myfile.zip",
+            .uk: "напр. /sdcard/Download/myfile.zip"
+        ],
+        "file_pull_source": [
+            .zhHant: "手機來源檔案路徑:",
+            .zhHans: "手机源文件路径:",
+            .en: "Device File Path:",
+            .ja: "端末ファイルパス:",
+            .es: "Ruta del archivo en el dispositivo:",
+            .ko: "기기 파일 경로:",
+            .ru: "Путь к файлу на устройстве:",
+            .uk: "Шлях до файлу на пристрої:"
+        ],
+        "file_pull_title": [
+            .zhHant: "從手機下載檔案 (Pull)",
+            .zhHans: "从手机下载文件 (Pull)",
+            .en: "Pull Files from Device",
+            .ja: "端末からファイル取得 (Pull)",
+            .es: "Descargar archivos del dispositivo",
+            .ko: "기기에서 파일 가져오기 (Pull)",
+            .ru: "Загрузка файлов с устройства",
+            .uk: "Завантаження файлів з пристрою"
+        ],
+        "file_push_btn": [
+            .zhHant: "傳送檔案至手機",
+            .zhHans: "传送文件至手机",
+            .en: "Push to Device",
+            .ja: "端末に送信",
+            .es: "Enviar al dispositivo",
+            .ko: "기기로 전송",
+            .ru: "Отправить на устройство",
+            .uk: "Надіслати на пристрій"
+        ],
+        "file_push_desc": [
+            .zhHant: "將 Mac 本地檔案或目錄複製進手機記憶卡中。",
+            .zhHans: "将 Mac 本地文件或目录复制进手机存储中。",
+            .en: "Copy local Mac files or folders to device storage.",
+            .ja: "Mac のファイルやフォルダを端末のストレージにコピーします。",
+            .es: "Copie archivos o carpetas locales de su Mac al almacenamiento del dispositivo.",
+            .ko: "Mac의 로컬 파일 또는 폴더를 기기 저장공간으로 복사합니다.",
+            .ru: "Копирование локальных файлов или папок Mac в память устройства.",
+            .uk: "Копіювання локальних файлів або папок Mac у пам'ять пристрою."
+        ],
+        "file_push_dest": [
+            .zhHant: "手機目標路徑 (預設 /sdcard/Download/):",
+            .zhHans: "手机目标路径 (默认 /sdcard/Download/):",
+            .en: "Device Destination Path:",
+            .ja: "端末保存先パス:",
+            .es: "Ruta de destino en el dispositivo:",
+            .ko: "기기 대상 경로:",
+            .ru: "Путь назначения на устройстве:",
+            .uk: "Шлях призначення на пристрої:"
+        ],
+        "file_push_path_placeholder": [
+            .zhHant: "路徑",
+            .zhHans: "路径",
+            .en: "Path",
+            .ja: "パス",
+            .es: "Ruta",
+            .ko: "경로",
+            .ru: "Путь",
+            .uk: "Шлях"
+        ],
+        "file_push_source": [
+            .zhHant: "Mac 來源檔案/資料夾:",
+            .zhHans: "Mac 源文件/文件夹:",
+            .en: "Mac Source File/Folder:",
+            .ja: "Mac 元ファイル/フォルダ:",
+            .es: "Archivo/Carpeta de origen en Mac:",
+            .ko: "Mac 소스 파일/폴더:",
+            .ru: "Исходный файл/папка на Mac:",
+            .uk: "Вихідний файл/папка на Mac:"
+        ],
+        "file_push_title": [
+            .zhHant: "傳送檔案至手機 (Push)",
+            .zhHans: "传送文件至手机 (Push)",
+            .en: "Push Files to Device",
+            .ja: "端末へファイル送信 (Push)",
+            .es: "Enviar archivos al dispositivo",
+            .ko: "기기로 파일 전송 (Push)",
+            .ru: "Отправка файлов на устройство",
+            .uk: "Надсилання файлів на пристрій"
+        ],
+        "file_save_screenshot": [
+            .zhHant: "儲存截圖...",
+            .zhHans: "保存截图...",
+            .en: "Save Screenshot...",
+            .ja: "画像を保存...",
+            .es: "Guardar captura...",
+            .ko: "스크린샷 저장...",
+            .ru: "Сохранить снимок...",
+            .uk: "Зберегти знімок..."
+        ],
+        "file_screenshot_desc": [
+            .zhHant: "即時擷取 Android 螢幕畫面，可直接複製或儲存至 Mac。",
+            .zhHans: "实时截取 Android 屏幕画面，可直接复制或保存至 Mac。",
+            .en: "Capture device screen instantly, copy to clipboard, or save to disk.",
+            .ja: "画面を即座にキャプチャし、クリップボードにコピーまたは保存します。",
+            .es: "Capture la pantalla del dispositivo al instante, cópiela al portapapeles o guárdela.",
+            .ko: "휴대폰 화면을 즉시 캡처하여 클립보드에 복사하거나 디스크에 저장합니다.",
+            .ru: "Мгновенный снимок экрана устройства, копирование в буфер или сохранение.",
+            .uk: "Миттєвий знімок екрана пристрою, копіювання в буфер або збереження."
+        ],
+        "file_screenshot_title": [
+            .zhHant: "螢幕擷取與即時畫面 (Screenshot)",
+            .zhHans: "屏幕截图与实时画面 (Screenshot)",
+            .en: "Screen Capture & Preview",
+            .ja: "画面キャプチャ & プレビュー",
+            .es: "Captura y vista previa de pantalla",
+            .ko: "화면 캡처 및 미리보기",
+            .ru: "Снимок экрана и предпросмотр",
+            .uk: "Знімок екрана та передперегляд"
+        ],
+        "file_sideload_btn": [
+            .zhHant: "開始 Sideload 刷入",
+            .zhHans: "开始 Sideload 刷入",
+            .en: "Start Sideload",
+            .ja: "Sideload 開始",
+            .es: "Iniciar Sideload",
+            .ko: "Sideload 시작",
+            .ru: "Начать Sideload",
+            .uk: "Почати Sideload"
+        ],
+        "file_sideload_confirm_msg": [
+            .zhHant: "請確認設備已進入 Recovery 模式並點選了「Apply update from ADB」或「ADB Sideload」。",
+            .zhHans: "请确认设备已进入 Recovery 模式并点击了“Apply update from ADB”或“ADB Sideload”。",
+            .en: "Please make sure your device is in Recovery mode with 'Apply update from ADB' or 'ADB Sideload' active.",
+            .ja: "端末がRecoveryモードに入り、「Apply update from ADB」または「ADB Sideload」が選択されていることを確認してください。",
+            .es: "Asegúrese de que el dispositivo esté en modo Recovery con 'Apply update from ADB' o 'ADB Sideload' activo.",
+            .ko: "기기가 Recovery 모드에 진입하여 'Apply update from ADB' 또는 'ADB Sideload'가 활성화되어 있는지 확인하세요.",
+            .ru: "Убедитесь, что устройство в режиме Recovery и выбран пункт «Apply update from ADB» или «ADB Sideload».",
+            .uk: "Переконайтеся, що пристрій у режимі Recovery та вибрано пункт «Apply update from ADB» або «ADB Sideload»."
+        ],
+        "file_sideload_confirm_title": [
+            .zhHant: "確定要執行 ADB Sideload 刷機嗎？",
+            .zhHans: "确定要执行 ADB Sideload 刷机吗？",
+            .en: "Are you sure you want to perform ADB Sideload?",
+            .ja: "ADB Sideload フラッシュを実行してもよろしいですか？",
+            .es: "¿Seguro que desea realizar ADB Sideload?",
+            .ko: "정말 ADB Sideload 플래시를 실행하시겠습니까?",
+            .ru: "Выполнить ADB Sideload?",
+            .uk: "Виконати ADB Sideload?"
+        ],
+        "file_sideload_desc": [
+            .zhHant: "在 Recovery 模式下無需將 zip 複製到手機，直接透過傳輸線刷入更新包、自訂 ROM 或 Magisk / Kernel 卡刷包。",
+            .zhHans: "在 Recovery 模式下无需将 zip 复制到手机，直接通过数据线刷入更新包、自定义 ROM 或 Magisk / Kernel 卡刷包。",
+            .en: "Directly flash update packages, custom ROMs, or Magisk zips from Mac in Recovery mode.",
+            .ja: "Recovery モードで zip を端末にコピーせず、Mac から直接アップデートや Magisk を書き込みます。",
+            .es: "Flashee directamente paquetes de actualización, ROMs o zips de Magisk desde el Mac en modo Recovery.",
+            .ko: "Recovery 모드에서 Mac을 통해 업데이트 패키지, 커스텀 롬, Magisk zip을 직접 플래시합니다.",
+            .ru: "Прямая прошивка обновлений, кастомных прошивок или zip-файлов Magisk с Mac в режиме Recovery.",
+            .uk: "Пряма прошивка оновлень, кастомних прошивок або zip-файлів Magisk з Mac у режимі Recovery."
+        ],
+        "file_sideload_placeholder": [
+            .zhHant: "請選擇刷機套件 (.zip)",
+            .zhHans: "请选择刷机包 (.zip)",
+            .en: "Select flashable package (.zip)",
+            .ja: "フラッシュパッケージ (.zip) を選択",
+            .es: "Seleccione el paquete flasheable (.zip)",
+            .ko: "플래시할 패키지(.zip) 선택",
+            .ru: "Выберите архив для прошивки (.zip)",
+            .uk: "Виберіть архів для прошивки (.zip)"
+        ],
+        "file_sideload_start_btn": [
+            .zhHant: "開始 Sideload 刷入",
+            .zhHans: "开始 Sideload 刷入",
+            .en: "Start Sideload",
+            .ja: "Sideload を開始",
+            .es: "Iniciar Sideload",
+            .ko: "Sideload 플래시 시작",
+            .ru: "Начать Sideload",
+            .uk: "Почати Sideload"
+        ],
+        "file_sideload_title": [
+            .zhHant: "ADB Sideload 線刷 (Recovery OTA / ROM / 卡刷包)",
+            .zhHans: "ADB Sideload 线刷 (Recovery OTA / ROM / 卡刷包)",
+            .en: "ADB Sideload (Recovery OTA / ROM / Zip)",
+            .ja: "ADB Sideload (リカバリ OTA / ROM / Zip)",
+            .es: "ADB Sideload (OTA / ROM / Zip de Recovery)",
+            .ko: "ADB Sideload (Recovery OTA / 롬 / Zip)",
+            .ru: "ADB Sideload (OTA / Прошивка / Zip в Recovery)",
+            .uk: "ADB Sideload (OTA / Прошивка / Zip в Recovery)"
+        ],
+        "file_take_screenshot": [
+            .zhHant: "立即截圖",
+            .zhHans: "立即截图",
+            .en: "Capture",
+            .ja: "スクリーンショット取得",
+            .es: "Capturar",
+            .ko: "화면 캡처",
+            .ru: "Сделать снимок",
+            .uk: "Зробити знімок"
+        ],
+        "guide_item_1_content": [
+            .zhHant: "前往手機「設定」>「關於手機」> 連續點擊「版本號碼 (Build Number)」7 次以啟用開發人員選項。接著返回「設定」>「系統」>「開發人員選項」，開啟「USB 偵錯」。",
+            .zhHans: "前往手机“设置”>“关于手机”> 连续点击“版本号 (Build Number)”7 次以启用开发者选项。接着返回“设置”>“系统”>“开发者选项”，开启“USB 调试”。",
+            .en: "Go to Settings > About Phone > Tap 'Build Number' 7 times to enable Developer Options. Then return to Settings > System > Developer Options and enable 'USB Debugging'.",
+            .ja: "端末の「設定」>「端末情報」>「ビルド番号」を7回タップして開発者向けオプションを有効化します。その後「設定」>「システム」>「開発者向けオプション」で「USBデバッグ」をオンにします。",
+            .es: "Vaya a Ajustes > Acerca del teléfono > Pulse 'Número de compilación' 7 veces. Luego vaya a Ajustes > Sistema > Opciones para desarrolladores y active 'Depuración USB'.",
+            .ko: "설정 > 휴대전화 정보 > '빌드 번호'를 7번 탭하여 개발자 옵션을 켭니다. 그 후 설정 > 시스템 > 개발자 옵션에서 'USB 디버깅'을 활성화하세요.",
+            .ru: "Перейдите в Настройки > О телефоне > Нажмите «Номер сборки» 7 раз. Затем перейдите в Настройки > Система > Для разработчиков и включите «Отладка по USB».",
+            .uk: "Перейдіть у Налаштування > Про телефон > Натисніть «Номер збірки» 7 разів. Потім перейдіть у Налаштування > Система > Для розробників і увімкніть «Налагодження по USB»."
+        ],
+        "guide_item_1_title": [
+            .zhHant: "如何開啟 Android 手機的 USB 偵錯？",
+            .zhHans: "如何开启 Android 手机的 USB 调试？",
+            .en: "How to enable USB Debugging on Android?",
+            .ja: "Android 端末の USB デバッグを有効にする方法",
+            .es: "¿Cómo habilitar la depuración USB en Android?",
+            .ko: "Android에서 USB 디버깅을 어떻게 켜나요?",
+            .ru: "Как включить отладку по USB на Android?",
+            .uk: "Як увімкнути налагодження по USB на Android?"
+        ],
+        "guide_item_2_content": [
+            .zhHant: "方法一：手機開機且開啟 USB 偵錯時，在軟體儀表板點選「重啟至 Bootloader」。\n方法二：將手機完全關機，長按「音量減鍵 + 電源鍵」，直到螢幕顯示 Fastboot 兔子、小綠人或文字圖示。",
+            .zhHans: "方法一：手机开机且开启 USB 调试时，在软件仪表板点击“重启至 Bootloader”。\n方法二：将手机完全关机，长按“音量减键 + 电源键”，直到屏幕显示 Fastboot 兔子、小绿人或文字图标。",
+            .en: "Method 1: When device is on with USB Debugging enabled, click 'Reboot to Bootloader' on the dashboard.\nMethod 2: Power off completely, then press and hold Volume Down + Power button until Fastboot logo appears.",
+            .ja: "方法1: 端末起動中（USBデバッグ有効）にダッシュボードの「Bootloader へ再起動」をクリックします。\n方法2: 電源を完全に切り、「音量下 + 電源ボタン」を Fastboot ロゴが表示されるまで長押しします。",
+            .es: "Método 1: Con el dispositivo encendido y la depuración USB activa, pulse 'Reiniciar a Bootloader' en el panel.\nMétodo 2: Apague el dispositivo por completo y mantenga presionado Volumen Abajo + Botón de Encendido hasta ver el logo de Fastboot.",
+            .ko: "방법 1: 기기가 켜져 있고 USB 디버깅이 활성화된 상태에서 대시보드의 'Bootloader로 재부팅'을 클릭합니다.\n방법 2: 전원을 완전히 끈 상태에서 볼륨 하 + 전원 버튼을 길게 눌러 Fastboot 로고가 나타날 때까지 기다립니다.",
+            .ru: "Способ 1: При включенном устройстве и активной отладке по USB нажмите «Перезагрузить в Bootloader» на панели.\nСпособ 2: Полностью выключите устройство, затем зажмите Громкость вниз + Кнопку питания до появления логотипа Fastboot.",
+            .uk: "Спосіб 1: При увімкненому пристрої та активному налагодженні по USB натисніть «Перезавантажити в Bootloader» на панелі.\nСпосіб 2: Повністю вимкніть пристрій, потім затисніть Гучність вниз + Кнопку живлення до появи логотипу Fastboot."
+        ],
+        "guide_item_2_title": [
+            .zhHant: "如何進入 Fastboot / Bootloader 模式？",
+            .zhHans: "如何进入 Fastboot / Bootloader 模式？",
+            .en: "How to enter Fastboot / Bootloader mode?",
+            .ja: "Fastboot / Bootloader モードに入る方法",
+            .es: "¿Cómo entrar al modo Fastboot / Bootloader?",
+            .ko: "Fastboot / Bootloader 모드에 어떻게 들어가나요?",
+            .ru: "Как войти в режим Fastboot / Bootloader?",
+            .uk: "Як увійти в режим Fastboot / Bootloader?"
+        ],
+        "guide_item_3_content": [
+            .zhHant: "Android 10 引入了動態分區 (Dynamic Partitions)。刷寫 system、vendor、product 或 super 等動態分區映像檔時，必須處於 FastbootD 模式（可透過 recovery 選單或 fastboot reboot fastboot 進入）。",
+            .zhHans: "Android 10 引入了动态分区 (Dynamic Partitions)。刷写 system、vendor、product 或 super 等动态分区镜像时，必须处于 FastbootD 模式（可通过 recovery 菜单或 fastboot reboot fastboot 进入）。",
+            .en: "Android 10 introduced Dynamic Partitions. Flashing images like system, vendor, product, or super requires FastbootD mode (accessible via recovery menu or 'fastboot reboot fastboot').",
+            .ja: "Android 10 で導入された動的パーティションです。system、vendor、product、super 等のフラッシュには FastbootD モードが必要です（リカバリメニューまたは fastboot reboot fastboot で起動）。",
+            .es: "Android 10 introdujo particiones dinámicas. Flashear imágenes como system, vendor, product o super requiere el modo FastbootD (accesible desde el menú de recovery o con 'fastboot reboot fastboot').",
+            .ko: "Android 10부터 동적 파티션(Dynamic Partitions)이 도입되었습니다. system, vendor, product, super 등 동적 파티션을 플래시하려면 반드시 FastbootD 모드여야 합니다 (recovery 메뉴 또는 'fastboot reboot fastboot'로 진입).",
+            .ru: "В Android 10 появились динамические разделы. Прошивка system, vendor, product или super требует режима FastbootD (доступен через меню recovery или команду 'fastboot reboot fastboot').",
+            .uk: "В Android 10 з'явилися динамічні розділи. Прошивка system, vendor, product або super вимагає режиму FastbootD (доступний через меню recovery або команду 'fastboot reboot fastboot')."
+        ],
+        "guide_item_3_title": [
+            .zhHant: "什麼是 FastbootD 模式？",
+            .zhHans: "什么是 FastbootD 模式？",
+            .en: "What is FastbootD mode?",
+            .ja: "FastbootD モードとは？",
+            .es: "¿Qué es el modo FastbootD?",
+            .ko: "FastbootD 모드란 무엇인가요?",
+            .ru: "Что такое режим FastbootD?",
+            .uk: "Що таке режим FastbootD?"
+        ],
+        "guide_item_4_content": [
+            .zhHant: "在 macOS 插入 Android 設備時，若系統彈出「是否允許配件連接？」對話框，請務必點選「允許」。",
+            .zhHans: "在 macOS 插入 Android 设备时，若系统弹出“是否允许配件连接？”对话框，请务必点击“允许”。",
+            .en: "When connecting an Android device to macOS, if a prompt asks 'Allow accessory to connect?', make sure to click 'Allow'.",
+            .ja: "macOS に Android 端末を接続した際、「アクセサリの接続を許可しますか？」と表示されたら必ず「許可」を選択してください。",
+            .es: "Al conectar un dispositivo Android a macOS, si aparece el mensaje '¿Permitir que el accesorio se conecte?', asegúrese de hacer clic en 'Permitir'.",
+            .ko: "macOS에 Android 기기를 연결할 때 '액세서리 연결을 허용하겠습니까?'라는 메시지가 나타나면 반드시 '허용'을 클릭하세요.",
+            .ru: "При подключении устройства Android к macOS, если появится запрос «Разрешить подключение аксессуара?», обязательно нажмите «Разрешить».",
+            .uk: "При підключенні пристрою Android до macOS, якщо з'явиться запит «Дозволити підключення аксесуара?», обов'язково натисніть «Дозволити»."
+        ],
+        "guide_item_4_title": [
+            .zhHant: "macOS 權限注意事項",
+            .zhHans: "macOS 权限注意事项",
+            .en: "macOS Permission Notice",
+            .ja: "macOS のアクセス権限に関する注意",
+            .es: "Aviso de permisos en macOS",
+            .ko: "macOS 권한 주의사항",
+            .ru: "Уведомление о разрешениях macOS",
+            .uk: "Повідомлення про дозволи macOS"
+        ],
+        "guide_title": [
+            .zhHant: "刷機與除錯連線指南",
+            .zhHans: "刷机与调试连接指南",
+            .en: "Flashing & Debugging Connection Guide",
+            .ja: "フラッシュ & デバッグ接続ガイド",
+            .es: "Guía de conexión para flasheo y depuración",
+            .ko: "플래시 및 디버깅 연결 가이드",
+            .ru: "Руководство по подключению и прошивке",
+            .uk: "Посібник з підключення та прошивки"
+        ],
+        "menu_connected_count": [
+            .zhHant: "📱 已連接 %d 台設備",
+            .zhHans: "📱 已连接 %d 台设备",
+            .en: "📱 %d Connected Device(s)",
+            .ja: "📱 接続済み %d 台の端末",
+            .es: "📱 %d dispositivo(s) conectado(s)",
+            .ko: "📱 %d대 기기 연결됨",
+            .ru: "📱 Подключено устройств: %d",
+            .uk: "📱 Підключено пристроїв: %d"
+        ],
+        "menu_open_main": [
+            .zhHant: "開啟主視窗",
+            .zhHans: "打开主窗口",
+            .en: "Open Main Window",
+            .ja: "メインウィンドウを開く",
+            .es: "Abrir ventana principal",
+            .ko: "메인 창 열기",
+            .ru: "Открыть главное окно",
+            .uk: "Відкрити головне вікно"
+        ],
+        "menu_quit": [
+            .zhHant: "結束麥安工具箱",
+            .zhHans: "退出麦安工具箱",
+            .en: "Quit MacAndroidToolbox",
+            .ja: "麦安ツールボックスを終了",
+            .es: "Salir de MacAndroidToolbox",
+            .ko: "맥안드로이드 툴박스 종료",
+            .ru: "Завершить MacAndroidToolbox",
+            .uk: "Завершити MacAndroidToolbox"
+        ],
+        "menu_refresh": [
+            .zhHant: "重新掃描設備",
+            .zhHans: "重新扫描设备",
+            .en: "Refresh Devices",
+            .ja: "デバイスを再スキャン",
+            .es: "Actualizar dispositivos",
+            .ko: "기기 다시 검색",
+            .ru: "Обновить список устройств",
+            .uk: "Оновити список пристроїв"
+        ],
+        "mode_adb": [
+            .zhHant: "ADB 模式",
+            .zhHans: "ADB 模式",
+            .en: "ADB Mode",
+            .ja: "ADB モード",
+            .es: "Modo ADB",
+            .ko: "ADB 모드",
+            .ru: "Режим ADB",
+            .uk: "Режим ADB"
+        ],
+        "mode_edl": [
+            .zhHant: "EDL / 9008 模式",
+            .zhHans: "EDL / 9008 模式",
+            .en: "EDL / 9008 Mode",
+            .ja: "EDL / 9008 モード",
+            .es: "Modo EDL / 9008",
+            .ko: "EDL / 9008 모드",
+            .ru: "Режим EDL / 9008",
+            .uk: "Режим EDL / 9008"
+        ],
+        "mode_fastboot": [
+            .zhHant: "Fastboot 模式",
+            .zhHans: "Fastboot 模式",
+            .en: "Fastboot Mode",
+            .ja: "Fastboot モード",
+            .es: "Modo Fastboot",
+            .ko: "Fastboot 모드",
+            .ru: "Режим Fastboot",
+            .uk: "Режим Fastboot"
+        ],
+        "mode_fastbootd": [
+            .zhHant: "FastbootD 模式",
+            .zhHans: "FastbootD 模式",
+            .en: "FastbootD Mode",
+            .ja: "FastbootD モード",
+            .es: "Modo FastbootD",
+            .ko: "FastbootD 모드",
+            .ru: "Режим FastbootD",
+            .uk: "Режим FastbootD"
+        ],
+        "mode_offline": [
+            .zhHant: "離線",
+            .zhHans: "离线",
+            .en: "Offline",
+            .ja: "オフライン",
+            .es: "Desconectado",
+            .ko: "오프라인",
+            .ru: "Не в сети",
+            .uk: "Офлайн"
+        ],
+        "mode_recovery": [
+            .zhHant: "Recovery 模式",
+            .zhHans: "Recovery 模式",
+            .en: "Recovery Mode",
+            .ja: "Recovery モード",
+            .es: "Modo Recovery",
+            .ko: "Recovery 모드",
+            .ru: "Режим Recovery",
+            .uk: "Режим Recovery"
+        ],
+        "mode_sideload": [
+            .zhHant: "Sideload 刷機模式",
+            .zhHans: "Sideload 刷机模式",
+            .en: "Sideload Mode",
+            .ja: "Sideload モード",
+            .es: "Modo Sideload",
+            .ko: "Sideload 플래시 모드",
+            .ru: "Режим Sideload",
+            .uk: "Режим Sideload"
+        ],
+        "mode_unauthorized": [
+            .zhHant: "未授權 (請在螢幕點允許)",
+            .zhHans: "未授权 (请在屏幕点击允许)",
+            .en: "Unauthorized (Allow on device)",
+            .ja: "未承認 (端末画面で許可してください)",
+            .es: "No autorizado (Permita en la pantalla)",
+            .ko: "미인증 (화면에서 허용을 누르세요)",
+            .ru: "Не авторизовано (Разрешите на экране)",
+            .uk: "Не авторизовано (Дозвольте на екрані)"
+        ],
+        "mode_unknown": [
+            .zhHant: "未知狀態",
+            .zhHans: "未知状态",
+            .en: "Unknown State",
+            .ja: "不明な状態",
+            .es: "Estado desconocido",
+            .ko: "알 수 없는 상태",
+            .ru: "Неизвестное состояние",
+            .uk: "Невідомий стан"
+        ],
+        "nav_apps": [
+            .zhHant: "應用管理",
+            .zhHans: "应用管理",
+            .en: "App Manager",
+            .ja: "アプリ管理",
+            .es: "Gestor de aplicaciones",
+            .ko: "앱 관리자",
+            .ru: "Управление приложениями",
+            .uk: "Керування додатками"
+        ],
+        "nav_connected_devices": [
+            .zhHant: "已連接設備",
+            .zhHans: "已连接设备",
+            .en: "Connected Devices",
+            .ja: "接続されたデバイス",
+            .es: "Dispositivos conectados",
+            .ko: "연결된 기기",
+            .ru: "Подключенные устройства",
+            .uk: "Підключені пристрої"
+        ],
+        "nav_dashboard": [
+            .zhHant: "裝置總覽",
+            .zhHans: "设备总览",
+            .en: "Dashboard",
+            .ja: "デバイス概要",
+            .es: "Panel de control",
+            .ko: "기기 개요",
+            .ru: "Панель управления",
+            .uk: "Панель керування"
+        ],
+        "nav_fastboot": [
+            .zhHant: "Fastboot 刷機",
+            .zhHans: "Fastboot 刷机",
+            .en: "Fastboot Flasher",
+            .ja: "Fastboot フラッシュ",
+            .es: "Flasheador Fastboot",
+            .ko: "Fastboot 플래시",
+            .ru: "Прошивка Fastboot",
+            .uk: "Прошивка Fastboot"
+        ],
+        "nav_files": [
+            .zhHant: "檔案 & Sideload",
+            .zhHans: "文件 & Sideload",
+            .en: "Files & Sideload",
+            .ja: "ファイル & Sideload",
+            .es: "Archivos y Sideload",
+            .ko: "파일 및 Sideload",
+            .ru: "Файлы и Sideload",
+            .uk: "Файли та Sideload"
+        ],
+        "nav_main_navigation": [
+            .zhHant: "主功能導航",
+            .zhHans: "主功能导航",
+            .en: "Main Navigation",
+            .ja: "メインナビゲーション",
+            .es: "Navegación principal",
+            .ko: "기능 탐색",
+            .ru: "Основная навигация",
+            .uk: "Головна навігація"
+        ],
+        "nav_no_devices": [
+            .zhHant: "未檢測到設備",
+            .zhHans: "未检测到设备",
+            .en: "No Devices Found",
+            .ja: "デバイスが見つかりません",
+            .es: "No se encontraron dispositivos",
+            .ko: "기기가 감지되지 않음",
+            .ru: "Устройства не найдены",
+            .uk: "Пристроїв не виявлено"
+        ],
+        "nav_settings": [
+            .zhHant: "設定",
+            .zhHans: "设置",
+            .en: "Settings",
+            .ja: "設定",
+            .es: "Ajustes",
+            .ko: "설정",
+            .ru: "Настройки",
+            .uk: "Налаштування"
+        ],
+        "nav_shell": [
+            .zhHant: "進階 Shell & 調優",
+            .zhHans: "高级 Shell & 调优",
+            .en: "Shell & Tweaks",
+            .ja: "高度な Shell & 調整",
+            .es: "Shell y ajustes",
+            .ko: "고급 Shell 및 튜닝",
+            .ru: "Shell и твики",
+            .uk: "Shell та твіки"
+        ],
+        "onboarding_agree_continue": [
+            .zhHant: "同意並繼續",
+            .zhHans: "同意并继续",
+            .en: "Agree and Continue",
+            .ja: "同意して次へ",
+            .es: "Aceptar y continuar",
+            .ko: "동의하고 계속하기",
+            .ru: "Принять и продолжить",
+            .uk: "Погодитися та продовжити"
+        ],
+        "onboarding_brew_detected": [
+            .zhHant: "已檢測到 Homebrew 套件管理器",
+            .zhHans: "已检测到 Homebrew 包管理器",
+            .en: "Homebrew Package Manager Detected",
+            .ja: "Homebrew パッケージマネージャーを検出しました",
+            .es: "Homebrew detectado en el sistema",
+            .ko: "Homebrew 패키지 관리자 감지됨",
+            .ru: "Обнаружен пакетный менеджер Homebrew",
+            .uk: "Виявлено пакетний менеджер Homebrew"
+        ],
+        "onboarding_brew_install_btn": [
+            .zhHant: "⚡️ 一鍵透過 Homebrew 安裝 Platform-Tools",
+            .zhHans: "⚡️ 一键通过 Homebrew 安装 Platform-Tools",
+            .en: "⚡️ One-Click Install Platform-Tools via Homebrew",
+            .ja: "⚡️ Homebrew で Platform-Tools をワンクリック導入",
+            .es: "⚡️ Instalar Platform-Tools en un clic con Homebrew",
+            .ko: "⚡️ Homebrew로 Platform-Tools 원클릭 자동 설치",
+            .ru: "⚡️ Установить Platform-Tools в один клик через Homebrew",
+            .uk: "⚡️ Встановити Platform-Tools в один клік через Homebrew"
+        ],
+        "onboarding_brew_install_success": [
+            .zhHant: "核心刷機工具已就緒，可開始使用！",
+            .zhHans: "核心刷机工具已就绪，可开始使用！",
+            .en: "Core flashing tools are ready to use!",
+            .ja: "コアツールは正常に準備され、利用可能です！",
+            .es: "¡Las herramientas principales están listas para usar!",
+            .ko: "핵심 툴이 준비되어 바로 사용할 수 있습니다!",
+            .ru: "Основные инструменты готовы к использованию!",
+            .uk: "Основні інструменти готові до використання!"
+        ],
+        "onboarding_brew_installing": [
+            .zhHant: "正在透過 Homebrew 下載安裝 platform-tools...",
+            .zhHans: "正在通过 Homebrew 下载安装 platform-tools...",
+            .en: "Installing platform-tools via Homebrew...",
+            .ja: "Homebrew 経由で platform-tools をインストール中...",
+            .es: "Instalando platform-tools mediante Homebrew...",
+            .ko: "Homebrew를 통해 platform-tools를 설치하는 중...",
+            .ru: "Установка platform-tools через Homebrew...",
+            .uk: "Встановлення platform-tools через Homebrew..."
+        ],
+        "onboarding_brew_missing": [
+            .zhHant: "未檢測到 Homebrew 套件管理器",
+            .zhHans: "未检测到 Homebrew 包管理器",
+            .en: "Homebrew Not Detected",
+            .ja: "Homebrew が見つかりません",
+            .es: "Homebrew no detectado",
+            .ko: "Homebrew가 설치되어 있지 않습니다",
+            .ru: "Homebrew не обнаружен",
+            .uk: "Homebrew не виявлено"
+        ],
+        "onboarding_brew_missing_desc": [
+            .zhHant: "未能在系統預設路徑找到 brew。您可以前往 Homebrew 官方網站安裝，或複製指令手動在終端機中執行。",
+            .zhHans: "未能在系统默认路径找到 brew。您可以前往 Homebrew 官方网站安装，或复制命令手动在终端中执行。",
+            .en: "brew was not found in default paths. You can install it from brew.sh or copy the terminal command.",
+            .ja: "既定のパスに brew が見つかりませんでした。公式サイト brew.sh を開くか、インストールコマンドをコピーしてターミナルで実行してください。",
+            .es: "No se encontró brew en las rutas del sistema. Puede instalarlo desde brew.sh o copiar el comando de instalación.",
+            .ko: "기본 경로에서 brew를 찾을 수 없습니다. 공식 웹사이트 brew.sh를 방문하거나 설치 명령어를 복사하여 터미널에서 실행하십시오.",
+            .ru: "Команда brew не найдена. Перейдите на сайт brew.sh или скопируйте команду установки для выполнения в Терминале.",
+            .uk: "Команду brew не знайдено. Перейдіть на сайт brew.sh або скопіюйте команду встановлення для запуску в Терміналі."
+        ],
+        "onboarding_cmd_copied": [
+            .zhHant: "✅ 指令已複製到剪貼簿",
+            .zhHans: "✅ 命令已复制到剪贴板",
+            .en: "✅ Command Copied to Clipboard",
+            .ja: "✅ コマンドをクリップボードにコピーしました",
+            .es: "✅ Comando copiado al portapapeles",
+            .ko: "✅ 명령어가 클립보드에 복사되었습니다",
+            .ru: "✅ Команда скопирована в буфер",
+            .uk: "✅ Команду скопійовано в буфер"
+        ],
+        "onboarding_copy_brew_cmd": [
+            .zhHant: "📋 複製 Homebrew 安裝指令",
+            .zhHans: "📋 复制 Homebrew 安装命令",
+            .en: "📋 Copy Homebrew Install Command",
+            .ja: "📋 インストールコマンドをコピー",
+            .es: "📋 Copiar comando de instalación",
+            .ko: "📋 Homebrew 설치 명령어 복사",
+            .ru: "📋 Скопировать команду установки",
+            .uk: "📋 Скопіювати команду встановлення"
+        ],
+        "onboarding_disagree_quit": [
+            .zhHant: "不同意並退出",
+            .zhHans: "不同意并退出",
+            .en: "Disagree & Quit",
+            .ja: "同意せず終了",
+            .es: "No aceptar y salir",
+            .ko: "동의하지 않고 종료",
+            .ru: "Отклонить и выйти",
+            .uk: "Відхилити та вийти"
+        ],
+        "onboarding_disclaimer_content": [
+            .zhHant: "歡迎使用「麥安工具箱」（MacAndroid Toolbox）。在您使用本軟體進行任何操作（包含但不限於解鎖 Bootloader、刷入 Recovery、刷入系統分區鏡像、執行 Fastboot / ADB 指令、修改系統參數等）之前，請務必詳細閱讀並完全理解以下重要條款：\n\n1. 高風險操作提醒：\n解鎖 Bootloader、刷機、刷入未經驗證的第三方 ROM 或核心可能導致設備變磚（無法開機）、失去原廠保固、資料永久丟失或硬體損壞。請在操作前務必完整備份手機中的重要資料。\n\n2. 責任承擔：\n本軟體按「現狀」（As-Is）提供，開發者不對因使用本軟體或相關指令所導致的任何直接或間接損失、資料損毀、硬體故障或法律糾紛承擔任何法律與經濟賠償責任。使用者須對自身的一切操作及後果承擔全部風險與責任。\n\n3. 官方規範：\n請確保您擁有該設備的合法處置權，並遵守各手機製造商的服務條款。若您不同意上述條款，請立即結束並解除安裝本軟體。",
+            .zhHans: "欢迎使用“麦安工具箱”（MacAndroid Toolbox）。在您使用本软件进行任何操作（包括但不限于解锁 Bootloader、刷入 Recovery、刷入系统分区镜像、执行 Fastboot / ADB 命令、修改系统参数等）之前，请务必详细阅读并完全理解以下重要条款：\n\n1. 高风险操作提醒：\n解锁 Bootloader、刷机、刷入未经检验的第三方 ROM 或内核可能导致设备变砖（无法开机）、失去原厂保修、数据永久丢失或硬件损坏。请在操作前务必完整备份手机中的重要数据。\n\n2. 责任承担：\n本软件按“现状”（As-Is）提供，开发者不对因使用本软件或相关命令所导致的任何直接或间接损失、数据损毁、硬件故障或法律纠纷承担任何法律与经济赔偿责任。用户须对自身的一切操作及后果承担全部风险与责任。\n\n3. 官方规范：\n请确保您拥有该设备的合法处置权，并遵守各手机制造商的服务条款。若您不同意上述条款，请立即退出并卸载本软件。",
+            .en: "Welcome to MacAndroid Toolbox. Before using this software for any operations (including but not limited to unlocking Bootloader, flashing Recovery, flashing system partitions, executing Fastboot / ADB commands, modifying system parameters, etc.), please read and understand the following terms:\n\n1. High Risk Notice:\nUnlocking Bootloader, flashing custom firmware, ROMs, or kernels may cause device bricking (bootloop/hard brick), void manufacturer warranty, permanent data loss, or hardware failure. Always back up your important data before proceeding.\n\n2. Assumption of Risk:\nThis software is provided \"as-is\" without warranty of any kind. The developer assumes no responsibility or liability for any direct or indirect damage, data loss, device malfunction, or legal disputes. You accept full responsibility for all actions and consequences.\n\n3. Compliance:\nEnsure you have legal rights to the device and comply with manufacturer terms. If you do not agree to these terms, please exit and uninstall the application immediately.",
+            .ja: "「麦安ツールボックス」（MacAndroid Toolbox）をご利用いただきありがとうございます。本ソフトウェアを使用して操作（Bootloader アンロック、Recovery / システムイメージの書き込み、Fastboot / ADB コマンドの実行、システム設定の変更等）を行う前に、以下の規約をよくお読みになり、十分にご理解ください。\n\n1. 高リスク操作の警告:\nBootloader のアンロックやカスタム ROM・カーネルの導入は、端末の文鎮化（起動不能）、メーカー保証の失効、データの完全消失、ハードウェア破損を引き起こす可能性があります。作業前に必ず重要データを完全にバックアップしてください。\n\n2. 免責事項:\n本ソフトウェアは現状有姿（As-Is）で提供され、開発者は本ツールの利用に起因するいかなる直接的・間接的損害、データ消失、端末故障、法的トラブルに対しても一切の責任を負いません。すべての操作および結果はユーザーの自己責任となります。\n\n3. 規約の同意:\n端末の正当な所有権を有していることを確認してください。本規約に同意されない場合は、直ちにアプリを終了してアンインストールしてください。",
+            .es: "Bienvenido a MacAndroid Toolbox. Antes de usar este software para cualquier operación (incluyendo pero no limitado a desbloquear Bootloader, flashear Recovery, flashear particiones del sistema, ejecutar comandos Fastboot / ADB, modificar parámetros del sistema, etc.), lea y comprenda los siguientes términos:\n\n1. Aviso de alto riesgo:\nDesbloquear el Bootloader, flashear ROMs personalizadas o kernels puede ocasionar que el dispositivo quede inutilizable (brick), anulación de garantía, pérdida permanente de datos o daños de hardware. Realice siempre una copia de seguridad antes de continuar.\n\n2. Exención de responsabilidad:\nEste software se proporciona \"tal cual\" (As-Is). El desarrollador no asume ninguna responsabilidad por daños directos o indirectos, pérdida de datos, fallos del dispositivo o disputas legales. Usted asume todo el riesgo y la responsabilidad de sus acciones.\n\n3. Cumplimiento:\nAsegúrese de tener los derechos legales sobre el dispositivo. Si no está de acuerdo con estos términos, salga y desinstale la aplicación de inmediato.",
+            .ko: "MacAndroid Toolbox에 오신 것을 환영합니다. 본 소프트웨어를 사용하여 작업(부트로더 언락, 리커버리 플래싱, 시스템 파티션 설치, Fastboot / ADB 명령어 실행, 시스템 수정 등)을 진행하기 전에 다음 약관을 반드시 주의 깊게 읽고 이해해 주시기 바랍니다:\n\n1. 고위험 작업 주의:\n부트로더 언락, 루팅, 비공식 ROM 플래싱은 기기 벽돌(부팅 불가), 제조사 보증 무효화, 데이터 영구 손실 또는 하드웨어 손상을 초래할 수 있습니다. 진행하기 전에 반드시 중요 데이터를 백업하십시오.\n\n2. 면책 조항:\n본 소프트웨어는 \"있는 그대로(As-Is)\" 제공되며, 개발자는 본 소프트웨어 사용으로 인한 직·간접적인 손상, 데이터 손실, 기기 고장 또는 법적 분쟁에 대해 어떠한 법적·경제적 책임도 지지 않습니다. 모든 작업과 결과에 대한 책임은 전적으로 사용자 본인에게 있습니다.\n\n3. 규정 준수:\n해당 기기에 대한 정당한 권한을 보유하고 있는지 확인하십시오. 위 약관에 동의하지 않으실 경우 즉시 앱을 종료하고 삭제해 주시기 바랍니다.",
+            .ru: "Добро пожаловать в MacAndroid Toolbox. Перед выполнением любых операций (включая разблокировку загрузчика, прошивку Recovery, установку образов системы, выполнение команд Fastboot / ADB и модификацию параметров) обязательно ознакомьтесь со следующими условиями:\n\n1. Предупреждение о высоких рисках:\nРазблокировка загрузчика и прошивка могут привести к окирпичиванию устройства, потере заводской гарантии, безвозвратной утрате данных или повреждению компонентов. Всегда делайте полную резервную копию перед началом.\n\n2. Отказ от ответственности:\nПрограмма предоставляется по принципу «как есть» (As-Is). Разработчик не несет ответственности за любые прямые или косвенные убытки, потерю данных, поломку оборудования или юридические последствия. Пользователь берет на себя все риски и ответственность за свои действия.\n\n3. Соответствие правилам:\nУбедитесь, что вы обладаете законным правом на модификацию устройства. Если вы не согласны с условиями, немедленно закройте и удалите приложение.",
+            .uk: "Ласкаво просимо до MacAndroid Toolbox. Перед виконанням будь-яких операцій (включаючи розблокування завантажувача, прошивку Recovery, встановлення образів системи, виконання команд Fastboot / ADB та модифікацію параметрів) обов'язково ознайомтеся з наступними умовами:\n\n1. Попередження про високі ризики:\nРозблокування Bootloader та прошивка можуть призвести до перетворення пристрою на «цеглину», втрати гарантії виробника, незворотної втрати даних або пошкодження компонентів. Завжди створюйте повну резервну копію перед початком.\n\n2. Відмова від відповідальності:\nПрограма надається на умовах «як є» (As-Is). Розробник не несе відповідальності за будь-які прямі чи непрямі збитки, втрату даних, несправність обладнання чи юридичні суперечки. Користувач бере на себе всі ризики та відповідальність за свої дії.\n\n3. Дотримання правил:\nПереконайтеся, що ви маєте законне право на модифікацію пристрою. Якщо ви не погоджуєтесь із цими умовами, негайно закрийте та видаліть програму."
+        ],
+        "onboarding_disclaimer_title": [
+            .zhHant: "免責聲明與風險提示",
+            .zhHans: "免责声明与风险提示",
+            .en: "Disclaimer & Risk Notice",
+            .ja: "免責事項およびリスクに関する注意事項",
+            .es: "Descargo de responsabilidad y aviso de riesgo",
+            .ko: "면책 조항 및 위험 안내",
+            .ru: "Отказ от ответственности и уведомление о рисках",
+            .uk: "Відмова від відповідальності та попередження про ризики"
+        ],
+        "onboarding_dont_remind": [
+            .zhHant: "我已詳細閱讀並理解上述風險（不再提醒）",
+            .zhHans: "我已详细阅读并理解上述风险（不再提醒）",
+            .en: "I have read and understood the risks (Don't remind again)",
+            .ja: "上記のリスクを理解しました（今後は表示しない）",
+            .es: "He leído y comprendido los riesgos (No volver a mostrar)",
+            .ko: "위 위험 요소를 확인하고 이해했습니다 (다시 묻지 않음)",
+            .ru: "Я прочитал и понимаю риски (Больше не напоминать)",
+            .uk: "Я прочитав та розумію ризики (Більше не нагадувати)"
+        ],
+        "onboarding_env_adb_ready": [
+            .zhHant: "ADB 工具已就緒",
+            .zhHans: "ADB 工具已就绪",
+            .en: "ADB Ready",
+            .ja: "ADB は準備完了です",
+            .es: "ADB listo",
+            .ko: "ADB 준비 완료",
+            .ru: "ADB готов к работе",
+            .uk: "ADB готовий до роботи"
+        ],
+        "onboarding_env_desc": [
+            .zhHant: "檢測 Mac 系統中的 Android 平台工具（ADB & Fastboot）與套件管理器。",
+            .zhHans: "检测 Mac 系统中的 Android 平台工具（ADB & Fastboot）与包管理器。",
+            .en: "Detecting Android platform tools (ADB & Fastboot) and package manager on your Mac.",
+            .ja: "Mac 上の Android プラットフォームツール（ADB & Fastboot）とパッケージマネージャーを検出します。",
+            .es: "Detectando herramientas de plataforma Android (ADB y Fastboot) y gestor de paquetes en su Mac.",
+            .ko: "Mac 시스템에서 Android 플랫폼 도구(ADB 및 Fastboot)와 패키지 관리자를 감지합니다.",
+            .ru: "Проверка наличия Android Platform Tools (ADB и Fastboot) и менеджера пакетов на вашем Mac.",
+            .uk: "Перевірка наявності Android Platform Tools (ADB та Fastboot) та менеджера пакетів на вашому Mac."
+        ],
+        "onboarding_env_fb_ready": [
+            .zhHant: "Fastboot 工具已就緒",
+            .zhHans: "Fastboot 工具已就绪",
+            .en: "Fastboot Ready",
+            .ja: "Fastboot は準備完了です",
+            .es: "Fastboot listo",
+            .ko: "Fastboot 준비 완료",
+            .ru: "Fastboot готов к работе",
+            .uk: "Fastboot готовий до роботи"
+        ],
+        "onboarding_env_title": [
+            .zhHant: "開發者環境檢測",
+            .zhHans: "开发者环境检测",
+            .en: "Environment Check",
+            .ja: "環境チェック",
+            .es: "Comprobación de entorno",
+            .ko: "개발 환경 점검",
+            .ru: "Проверка окружения",
+            .uk: "Перевірка середовища"
+        ],
+        "onboarding_open_brew_website": [
+            .zhHant: "🌐 在瀏覽器開啟 Homebrew 官網 (brew.sh)",
+            .zhHans: "🌐 在浏览器打开 Homebrew 官网 (brew.sh)",
+            .en: "🌐 Open Homebrew Website (brew.sh)",
+            .ja: "🌐 ブラウザで Homebrew 公式サイトを開く (brew.sh)",
+            .es: "🌐 Abrir sitio web de Homebrew (brew.sh)",
+            .ko: "🌐 브라우저에서 Homebrew 공식 사이트 열기 (brew.sh)",
+            .ru: "🌐 Открыть сайт Homebrew в браузере (brew.sh)",
+            .uk: "🌐 Відкрити сайт Homebrew у браузері (brew.sh)"
+        ],
+        "onboarding_opensource_notice": [
+            .zhHant: "本軟體遵循開源規範免費公開，嚴禁任何形式之倒賣或收費行為！",
+            .zhHans: "本软件遵循开源规范免费公开，严禁任何形式之倒卖或收费行为！",
+            .en: "This software is open-source and free for public use. Commercial resale or paid bundling is strictly prohibited!",
+            .ja: "本ソフトウェアはオープンソース規範に準拠し無償公開されています。転売や有料での再配布は固く禁じられています！",
+            .es: "Este software es de código abierto y gratuito. ¡Queda estrictamente prohibida su reventa o cobro de cualquier tipo!",
+            .ko: "본 소프트웨어는 오픈소스 규정에 따라 무료로 공개되며, 어떠한 형태의 유료 재판매나 영리 목적의 배포도 엄격히 금지됩니다!",
+            .ru: "Данное программное обеспечение является бесплатным и открытым. Любая перепродажа или взимание платы строго запрещены!",
+            .uk: "Це програмне забезпечення є безкоштовним і відкритим. Будь-який перепродаж або стягнення плати суворо заборонені!"
+        ],
+        "onboarding_recheck_btn": [
+            .zhHant: "重新檢測環境",
+            .zhHans: "重新检测环境",
+            .en: "Re-check Environment",
+            .ja: "環境を再チェック",
+            .es: "Volver a comprobar",
+            .ko: "환경 다시 점검",
+            .ru: "Перепроверить окружение",
+            .uk: "Повторно перевірити середовище"
+        ],
+        "onboarding_skip": [
+            .zhHant: "稍後手動配置 (略過)",
+            .zhHans: "稍后手动配置 (跳过)",
+            .en: "Configure Later (Skip)",
+            .ja: "後で手動設定する (スキップ)",
+            .es: "Configurar más tarde (Omitir)",
+            .ko: "나중에 수동 설정 (건너뛰기)",
+            .ru: "Настроить позже (Пропустить)",
+            .uk: "Налаштувати пізніше (Пропустити)"
+        ],
+        "onboarding_start_app": [
+            .zhHant: "進入麥安工具箱",
+            .zhHans: "进入麦安工具箱",
+            .en: "Enter Toolbox",
+            .ja: "ツールボックスを開く",
+            .es: "Entrar a la caja de herramientas",
+            .ko: "툴박스 시작하기",
+            .ru: "Открыть инструменты",
+            .uk: "Відкрити інструменти"
+        ],
+        "onboarding_title": [
+            .zhHant: "歡迎使用麥安工具箱",
+            .zhHans: "欢迎使用麦安工具箱",
+            .en: "Welcome to MacAndroid Toolbox",
+            .ja: "麦安ツールボックスへようこそ",
+            .es: "Bienvenido a MacAndroid Toolbox",
+            .ko: "MacAndroid Toolbox에 오신 것을 환영합니다",
+            .ru: "Добро пожаловать в MacAndroid Toolbox",
+            .uk: "Ласкаво просимо до MacAndroid Toolbox"
+        ],
+        "panel_choose_boot_image": [
+            .zhHant: "選擇 Boot 映像檔",
+            .zhHans: "选择 Boot 镜像文件",
+            .en: "Select Boot Image",
+            .ja: "Boot イメージを選択",
+            .es: "Seleccionar imagen Boot",
+            .ko: "Boot 이미지 선택",
+            .ru: "Выберите образ Boot",
+            .uk: "Виберіть образ Boot"
+        ],
+        "panel_choose_flash_zip": [
+            .zhHant: "選擇刷機 ZIP",
+            .zhHans: "选择刷机 ZIP",
+            .en: "Select Flashable ZIP",
+            .ja: "フラッシュ用 ZIP を選択",
+            .es: "Seleccionar ZIP flasheable",
+            .ko: "플래시용 ZIP 선택",
+            .ru: "Выберите ZIP для прошивки",
+            .uk: "Виберіть ZIP для прошивки"
+        ],
+        "panel_choose_image": [
+            .zhHant: "選擇映像檔",
+            .zhHans: "选择镜像文件",
+            .en: "Select Image File",
+            .ja: "イメージファイルを選択",
+            .es: "Seleccionar archivo de imagen",
+            .ko: "이미지 파일 선택",
+            .ru: "Выберите файл образа",
+            .uk: "Виберіть файл образу"
+        ],
+        "panel_choose_transfer_file": [
+            .zhHant: "選擇要傳送的檔案或資料夾",
+            .zhHans: "选择要传送的文件或文件夹",
+            .en: "Select File or Folder to Push",
+            .ja: "転送するファイルまたはフォルダを選択",
+            .es: "Seleccionar archivo o carpeta para transferir",
+            .ko: "전송할 파일 또는 폴더 선택",
+            .ru: "Выберите файл или папку для передачи",
+            .uk: "Виберіть файл або папку для передачі"
+        ],
+        "panel_save": [
+            .zhHant: "儲存",
+            .zhHans: "保存",
+            .en: "Save",
+            .ja: "保存",
+            .es: "Guardar",
+            .ko: "저장",
+            .ru: "Сохранить",
+            .uk: "Зберегти"
+        ],
+        "panel_save_apk": [
+            .zhHant: "儲存 APK",
+            .zhHans: "保存 APK",
+            .en: "Save APK",
+            .ja: "APK を保存",
+            .es: "Guardar APK",
+            .ko: "APK 저장",
+            .ru: "Сохранить APK",
+            .uk: "Зберегти APK"
+        ],
+        "panel_save_to_mac": [
+            .zhHant: "儲存至 Mac",
+            .zhHans: "保存至 Mac",
+            .en: "Save to Mac",
+            .ja: "Mac に保存",
+            .es: "Guardar en Mac",
+            .ko: "Mac에 저장",
+            .ru: "Сохранить на Mac",
+            .uk: "Зберегти на Mac"
+        ],
+        "reboot_target_bootloader": [
+            .zhHant: "重啟至 Bootloader (Fastboot)",
+            .zhHans: "重启至 Bootloader (Fastboot)",
+            .en: "Reboot to Bootloader",
+            .ja: "Bootloader に再起動",
+            .es: "Reiniciar a Bootloader (Fastboot)",
+            .ko: "Bootloader로 재부팅 (Fastboot)",
+            .ru: "Перезагрузить в Bootloader (Fastboot)",
+            .uk: "Перезавантажити в Bootloader (Fastboot)"
+        ],
+        "reboot_target_edl": [
+            .zhHant: "重啟至 EDL / 9008 (急救深刷)",
+            .zhHans: "重启至 EDL / 9008 (急救深刷)",
+            .en: "Reboot to EDL / 9008",
+            .ja: "EDL / 9008 に再起動",
+            .es: "Reiniciar a EDL / 9008 (Emergencia)",
+            .ko: "EDL / 9008로 재부팅 (긴급 복구)",
+            .ru: "Перезагрузить в EDL / 9008 (Аварийный режим)",
+            .uk: "Перезавантажити в EDL / 9008 (Аварійний режим)"
+        ],
+        "reboot_target_fastbootd": [
+            .zhHant: "重啟至 FastbootD (動態分區)",
+            .zhHans: "重启至 FastbootD (动态分区)",
+            .en: "Reboot to FastbootD",
+            .ja: "FastbootD に再起動",
+            .es: "Reiniciar a FastbootD (Dinámico)",
+            .ko: "FastbootD로 재부팅 (동적 파티션)",
+            .ru: "Перезагрузить в FastbootD (Динамические разделы)",
+            .uk: "Перезавантажити в FastbootD (Динамічні розділи)"
+        ],
+        "reboot_target_poweroff": [
+            .zhHant: "關閉設備電源 (Power Off)",
+            .zhHans: "关闭设备电源 (Power Off)",
+            .en: "Power Off Device",
+            .ja: "端末の電源を切る",
+            .es: "Apagar dispositivo (Power Off)",
+            .ko: "기기 전원 끄기 (Power Off)",
+            .ru: "Выключить питание (Power Off)",
+            .uk: "Вимкнути живлення (Power Off)"
+        ],
+        "reboot_target_recovery": [
+            .zhHant: "重啟至 Recovery (恢復模式)",
+            .zhHans: "重启至 Recovery (恢复模式)",
+            .en: "Reboot to Recovery",
+            .ja: "Recovery に再起動",
+            .es: "Reiniciar a Recovery (Recuperación)",
+            .ko: "Recovery로 재부팅 (복구 모드)",
+            .ru: "Перезагрузить в Recovery (Восстановление)",
+            .uk: "Перезавантажити в Recovery (Відновлення)"
+        ],
+        "reboot_target_system": [
+            .zhHant: "重啟至系統 (System)",
+            .zhHans: "重启至系统 (System)",
+            .en: "Reboot to System",
+            .ja: "システムを再起動 (System)",
+            .es: "Reiniciar al sistema (System)",
+            .ko: "시스템으로 재부팅 (System)",
+            .ru: "Перезагрузить в систему (System)",
+            .uk: "Перезавантажити в систему (System)"
+        ],
+        "settings_about_app": [
+            .zhHant: "關於麥安工具箱",
+            .zhHans: "关于麦安工具箱",
+            .en: "About MacAndroidToolbox",
+            .ja: "麦安ツールボックスについて",
+            .es: "Acerca de MacAndroidToolbox",
+            .ko: "맥안드로이드 툴박스 정보",
+            .ru: "О программе MacAndroidToolbox",
+            .uk: "Про програму MacAndroidToolbox"
+        ],
+        "settings_adb_path": [
+            .zhHant: "ADB 二進位路徑:",
+            .zhHans: "ADB 二进制路径:",
+            .en: "ADB Binary Path:",
+            .ja: "ADB バイナリパス:",
+            .es: "Ruta del binario ADB:",
+            .ko: "ADB 바이너리 경로:",
+            .ru: "Путь к бинарнику ADB:",
+            .uk: "Шлях до бінарника ADB:"
+        ],
+        "settings_author": [
+            .zhHant: "作者",
+            .zhHans: "作者",
+            .en: "Author",
+            .ja: "開発者",
+            .es: "Autor",
+            .ko: "제작자",
+            .ru: "Автор",
+            .uk: "Автор"
+        ],
+        "settings_autodetect": [
+            .zhHant: "自動偵測路徑",
+            .zhHans: "自动检测路径",
+            .en: "Auto-detect Paths",
+            .ja: "パス自動検出",
+            .es: "Detectar rutas automáticamente",
+            .ko: "경로 자동 감지",
+            .ru: "Автоопределение путей",
+            .uk: "Автовизначення шляхів"
+        ],
+        "settings_fastboot_path": [
+            .zhHant: "Fastboot 二進位路徑:",
+            .zhHans: "Fastboot 二进制路径:",
+            .en: "Fastboot Binary Path:",
+            .ja: "Fastboot バイナリパス:",
+            .es: "Ruta del binario Fastboot:",
+            .ko: "Fastboot 바이너리 경로:",
+            .ru: "Путь к бинарнику Fastboot:",
+            .uk: "Шлях до бінарника Fastboot:"
+        ],
+        "settings_language": [
+            .zhHant: "介面語言 (Language)",
+            .zhHans: "界面语言 (Language)",
+            .en: "Language",
+            .ja: "表示言語 (Language)",
+            .es: "Idioma",
+            .ko: "인터페이스 언어 (Language)",
+            .ru: "Язык интерфейса",
+            .uk: "Мова інтерфейсу"
+        ],
+        "settings_language_desc": [
+            .zhHant: "選擇軟體介面顯示的語言，設定將立即套用。",
+            .zhHans: "选择软件界面显示的语言，设置将立即生效。",
+            .en: "Choose the display language for the application. Changes take effect immediately.",
+            .ja: "アプリケーションの表示言語を選択します。設定は即座に反映されます。",
+            .es: "Seleccione el idioma de la aplicación. Los cambios surten efecto de inmediato.",
+            .ko: "애플리케이션 표시 언어를 선택합니다. 변경 사항은 즉시 적용됩니다.",
+            .ru: "Выберите язык интерфейса приложения. Изменения вступают в силу мгновенно.",
+            .uk: "Виберіть мову інтерфейсу додатку. Зміни набувають чинності миттєво."
+        ],
+        "settings_launch_at_login": [
+            .zhHant: "開機自動啟動",
+            .zhHans: "开机自动启动",
+            .en: "Launch at Login",
+            .ja: "ログイン時に起動",
+            .es: "Iniciar al encender el equipo",
+            .ko: "로그인 시 자동 실행",
+            .ru: "Запуск при входе в систему",
+            .uk: "Запуск при вході в систему"
+        ],
+        "settings_launch_at_login_desc": [
+            .zhHant: "在 Mac 開機登入時自動啟動麥安工具箱後台服務。",
+            .zhHans: "在 Mac 开机登录时自动启动麦安工具箱后台服务。",
+            .en: "Automatically start MacAndroidToolbox when you log in to your Mac.",
+            .ja: "Mac のログイン時に自動的に麦安ツールボックスを起動します。",
+            .es: "Inicia automáticamente MacAndroidToolbox al iniciar sesión en su Mac.",
+            .ko: "Mac에 로그인할 때 맥안드로이드 툴박스를 자동으로 실행합니다.",
+            .ru: "Автоматически запускать MacAndroidToolbox при входе в macOS.",
+            .uk: "Автоматично запускати MacAndroidToolbox при вході в macOS."
+        ],
+        "settings_open_onboarding": [
+            .zhHant: "環境檢測與免責引導",
+            .zhHans: "环境检测与免责引导",
+            .en: "Environment Check & Disclaimer Guide",
+            .ja: "環境チェックと免責事項ガイド",
+            .es: "Comprobación de entorno y aviso legal",
+            .ko: "환경 점검 및 면책 조항 안내",
+            .ru: "Проверка окружения и правовое руководство",
+            .uk: "Перевірка середовища та правове керівництво"
+        ],
+        "settings_open_onboarding_desc": [
+            .zhHant: "重新檢視免責條款或透過 Homebrew 自動修復 Android 平台工具",
+            .zhHans: "重新检视免责条款或通过 Homebrew 自动修复 Android 平台工具",
+            .en: "Review disclaimer terms or automatically setup Android tools via Homebrew",
+            .ja: "免責事項を再確認するか、Homebrew を通じて Android ツールを自動修復します",
+            .es: "Revisar términos o reparar herramientas Android automáticamente con Homebrew",
+            .ko: "면책 조항을 다시 확인하거나 Homebrew를 통해 Android 도구를 자동 설정합니다",
+            .ru: "Просмотреть условия соглашения или автоматически настроить инструменты через Homebrew",
+            .uk: "Переглянути умови угоди або автоматично налаштувати інструменти через Homebrew"
+        ],
+        "settings_recheck": [
+            .zhHant: "重新檢測二進位版本",
+            .zhHans: "重新检测二进制版本",
+            .en: "Check Tool Versions",
+            .ja: "バージョン再検証",
+            .es: "Comprobar versiones",
+            .ko: "도구 버전 확인",
+            .ru: "Проверить версии утилит",
+            .uk: "Перевірити версії утиліт"
+        ],
+        "settings_show_menu_bar": [
+            .zhHant: "在 macOS 狀態欄顯示圖示",
+            .zhHans: "在 macOS 状态栏显示图标",
+            .en: "Show Icon in macOS Menu Bar",
+            .ja: "macOS メニューバーにアイコンを表示",
+            .es: "Mostrar icono en la barra de menú",
+            .ko: "macOS 메뉴 막대에 아이콘 표시",
+            .ru: "Значок в строке меню macOS",
+            .uk: "Значок у рядку меню macOS"
+        ],
+        "settings_show_menu_bar_desc": [
+            .zhHant: "在右上角選單列常駐 Android 小機器人圖示，提供快捷操作與快速重啟選單。",
+            .zhHans: "在右上角菜单栏常驻 Android 小机器人图标，提供快捷操作与快速重启菜单。",
+            .en: "Keep an Android robot icon in the menu bar for quick device status and reboots.",
+            .ja: "メニューバーに Android ロボットアイコンを常駐させ、クイックステータスと再起動を提供します。",
+            .es: "Muestra un icono de robot Android en la barra de menú para ver el estado y reiniciar rápidamente.",
+            .ko: "메뉴 막대에 안드로이드 로봇 아이콘을 표시하여 기기 상태 확인 및 빠른 재부팅을 제공합니다.",
+            .ru: "Отображать значок робота Android в строке меню для быстрого доступа и перезагрузки.",
+            .uk: "Відображати значок робота Android у рядку меню для швидкого доступу та перезавантаження."
+        ],
+        "settings_show_polling": [
+            .zhHant: "在日誌終端顯示後台輪詢指令",
+            .zhHans: "在日志终端显示后台轮询指令",
+            .en: "Show Background Polling in Console",
+            .ja: "コンソールにバックグラウンドのポーリングコマンドを表示する",
+            .es: "Mostrar comandos de sondeo en segundo plano en la consola",
+            .ko: "콘솔에 백그라운드 폴링 명령어 표시",
+            .ru: "Показывать фоновые команды опроса в консоли",
+            .uk: "Показувати фонові команди опитування в консолі"
+        ],
+        "settings_show_polling_desc": [
+            .zhHant: "預設關閉以保持日誌視窗簡潔，開啟後將輸出 adb devices 與規格輪詢指令",
+            .zhHans: "默认关闭以保持日志窗口简洁，开启后将输出 adb devices 与规格轮询指令",
+            .en: "Disabled by default to keep logs clean. When enabled, outputs periodic adb devices & spec polling.",
+            .ja: "ログを簡潔に保つため既定で無効です。有効にすると、adb devices や仕様ポーリングコマンドを出力します。",
+            .es: "Desactivado por defecto para mantener la consola limpia. Muestra comandos periódicos de adb devices y sondeo al activarse.",
+            .ko: "로그를 깔끔하게 유지하기 위해 기본적으로 비활성화됩니다. 활성화 시 주기적인 adb devices 및 사양 폴링 명령어를 출력합니다.",
+            .ru: "По умолчанию отключено для чистоты консоли. При включении выводит периодические команды adb devices и опроса характеристик.",
+            .uk: "За замовчуванням вимкнено для чистоти консолі. При увімкненні виводить періодичні команди adb devices та опитування характеристик."
+        ],
+        "settings_tab_general": [
+            .zhHant: "通用設定",
+            .zhHans: "通用设置",
+            .en: "General",
+            .ja: "一般設定",
+            .es: "General",
+            .ko: "일반 설정",
+            .ru: "Основные",
+            .uk: "Загальні"
+        ],
+        "settings_tab_tools": [
+            .zhHant: "刷機二進位工具",
+            .zhHans: "刷机二进制工具",
+            .en: "Binary Tools",
+            .ja: "ツールバイナリ",
+            .es: "Herramientas binarias",
+            .ko: "바이너리 도구",
+            .ru: "Бинарные утилиты",
+            .uk: "Бінарні утиліти"
+        ],
+        "settings_tools_desc": [
+            .zhHant: "應用程式需要呼叫 adb 與 fastboot 命令列工具。系統預設會搜尋 Homebrew 與 Android SDK 路徑。",
+            .zhHans: "应用程序需要调用 adb 与 fastboot 命令行工具。系统默认会搜索 Homebrew 与 Android SDK 路径。",
+            .en: "The application requires adb and fastboot binaries. Defaults to Homebrew and Android SDK paths.",
+            .ja: "adb および fastboot コマンドが必要です。Homebrew または Android SDK のパスを検索します。",
+            .es: "La aplicación requiere las herramientas adb y fastboot. Busca automáticamente rutas de Homebrew y Android SDK.",
+            .ko: "애플리케이션에는 adb 및 fastboot 바이너리가 필요합니다. Homebrew 및 Android SDK 경로를 자동으로 검색합니다.",
+            .ru: "Приложению необходимы утилиты adb и fastboot. По умолчанию используются пути Homebrew и Android SDK.",
+            .uk: "Додатку потрібні утиліти adb та fastboot. За замовчуванням використовуються шляхи Homebrew та Android SDK."
+        ],
+        "shell_apply_dpi": [
+            .zhHant: "套用 DPI",
+            .zhHans: "应用 DPI",
+            .en: "Apply DPI",
+            .ja: "DPI 適用",
+            .es: "Aplicar DPI",
+            .ko: "DPI 적용",
+            .ru: "Применить DPI",
+            .uk: "Застосувати DPI"
+        ],
+        "shell_apply_res": [
+            .zhHant: "套用解析度",
+            .zhHans: "应用分辨率",
+            .en: "Apply Resolution",
+            .ja: "解像度適用",
+            .es: "Aplicar resolución",
+            .ko: "해상도 적용",
+            .ru: "Применить разрешение",
+            .uk: "Застосувати розд. здатність"
+        ],
+        "shell_btn_battery": [
+            .zhHant: "讀取電池健康詳情",
+            .zhHans: "读取电池健康详情",
+            .en: "Battery Diagnostics",
+            .ja: "バッテリー診断",
+            .es: "Diagnóstico de batería",
+            .ko: "배터리 상태 상세 정보",
+            .ru: "Диагностика батареи",
+            .uk: "Діагностика батареї"
+        ],
+        "shell_btn_clear_proxy": [
+            .zhHant: "重置/清除網路代理",
+            .zhHans: "重置/清除网络代理",
+            .en: "Clear Global Proxy",
+            .ja: "プロキシ設定解除",
+            .es: "Borrar proxy global",
+            .ko: "글로벌 프록시 초기화/삭제",
+            .ru: "Сбросить глобальный прокси",
+            .uk: "Скинути глобальний проксі"
+        ],
+        "shell_btn_demo_off": [
+            .zhHant: "關閉展示模式",
+            .zhHans: "关闭演示模式",
+            .en: "Disable Demo Mode",
+            .ja: "デモモード終了",
+            .es: "Desactivar modo Demo",
+            .ko: "데모 모드 끄기",
+            .ru: "Выключить демо-режим",
+            .uk: "Вимкнути демо-режим"
+        ],
+        "shell_btn_demo_on": [
+            .zhHant: "開啟乾淨展示模式 (Demo)",
+            .zhHans: "开启干净演示模式 (Demo)",
+            .en: "Enable Demo Mode",
+            .ja: "デモモード有効化",
+            .es: "Activar modo Demo",
+            .ko: "데모 모드 켜기 (Demo)",
+            .ru: "Включить демо-режим",
+            .uk: "Увімкнути демо-режим"
+        ],
+        "shell_btn_meminfo": [
+            .zhHant: "檢視 RAM 記憶體佔用",
+            .zhHans: "查看 RAM 内存占用",
+            .en: "Memory Info",
+            .ja: "メモリ使用量",
+            .es: "Uso de memoria (RAM)",
+            .ko: "RAM 메모리 점유율 보기",
+            .ru: "Память (RAM)",
+            .uk: "Пам'ять (RAM)"
+        ],
+        "shell_btn_restart_adb": [
+            .zhHant: "重啟 ADB 伺服器",
+            .zhHans: "重启 ADB 服务",
+            .en: "Restart ADB Server",
+            .ja: "ADB サーバー再起動",
+            .es: "Reiniciar servidor ADB",
+            .ko: "ADB 서버 재시작",
+            .ru: "Перезапустить сервер ADB",
+            .uk: "Перезапустити сервер ADB"
+        ],
+        "shell_custom_dpi_label": [
+            .zhHant: "自訂 DPI (例如: 420):",
+            .zhHans: "自定义 DPI (例如: 420):",
+            .en: "Custom DPI (e.g. 420):",
+            .ja: "カスタム DPI (例: 420):",
+            .es: "DPI personalizado (ej. 420):",
+            .ko: "사용자 지정 DPI (예: 420):",
+            .ru: "Свой DPI (напр. 420):",
+            .uk: "Власний DPI (напр. 420):"
+        ],
+        "shell_custom_res_label": [
+            .zhHant: "自訂解析度 (例如: 1080x2400):",
+            .zhHans: "自定义分辨率 (例如: 1080x2400):",
+            .en: "Custom Resolution (e.g. 1080x2400):",
+            .ja: "カスタム解像度 (例: 1080x2400):",
+            .es: "Resolución personalizada (ej. 1080x2400):",
+            .ko: "사용자 지정 해상도 (예: 1080x2400):",
+            .ru: "Свое разрешение (напр. 1080x2400):",
+            .uk: "Власна розд. здатність (напр. 1080x2400):"
+        ],
+        "shell_display_desc": [
+            .zhHant: "透過 ADB 調整螢幕 DPI 與解析度，適合修改介面元素大小或適配顯示比例。",
+            .zhHans: "通过 ADB 调整屏幕 DPI 与分辨率，适合修改界面元素大小或适配显示比例。",
+            .en: "Adjust screen DPI and resolution via ADB to customize interface scale.",
+            .ja: "画面 DPI や解像度を調整し、UI サイズや表示比率を変更します。",
+            .es: "Ajuste el DPI y la resolución mediante ADB para personalizar la escala de la interfaz.",
+            .ko: "ADB를 통해 화면 DPI와 해상도를 조절하여 UI 크기 및 배율을 맞춤 설정합니다.",
+            .ru: "Настройка разрешения и DPI экрана через ADB для изменения масштаба интерфейса.",
+            .uk: "Налаштування роздільної здатності та DPI екрана через ADB для зміни масштабу інтерфейсу."
+        ],
+        "shell_display_title": [
+            .zhHant: "螢幕解析度與 DPI 調教 (Display Tweak)",
+            .zhHans: "屏幕分辨率与 DPI 调节 (Display Tweak)",
+            .en: "Screen Resolution & DPI Tuning",
+            .ja: "画面解像度と DPI 調整",
+            .es: "Resolución de pantalla y ajuste de DPI",
+            .ko: "화면 해상도 및 DPI 튜닝",
+            .ru: "Разрешение экрана и DPI",
+            .uk: "Роздільна здатність екрана та DPI"
+        ],
+        "shell_execute": [
+            .zhHant: "執行",
+            .zhHans: "执行",
+            .en: "Run",
+            .ja: "実行",
+            .es: "Ejecutar",
+            .ko: "실행",
+            .ru: "Выполнить",
+            .uk: "Виконати"
+        ],
+        "shell_output": [
+            .zhHant: "執行結果輸出:",
+            .zhHans: "执行结果输出:",
+            .en: "Command Output:",
+            .ja: "実行結果:",
+            .es: "Salida del comando:",
+            .ko: "명령어 실행 결과:",
+            .ru: "Вывод команды:",
+            .uk: "Вивід команди:"
+        ],
+        "shell_preset_battery": [
+            .zhHant: "檢視電池詳情",
+            .zhHans: "查看电池详情",
+            .en: "View Battery Details",
+            .ja: "バッテリー詳細を表示",
+            .es: "Ver detalles de batería",
+            .ko: "배터리 상세 정보",
+            .ru: "Подробности о батарее",
+            .uk: "Подробиці про батарею"
+        ],
+        "shell_preset_clear_proxy": [
+            .zhHant: "清除全局代理",
+            .zhHans: "清除全局代理",
+            .en: "Clear Global Proxy",
+            .ja: "グローバルプロキシを解除",
+            .es: "Borrar proxy global",
+            .ko: "글로벌 프록시 삭제",
+            .ru: "Очистить глобальный прокси",
+            .uk: "Очистити глобальний проксі"
+        ],
+        "shell_preset_cpu": [
+            .zhHant: "檢視 CPU 資訊",
+            .zhHans: "查看 CPU 信息",
+            .en: "View CPU Info",
+            .ja: "CPU情報を表示",
+            .es: "Ver información de CPU",
+            .ko: "CPU 정보 보기",
+            .ru: "Инфо о процессоре (CPU)",
+            .uk: "Інфо про процесор (CPU)"
+        ],
+        "shell_preset_disk": [
+            .zhHant: "檢視磁碟空間",
+            .zhHans: "查看磁盘空间",
+            .en: "View Disk Usage",
+            .ja: "ディスク容量を表示",
+            .es: "Ver espacio en disco",
+            .ko: "디스크 용량 보기",
+            .ru: "Дисковое пространство",
+            .uk: "Дисковий простір"
+        ],
+        "shell_preset_get_proxy": [
+            .zhHant: "檢視當前代理",
+            .zhHans: "查看当前代理",
+            .en: "View Current Proxy",
+            .ja: "現在のプロキシを表示",
+            .es: "Ver proxy actual",
+            .ko: "현재 프록시 확인",
+            .ru: "Проверить текущий прокси",
+            .uk: "Перевірити поточний проксі"
+        ],
+        "shell_preset_mem": [
+            .zhHant: "檢視記憶體使用",
+            .zhHans: "查看内存占用",
+            .en: "View Memory Usage",
+            .ja: "メモリ使用量を表示",
+            .es: "Ver uso de memoria",
+            .ko: "메모리 사용량 보기",
+            .ru: "Использование памяти",
+            .uk: "Використання пам'яті"
+        ],
+        "shell_preset_props": [
+            .zhHant: "檢視系統屬性",
+            .zhHans: "查看系统属性",
+            .en: "View System Properties",
+            .ja: "システムプロパティを表示",
+            .es: "Ver propiedades del sistema",
+            .ko: "시스템 속성 보기",
+            .ru: "Системные свойства",
+            .uk: "Системні властивості"
+        ],
+        "shell_presets": [
+            .zhHant: "常用預設",
+            .zhHans: "常用预设",
+            .en: "Presets",
+            .ja: "プリセット",
+            .es: "Comandos predefinidos",
+            .ko: "자주 쓰는 프리셋",
+            .ru: "Готовые команды",
+            .uk: "Готові команди"
+        ],
+        "shell_reset_default": [
+            .zhHant: "還原預設",
+            .zhHans: "恢复默认",
+            .en: "Reset Default",
+            .ja: "標準に戻す",
+            .es: "Restablecer valores",
+            .ko: "기본값 복원",
+            .ru: "Сбросить по умолчанию",
+            .uk: "Скинути за замовчуванням"
+        ],
+        "shell_terminal_prompt": [
+            .zhHant: "輸入 Shell 指令 (例如: getprop, ls -la /sdcard)...",
+            .zhHans: "输入 Shell 指令 (例如: getprop, ls -la /sdcard)...",
+            .en: "Enter shell command (e.g. getprop, ls -la /sdcard)...",
+            .ja: "Shell コマンドを入力 (例: getprop, ls -la /sdcard)...",
+            .es: "Ingrese comando shell (ej. getprop, ls -la /sdcard)...",
+            .ko: "Shell 명령어 입력 (예: getprop, ls -la /sdcard)...",
+            .ru: "Введите команду shell (напр. getprop, ls -la /sdcard)...",
+            .uk: "Введіть команду shell (напр. getprop, ls -la /sdcard)..."
+        ],
+        "shell_terminal_title": [
+            .zhHant: "互動式 ADB Shell 終端機",
+            .zhHans: "交互式 ADB Shell 终端",
+            .en: "Interactive ADB Shell",
+            .ja: "インタラクティブ ADB Shell ターミナル",
+            .es: "Terminal interactiva ADB Shell",
+            .ko: "대화형 ADB Shell 터미널",
+            .ru: "Интерактивный терминал ADB Shell",
+            .uk: "Інтерактивний термінал ADB Shell"
+        ],
+        "shell_tweaks_desc": [
+            .zhHant: "快速執行常用 Android 調試維護指令與 ADB 伺服器狀態管理。",
+            .zhHans: "快速执行常用 Android 调试维护指令与 ADB 服务器状态管理。",
+            .en: "Quickly run common maintenance commands and manage ADB server state.",
+            .ja: "一般的なデバッグ保守コマンドの実行や ADB サーバーの再起動を行います。",
+            .es: "Ejecute rápidamente comandos comunes de mantenimiento y gestione el servidor ADB.",
+            .ko: "자주 쓰는 안드로이드 디버깅 유지보수 명령어 및 ADB 서버를 빠르게 관리합니다.",
+            .ru: "Быстрый запуск команд обслуживания и управление сервером ADB.",
+            .uk: "Швидкий запуск команд обслуговування та керування сервером ADB."
+        ],
+        "shell_tweaks_title": [
+            .zhHant: "系統快速調優與捷徑 (Quick Tweaks)",
+            .zhHans: "系统快速调优与快捷方式 (Quick Tweaks)",
+            .en: "Quick System Tweaks",
+            .ja: "クイックシステム調整",
+            .es: "Ajustes rápidos del sistema",
+            .ko: "빠른 시스템 튜닝 및 바로가기",
+            .ru: "Быстрые твики системы",
+            .uk: "Швидкі твіки системи"
+        ],
+        "shell_waiting": [
+            .zhHant: "（等待執行指令）",
+            .zhHans: "（等待执行指令）",
+            .en: "(Awaiting command)",
+            .ja: "（コマンド実行待ち）",
+            .es: "(Esperando comando)",
+            .ko: "(명령어 실행 대기 중)",
+            .ru: "(Ожидание команды)",
+            .uk: "(Очікування команди)"
+        ],
+        "sponsor_btn": [
+            .zhHant: "贊助支持",
+            .zhHans: "赞助支持",
+            .en: "Sponsor",
+            .ja: "支援する",
+            .es: "Patrocinar",
+            .ko: "후원하기",
+            .ru: "Поддержать",
+            .uk: "Підтримати"
+        ],
+        "sponsor_close": [
+            .zhHant: "關閉",
+            .zhHans: "关闭",
+            .en: "Close",
+            .ja: "閉じる",
+            .es: "Cerrar",
+            .ko: "닫기",
+            .ru: "Закрыть",
+            .uk: "Закрити"
+        ],
+        "sponsor_copy_tip": [
+            .zhHant: "感謝每一位支持麥安工具箱的朋友！",
+            .zhHans: "感谢每一位支持麦安工具箱的朋友！",
+            .en: "Heartfelt thanks to everyone who supports MacAndroidToolbox!",
+            .ja: "麦安ツールボックスを応援してくださるすべての皆様に感謝申し上げます！",
+            .es: "¡Agradecimiento sincero a todos los que apoyan MacAndroidToolbox!",
+            .ko: "MacAndroidToolbox를 응원해 주시는 모든 분들께 진심으로 감사드립니다!",
+            .ru: "Искренняя благодарность каждому, кто поддерживает MacAndroidToolbox!",
+            .uk: "Щира подяка кожному, хто підтримує MacAndroidToolbox!"
+        ],
+        "sponsor_method_alipay": [
+            .zhHant: "支付寶",
+            .zhHans: "支付宝",
+            .en: "Alipay",
+            .ja: "Alipay (アリペイ)",
+            .es: "Alipay",
+            .ko: "알리페이 (Alipay)",
+            .ru: "Alipay",
+            .uk: "Alipay"
+        ],
+        "sponsor_method_alipay_desc": [
+            .zhHant: "使用支付寶 App 掃描二維碼",
+            .zhHans: "使用支付宝 App 扫描二维码",
+            .en: "Scan QR code with Alipay App",
+            .ja: "Alipay アプリで QR コードをスキャン",
+            .es: "Escanear código QR con Alipay",
+            .ko: "Alipay 앱으로 QR 코드를 스캔하세요",
+            .ru: "Сканируйте QR-код в приложении Alipay",
+            .uk: "Скануйте QR-код у додатку Alipay"
+        ],
+        "sponsor_method_paypal": [
+            .zhHant: "PayPal",
+            .zhHans: "PayPal",
+            .en: "PayPal",
+            .ja: "PayPal",
+            .es: "PayPal",
+            .ko: "페이팔 (PayPal)",
+            .ru: "PayPal",
+            .uk: "PayPal"
+        ],
+        "sponsor_method_paypal_desc": [
+            .zhHant: "使用 PayPal App 掃描二維碼",
+            .zhHans: "使用 PayPal App 扫描二维码",
+            .en: "Scan QR code with PayPal App",
+            .ja: "PayPal アプリで QR コードをスキャン",
+            .es: "Escanear código QR con PayPal",
+            .ko: "PayPal 앱으로 QR 코드를 스캔하세요",
+            .ru: "Сканируйте QR-код в приложении PayPal",
+            .uk: "Скануйте QR-код у додатку PayPal"
+        ],
+        "sponsor_method_wechat": [
+            .zhHant: "微信支付",
+            .zhHans: "微信支付",
+            .en: "WeChat Pay",
+            .ja: "WeChat Pay (微信支付)",
+            .es: "WeChat Pay",
+            .ko: "위챗페이 (WeChat Pay)",
+            .ru: "WeChat Pay",
+            .uk: "WeChat Pay"
+        ],
+        "sponsor_method_wechat_desc": [
+            .zhHant: "使用微信 App 掃描二維碼",
+            .zhHans: "使用微信 App 扫描二维码",
+            .en: "Scan QR code with WeChat App",
+            .ja: "WeChat アプリで QR コードをスキャン",
+            .es: "Escanear código QR con WeChat",
+            .ko: "WeChat 앱으로 QR 코드를 스캔하세요",
+            .ru: "Сканируйте QR-код в приложении WeChat",
+            .uk: "Скануйте QR-код у додатку WeChat"
+        ],
+        "sponsor_save_image": [
+            .zhHant: "儲存收款碼圖片",
+            .zhHans: "保存收款码图片",
+            .en: "Save QR Code Image",
+            .ja: "QR コード画像を保存",
+            .es: "Guardar imagen QR",
+            .ko: "QR 코드 이미지 저장",
+            .ru: "Сохранить QR-код",
+            .uk: "Зберегти QR-код"
+        ],
+        "sponsor_saved_toast": [
+            .zhHant: "已儲存至「下載」檔案夾",
+            .zhHans: "已保存至“下载”文件夹",
+            .en: "Saved to Downloads folder",
+            .ja: "ダウンロードフォルダに保存しました",
+            .es: "Guardado en la carpeta Descargas",
+            .ko: "다운로드 폴더에 저장되었습니다",
+            .ru: "Сохранено в папку Загрузки",
+            .uk: "Збережено в папку Завантаження"
+        ],
+        "sponsor_subtitle": [
+            .zhHant: "若您喜歡麥安工具箱，歡迎請作者喝杯咖啡，支持軟體的持續優化與後續更新！",
+            .zhHans: "若您喜欢麦安工具箱，欢迎请作者喝杯咖啡，支持软件的持续优化与后续更新！",
+            .en: "If you enjoy MacAndroidToolbox, consider buying the developer a coffee to support continuous updates!",
+            .ja: "麦安ツールボックスがお役に立ちましたら、継続的な開発と更新を支援するためにぜひ開発者にコーヒーをご馳走してください！",
+            .es: "Si le gusta MacAndroidToolbox, considere invitar un café al desarrollador para apoyar el desarrollo continuo.",
+            .ko: "MacAndroidToolbox가 마음에 드셨다면 커피 한 잔 후원으로 지속적인 업데이트를 응원해 주세요!",
+            .ru: "Если вам нравится MacAndroidToolbox, угостите автора кофе, чтобы поддержать дальнейшее развитие проекта!",
+            .uk: "Якщо вам подобається MacAndroidToolbox, пригостіть розробника кавою, щоб підтримати подальший розвиток проєкту!"
+        ],
+        "sponsor_title": [
+            .zhHant: "贊助支持開發者",
+            .zhHans: "赞助支持开发者",
+            .en: "Sponsor & Support Developer",
+            .ja: "開発者を支援する",
+            .es: "Patrocinar al desarrollador",
+            .ko: "개발자 후원 및 지원",
+            .ru: "Поддержка разработчика",
+            .uk: "Підтримка розробника"
+        ],
+        "tb_collapse_log": [
+            .zhHant: "收合日誌",
+            .zhHans: "收起日志",
+            .en: "Collapse Log",
+            .ja: "ログを折りたたむ",
+            .es: "Contraer registro",
+            .ko: "로그 접기",
+            .ru: "Свернуть лог",
+            .uk: "Згорнути журнал"
+        ],
+        "tb_expand_log": [
+            .zhHant: "展開日誌",
+            .zhHans: "展开日志",
+            .en: "Expand Log",
+            .ja: "ログを展開",
+            .es: "Expandir registro",
+            .ko: "로그 펼치기",
+            .ru: "Развернуть лог",
+            .uk: "Розгорнути журнал"
+        ],
+        "tb_no_devices": [
+            .zhHant: "未連接任何設備",
+            .zhHans: "未连接任何设备",
+            .en: "No Devices Connected",
+            .ja: "デバイスが接続されていません",
+            .es: "Ningún dispositivo conectado",
+            .ko: "연결된 기기 없음",
+            .ru: "Нет подключенных устройств",
+            .uk: "Немає підключених пристроїв"
+        ],
+        "tb_refresh": [
+            .zhHant: "重新整理",
+            .zhHans: "刷新",
+            .en: "Refresh",
+            .ja: "更新",
+            .es: "Actualizar",
+            .ko: "새로고침",
+            .ru: "Обновить",
+            .uk: "Оновити"
+        ],
+        "tb_select_device": [
+            .zhHant: "選擇設備",
+            .zhHans: "选择设备",
+            .en: "Select Device",
+            .ja: "デバイスを選択",
+            .es: "Seleccionar dispositivo",
+            .ko: "기기 선택",
+            .ru: "Выбрать устройство",
+            .uk: "Вибрати пристрій"
+        ],
+        "theme_dark": [
+            .zhHant: "深色模式",
+            .zhHans: "深色模式",
+            .en: "Dark Mode",
+            .ja: "ダークモード",
+            .es: "Modo oscuro",
+            .ko: "다크 모드",
+            .ru: "Тёмная тема",
+            .uk: "Темна тема"
+        ],
+        "theme_light": [
+            .zhHant: "淺色模式",
+            .zhHans: "浅色模式",
+            .en: "Light Mode",
+            .ja: "ライトモード",
+            .es: "Modo claro",
+            .ko: "라이트 모드",
+            .ru: "Светлая тема",
+            .uk: "Світла тема"
+        ],
+        "theme_setting_desc": [
+            .zhHant: "切換軟體介面顯示風格：淺色模式、深色模式或隨系統自動切換",
+            .zhHans: "切换软件界面显示风格：浅色模式、深色模式或随系统自动切换",
+            .en: "Switch app appearance: Light Mode, Dark Mode, or Follow System",
+            .ja: "アピアランスを切り替えます: ライトモード、ダークモード、またはシステムに合わせる",
+            .es: "Cambiar apariencia: Modo claro, Modo oscuro o Seguir al sistema",
+            .ko: "앱 인터페이스 모드 전환: 라이트 모드, 다크 모드 또는 시스템 설정 따름",
+            .ru: "Выбор темы: Светлая тема, Тёмная тема или Как в системе",
+            .uk: "Вибір теми: Світла тема, Темна тема або Як у системі"
+        ],
+        "theme_setting_title": [
+            .zhHant: "外觀色彩主題",
+            .zhHans: "外观颜色主题",
+            .en: "Appearance Theme",
+            .ja: "外観カラーテーマ",
+            .es: "Tema de apariencia",
+            .ko: "화면 모드 테마",
+            .ru: "Тема оформления",
+            .uk: "Тема оформлення"
+        ],
+        "theme_system": [
+            .zhHant: "跟隨系統",
+            .zhHans: "跟随系统",
+            .en: "Follow System",
+            .ja: "システムに合わせる",
+            .es: "Seguir al sistema",
+            .ko: "시스템 설정",
+            .ru: "Как в системе",
+            .uk: "Як у системі"
+        ]
+    ]
+}
+
+// Global convenience accessor
+@MainActor
+public func L10n(_ key: String) -> String {
+    return LanguageManager.shared.localized(key)
+}
