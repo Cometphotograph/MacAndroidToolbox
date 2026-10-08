@@ -3419,6 +3419,17 @@ public final class LanguageManager: ObservableObject {
             .ru: "Развернуть лог",
             .uk: "Розгорнути журнал"
         ],
+        "tb_connected": [
+            .zhHant: "已連接",
+            .zhHans: "已连接",
+            .en: "Connected",
+            .fr: "Connecté",
+            .ja: "接続済み",
+            .es: "Conectado",
+            .ko: "연결됨",
+            .ru: "Подключено",
+            .uk: "Підключено"
+        ],
         "tb_no_devices": [
             .zhHant: "未連接任何設備",
             .zhHans: "未连接任何设备",

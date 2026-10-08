@@ -125,12 +125,12 @@ public struct MainView: View {
             }
             .listStyle(.sidebar)
             .scrollContentBackground(.hidden)
-            .background(LiquidBackgroundView())
+            .background(SidebarGlassBackgroundView())
             .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 280)
         } detail: {
             ZStack {
                 // Liquid Glass Background Ambient Glow
-                LiquidBackgroundView()
+                LiquidDetailGlassBackgroundView()
                 
                 VStack(spacing: 0) {
                     // Main Detail Content
@@ -161,78 +161,16 @@ public struct MainView: View {
                 }
             }
             .toolbar {
-                // Device Selector (Aligned to 16pt margin matching content cards below)
+                // Apple HIG Header: Software Name + Connection Status
                 ToolbarItem(placement: .navigation) {
-                    Picker(L10n("tb_select_device"), selection: Binding(
-                        get: { deviceManager.selectedDevice?.serial ?? "" },
-                        set: { newSerial in
-                            if let matched = deviceManager.devices.first(where: { $0.serial == newSerial }) {
-                                deviceManager.selectedDevice = matched
-                            }
-                        }
-                    )) {
-                        if deviceManager.devices.isEmpty {
-                            Text(L10n("tb_no_devices")).tag("")
-                        } else {
-                            ForEach(deviceManager.devices) { dev in
-                                Text("\(dev.displayName) (\(dev.mode.title))")
-                                    .tag(dev.serial)
-                            }
-                        }
+                    HStack(spacing: 12) {
+                        Text(L10n("app_name"))
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.primary)
+                        
+                        connectionStatusBadge
                     }
-                    .pickerStyle(.menu)
-                    .frame(width: 330)
-                    .padding(.leading, 8)
-                }
-                
-                // Refresh Devices
-                ToolbarItem(placement: .automatic) {
-                    Button {
-                        deviceManager.refreshDevices()
-                    } label: {
-                        Label(L10n("tb_refresh"), systemImage: "arrow.clockwise")
-                    }
-                    .help("\(L10n("tb_refresh")) (Cmd+R)")
-                    .keyboardShortcut("r", modifiers: .command)
-                }
-                
-                // Device Connection Mode Badge (Liquid Pill)
-                ToolbarItem(placement: .status) {
-                    if let dev = deviceManager.selectedDevice {
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(dev.mode.color)
-                                .frame(width: 7, height: 7)
-                            Text(dev.mode.title)
-                                .font(.caption.bold())
-                                .foregroundColor(dev.mode.color)
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 3)
-                        .background(
-                            Capsule()
-                                .fill(.ultraThinMaterial)
-                        )
-                        .overlay(
-                            Capsule()
-                                .stroke(dev.mode.color.opacity(0.3), lineWidth: 1)
-                        )
-                    }
-                }
-                
-                // Toggle Console Drawer
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        withAnimation {
-                            isConsoleExpanded.toggle()
-                        }
-                    } label: {
-                        Label(
-                            isConsoleExpanded ? L10n("tb_collapse_log") : L10n("tb_expand_log"),
-                            systemImage: isConsoleExpanded ? "terminal.fill" : "terminal"
-                        )
-                    }
-                    .help(isConsoleExpanded ? L10n("tb_collapse_log") : L10n("tb_expand_log"))
+                    .padding(.leading, 4)
                 }
             }
         }
@@ -244,6 +182,76 @@ public struct MainView: View {
         .onAppear {
             checkOnboardingStatus()
         }
+    }
+    
+    // MARK: - Connection Status Badge (Apple HIG Style)
+    @ViewBuilder
+    private var connectionStatusBadge: some View {
+        if let dev = deviceManager.selectedDevice {
+            if deviceManager.devices.count > 1 {
+                Menu {
+                    ForEach(deviceManager.devices) { d in
+                        Button {
+                            deviceManager.selectedDevice = d
+                        } label: {
+                            HStack {
+                                Text("\(d.displayName) (\(d.mode.title))")
+                                if d.serial == dev.serial {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    connectedPill(dev)
+                }
+                .menuStyle(.borderlessButton)
+            } else {
+                connectedPill(dev)
+            }
+        } else {
+            disconnectedPill
+        }
+    }
+    
+    private func connectedPill(_ dev: AndroidDevice) -> some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(dev.mode.color)
+                .frame(width: 7, height: 7)
+            
+            Text("\(L10n("tb_connected")) - \(dev.displayName) (\(dev.mode.title))")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.primary)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 3.5)
+        .background(dev.mode.color.opacity(0.12))
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(dev.mode.color.opacity(0.25), lineWidth: 1)
+        )
+    }
+    
+    private var disconnectedPill: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(Color.secondary.opacity(0.5))
+                .frame(width: 7, height: 7)
+            
+            Text(L10n("tb_no_devices"))
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 3.5)
+        .background(Color.primary.opacity(0.04))
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+        )
     }
     
     private func checkOnboardingStatus() {

@@ -63,6 +63,7 @@ private func enforceSingleInstance() -> Int32 {
 // Global reference holding the lock file descriptor for the app's lifetime
 private let gSingleInstanceLockFd = enforceSingleInstance()
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
@@ -73,11 +74,49 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Apply saved appearance theme
         GeneralSettingsManager.shared.selectedTheme.apply()
+        
+        // Configure native unified window appearance (Apple HIG)
+        DispatchQueue.main.async { [weak self] in
+            self?.setupWindowAppearance()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.setupWindowAppearance()
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.didBecomeKeyNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                for window in NSApp.windows {
+                    self?.configureWindow(window)
+                }
+            }
+        }
+    }
+    
+    private func setupWindowAppearance() {
+        for window in NSApp.windows {
+            configureWindow(window)
+        }
+    }
+    
+    private func configureWindow(_ window: NSWindow) {
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.styleMask.insert(.fullSizeContentView)
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
+        window.isMovableByWindowBackground = true
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             for window in sender.windows {
+                configureWindow(window)
                 window.makeKeyAndOrderFront(self)
             }
         }
@@ -105,7 +144,7 @@ struct MacAndroidToolboxApp: App {
                 .preferredColorScheme(generalSettings.selectedTheme.colorScheme)
         }
         .windowStyle(.titleBar)
-        .windowToolbarStyle(.unified)
+        .windowToolbarStyle(.unified(showsTitle: false))
         .commands {
             SidebarCommands()
             CommandGroup(replacing: .newItem) {}

@@ -124,49 +124,108 @@ public struct LiquidGlassButtonStyle: ButtonStyle {
     }
 }
 
-public struct LiquidBackgroundView: View {
+// MARK: - Native macOS Frosted Glass (Behind Window Sampling)
+public struct VisualEffectView: NSViewRepresentable {
+    public let material: NSVisualEffectView.Material
+    public let blendingMode: NSVisualEffectView.BlendingMode
+    public let state: NSVisualEffectView.State
+
+    public init(
+        material: NSVisualEffectView.Material = .sidebar,
+        blendingMode: NSVisualEffectView.BlendingMode = .behindWindow,
+        state: NSVisualEffectView.State = .followsWindowActiveState
+    ) {
+        self.material = material
+        self.blendingMode = blendingMode
+        self.state = state
+    }
+
+    public func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = state
+        view.autoresizingMask = [.width, .height]
+        return view
+    }
+
+    public func updateNSView(_ view: NSVisualEffectView, context: Context) {
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = state
+    }
+}
+
+// MARK: - Sidebar Frosted Glass Background (Apple Settings style with subtle cool gray)
+public struct SidebarGlassBackgroundView: View {
     public init() {}
     
     public var body: some View {
         ZStack {
-            // Base background
-            Color(NSColor.windowBackgroundColor)
+            // 1. Native macOS sidebar frosted glass (blurs wallpaper/windows behind)
+            VisualEffectView(material: .sidebar, blendingMode: .behindWindow)
             
-            // Subtle ambient fluid color orbs
+            // 2. Apple System Settings subtle cool gray tint
+            Color(NSColor.windowBackgroundColor).opacity(0.55)
+            Color.primary.opacity(0.04)
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - Detail Liquid Glass Background (Translucent glass like Apple official)
+public struct LiquidDetailGlassBackgroundView: View {
+    public init() {}
+    
+    public var body: some View {
+        ZStack {
+            // 1. Native macOS behind-window frosted glass
+            VisualEffectView(material: .underWindowBackground, blendingMode: .behindWindow)
+            
+            // 2. Translucent control surface for contrast and legibility
+            Color(NSColor.controlBackgroundColor).opacity(0.68)
+            
+            // 3. Subtle ambient fluid light
             GeometryReader { proxy in
                 let w = proxy.size.width
                 let h = proxy.size.height
                 
-                // Top-right emerald/cyan fluid light
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color.green.opacity(0.12), Color.cyan.opacity(0.06), Color.clear],
+                            colors: [Color.green.opacity(0.04), Color.cyan.opacity(0.02), Color.clear],
                             center: .center,
                             startRadius: 20,
                             endRadius: w * 0.35
                         )
                     )
-                    .frame(width: w * 0.7, height: w * 0.7)
-                    .position(x: w * 0.85, y: h * 0.15)
-                    .blur(radius: 50)
+                    .frame(width: w * 0.6, height: w * 0.6)
+                    .position(x: w * 0.85, y: h * 0.45)
+                    .blur(radius: 60)
                 
-                // Bottom-left blue/purple fluid light
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color.blue.opacity(0.1), Color.indigo.opacity(0.06), Color.clear],
+                            colors: [Color.blue.opacity(0.04), Color.indigo.opacity(0.02), Color.clear],
                             center: .center,
                             startRadius: 20,
                             endRadius: w * 0.4
                         )
                     )
-                    .frame(width: w * 0.8, height: w * 0.8)
-                    .position(x: w * 0.15, y: h * 0.85)
+                    .frame(width: w * 0.7, height: w * 0.7)
+                    .position(x: w * 0.15, y: h * 0.80)
                     .blur(radius: 60)
             }
         }
         .ignoresSafeArea()
+    }
+}
+
+public struct LiquidBackgroundView: View {
+    public init() {}
+    
+    public var body: some View {
+        LiquidDetailGlassBackgroundView()
     }
 }
 
