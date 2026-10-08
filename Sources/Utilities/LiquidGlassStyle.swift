@@ -697,15 +697,25 @@ public struct MacOS27HeaderBackgroundView: View {
     
     public var body: some View {
         ZStack {
-            VisualEffectView(material: .headerView, blendingMode: .behindWindow)
+            VisualEffectView(material: .popover, blendingMode: .withinWindow)
             
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(white: 0.12, alpha: 0.65)
+                    return NSColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 0.68)
                 } else {
-                    return NSColor(white: 0.98, alpha: 0.75)
+                    return NSColor(white: 0.96, alpha: 0.72)
                 }
             }))
+            
+            LinearGradient(
+                stops: [
+                    .init(color: Color.white.opacity(0.12), location: 0.0),
+                    .init(color: Color.white.opacity(0.02), location: 0.35),
+                    .init(color: Color.clear, location: 0.60)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
             
             VStack {
                 Spacer()
@@ -747,12 +757,12 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
             // 1. Native macOS within-window HUD / Popover material for physical frosted glass
             VisualEffectView(material: .popover, blendingMode: .withinWindow)
             
-            // 2. Translucent tone layer for low transparency frosted glass (subtly revealing controls underneath)
+            // 2. Translucent tone layer matching top header (+10% transparency => alpha 0.68 dark / 0.72 light)
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 0.78)
+                    return NSColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 0.68)
                 } else {
-                    return NSColor(white: 0.96, alpha: 0.82)
+                    return NSColor(white: 0.96, alpha: 0.72)
                 }
             }))
             
