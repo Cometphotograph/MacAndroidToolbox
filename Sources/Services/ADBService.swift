@@ -163,6 +163,37 @@ public final class ADBService {
                 }
             }
         }
+        
+        // SoC / Chipset Info
+        let socCmd = "echo [sm]:$(getprop ro.soc.model); echo [bp]:$(getprop ro.board.platform); echo [mf]:$(getprop ro.soc.manufacturer); echo [hw]:$(getprop ro.hardware); echo [hc]:$(getprop ro.hardware.chipname); echo [ci]:$(grep Hardware /proc/cpuinfo | head -n 1)"
+        if let socOut = try? await runShellSimple(serial: serial, command: socCmd, isPolling: isPolling) {
+            parseSocInfo(socOut, into: &device)
+        }
+    }
+    
+    private func parseSocInfo(_ output: String, into device: inout AndroidDevice) {
+        for line in output.components(separatedBy: .newlines) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("[sm]:") {
+                let val = trimmed.replacingOccurrences(of: "[sm]:", with: "").trimmingCharacters(in: .whitespaces)
+                if !val.isEmpty { device.socModel = val }
+            } else if trimmed.hasPrefix("[bp]:") {
+                let val = trimmed.replacingOccurrences(of: "[bp]:", with: "").trimmingCharacters(in: .whitespaces)
+                if !val.isEmpty { device.boardPlatform = val }
+            } else if trimmed.hasPrefix("[mf]:") {
+                let val = trimmed.replacingOccurrences(of: "[mf]:", with: "").trimmingCharacters(in: .whitespaces)
+                if !val.isEmpty { device.socManufacturer = val }
+            } else if trimmed.hasPrefix("[hw]:") {
+                let val = trimmed.replacingOccurrences(of: "[hw]:", with: "").trimmingCharacters(in: .whitespaces)
+                if !val.isEmpty { device.hardwareChip = val }
+            } else if trimmed.hasPrefix("[hc]:") {
+                let val = trimmed.replacingOccurrences(of: "[hc]:", with: "").trimmingCharacters(in: .whitespaces)
+                if !val.isEmpty && device.socModel == nil { device.socModel = val }
+            } else if trimmed.hasPrefix("[ci]:") {
+                let val = trimmed.replacingOccurrences(of: "[ci]:", with: "").trimmingCharacters(in: .whitespaces)
+                if !val.isEmpty { device.cpuinfoHardware = val }
+            }
+        }
     }
     
     private func parseBattery(_ output: String, into device: inout AndroidDevice) {

@@ -97,6 +97,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    private var configuredWindows = Set<ObjectIdentifier>()
+    
     private func setupWindowAppearance() {
         for window in NSApp.windows {
             configureWindow(window)
@@ -104,6 +106,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func configureWindow(_ window: NSWindow) {
+        let wid = ObjectIdentifier(window)
+        guard !configuredWindows.contains(wid) else { return }
+        
+        let typeName = String(describing: type(of: window))
+        guard !typeName.contains("GlassEffect"),
+              !typeName.contains("Alert"),
+              !typeName.contains("Panel"),
+              !(window is NSPanel),
+              window.sheetParent == nil,
+              window.parent == nil else { return }
+        
+        configuredWindows.insert(wid)
+        
         window.title = ""
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true

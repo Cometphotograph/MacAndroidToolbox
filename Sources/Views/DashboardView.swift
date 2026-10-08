@@ -170,10 +170,10 @@ public struct DashboardView: View {
             )
             
             specCard(
-                icon: "display",
-                title: L10n("dash_screen_specs"),
-                value: device.screenResolution ?? L10n("common_unknown"),
-                subtitle: device.screenDensity,
+                icon: "cpu.fill",
+                title: L10n("dash_soc_platform"),
+                value: device.socDisplayName,
+                subtitle: device.socCodeName,
                 color: .purple
             )
             

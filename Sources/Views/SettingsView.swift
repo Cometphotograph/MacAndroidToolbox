@@ -8,32 +8,61 @@ public struct SettingsView: View {
     @State private var selectedSettingsTab: Int = 0
     @State private var showOnboardingSheet: Bool = false
     @State private var showSponsorSheet: Bool = false
+    @State private var showEmailCopiedAlert: Bool = false
+    @State private var showCopiedToast: Bool = false
     
     public init() {}
     
     public var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Liquid Glass Segmented Header
-                Picker("", selection: $selectedSettingsTab) {
-                    Text(L10n("settings_tab_general")).tag(0)
-                    Text(L10n("settings_tab_tools")).tag(1)
+        ZStack(alignment: .top) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Liquid Glass Segmented Header
+                    Picker("", selection: $selectedSettingsTab) {
+                        Text(L10n("settings_tab_general")).tag(0)
+                        Text(L10n("settings_tab_tools")).tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 320)
+                    .padding(.top, 4)
+                    
+                    if selectedSettingsTab == 0 {
+                        generalSettingsSection
+                    } else {
+                        toolBinariesSection
+                    }
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 320)
-                .padding(.top, 4)
-                
-                if selectedSettingsTab == 0 {
-                    generalSettingsSection
-                } else {
-                    toolBinariesSection
-                }
+                .padding(.horizontal, 20)
+                .padding(.top, 64)
+                .padding(.bottom, 220)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 64)
-            .padding(.bottom, 220)
+            .scrollContentBackground(.hidden)
+            
+            // Floating liquid glass copy toast prompt
+            if showCopiedToast {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 14, weight: .bold))
+                    Text(L10n("email_copied_toast"))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.primary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.18), radius: 14, y: 6)
+                .padding(.top, 16)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
-        .scrollContentBackground(.hidden)
         .sheet(isPresented: $showOnboardingSheet) {
             OnboardingView()
                 .preferredColorScheme(generalSettings.selectedTheme.colorScheme)
@@ -41,6 +70,13 @@ public struct SettingsView: View {
         .sheet(isPresented: $showSponsorSheet) {
             SponsorView()
                 .preferredColorScheme(generalSettings.selectedTheme.colorScheme)
+        }
+        .alert(isPresented: $showEmailCopiedAlert) {
+            Alert(
+                title: Text(L10n("email_copied_title")),
+                message: Text(L10n("email_copied_msg")),
+                dismissButton: .default(Text(L10n("common_ok")))
+            )
         }
     }
     
@@ -266,6 +302,26 @@ public struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         
+                        // Blue background white text Email control
+                        Button {
+                            copyAuthorEmail()
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "envelope.fill")
+                                    .font(.caption)
+                                Text("magicalgirlkrea@gmail.com")
+                                    .font(.system(size: 12, weight: .bold))
+                            }
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 3.5)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(Capsule())
+                            .shadow(color: Color.blue.opacity(0.35), radius: 3, y: 1)
+                        }
+                        .buttonStyle(.plain)
+                        .help("点击复制作者邮箱: magicalgirlkrea@gmail.com")
+                        
                         Button {
                             showSponsorSheet = true
                         } label: {
@@ -377,6 +433,26 @@ public struct SettingsView: View {
                             .overlay(Capsule().stroke(Color.primary.opacity(0.2), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
+                        
+                        // Blue background white text Email control
+                        Button {
+                            copyAuthorEmail()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "envelope.fill")
+                                    .font(.system(size: 10))
+                                Text("magicalgirlkrea@gmail.com")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 2)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(Capsule())
+                            .shadow(color: Color.blue.opacity(0.3), radius: 2, y: 1)
+                        }
+                        .buttonStyle(.plain)
+                        .help("点击复制作者邮箱: magicalgirlkrea@gmail.com")
                     }
                     
                     // Sponsor Button
@@ -585,6 +661,20 @@ public struct SettingsView: View {
         if panel.runModal() == .OK, let url = panel.url {
             toolConfig.fastbootPath = url.path
             toolConfig.checkTools()
+        }
+    }
+    
+    private func copyAuthorEmail() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("magicalgirlkrea@gmail.com", forType: .string)
+        showEmailCopiedAlert = true
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            showCopiedToast = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation(.easeOut(duration: 0.25)) {
+                showCopiedToast = false
+            }
         }
     }
 }

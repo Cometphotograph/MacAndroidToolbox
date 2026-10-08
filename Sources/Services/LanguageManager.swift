@@ -28,6 +28,10 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
         case .uk: return "Українська"
         }
     }
+    
+    public var isChinese: Bool {
+        self == .zhHans || self == .zhHant
+    }
 }
 
 @MainActor
@@ -35,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.0"
-    public let appBuild = "20261008_139"
+    public let appBuild = "20261008_140"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -986,6 +990,50 @@ public final class LanguageManager: ObservableObject {
             .ko: "화면 사양",
             .ru: "Экран",
             .uk: "Екран"
+        ],
+        "dash_soc_platform": [
+            .zhHant: "晶片平台",
+            .zhHans: "芯片平台",
+            .en: "SoC Platform",
+            .fr: "Plateforme SoC",
+            .ja: "チップセット",
+            .es: "Plataforma SoC",
+            .ko: "칩셋 플랫폼",
+            .ru: "Платформа SoC",
+            .uk: "Платформа SoC"
+        ],
+        "email_copied_title": [
+            .zhHant: "複製成功",
+            .zhHans: "复制成功",
+            .en: "Copied Successfully",
+            .fr: "Copié avec succès",
+            .ja: "コピー完了",
+            .es: "Copiado con éxito",
+            .ko: "복사 완료",
+            .ru: "Успешно скопировано",
+            .uk: "Успішно скопійовано"
+        ],
+        "email_copied_msg": [
+            .zhHant: "作者郵箱 magicalgirlkrea@gmail.com 已複製到剪貼板。",
+            .zhHans: "作者邮箱 magicalgirlkrea@gmail.com 已复制到剪贴板。",
+            .en: "Author email magicalgirlkrea@gmail.com has been copied to clipboard.",
+            .fr: "L'adresse e-mail de l'auteur magicalgirlkrea@gmail.com a été copiée dans le presse-papiers.",
+            .ja: "作者のメールアドレス magicalgirlkrea@gmail.com をクリップボードにコピーしました。",
+            .es: "El correo del autor magicalgirlkrea@gmail.com ha sido copiado al portapapeles.",
+            .ko: "작성자 이메일 magicalgirlkrea@gmail.com 이 클립보드에 복사되었습니다.",
+            .ru: "Электронная почта автора magicalgirlkrea@gmail.com скопирована в буфер обмена.",
+            .uk: "Електронну пошту автора magicalgirlkrea@gmail.com скопійовано в буфер обміну."
+        ],
+        "email_copied_toast": [
+            .zhHant: "已複製作者郵箱：magicalgirlkrea@gmail.com",
+            .zhHans: "已复制作者邮箱：magicalgirlkrea@gmail.com",
+            .en: "Copied author email: magicalgirlkrea@gmail.com",
+            .fr: "E-mail de l'auteur copié : magicalgirlkrea@gmail.com",
+            .ja: "作者のメールをコピーしました：magicalgirlkrea@gmail.com",
+            .es: "Correo del autor copiado: magicalgirlkrea@gmail.com",
+            .ko: "작성자 이메일 복사됨: magicalgirlkrea@gmail.com",
+            .ru: "Почта автора скопирована: magicalgirlkrea@gmail.com",
+            .uk: "Пошту автора скопійовано: magicalgirlkrea@gmail.com"
         ],
         "dash_security_level": [
             .zhHant: "安全性更新等級",

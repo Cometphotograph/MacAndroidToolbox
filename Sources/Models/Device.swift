@@ -75,6 +75,12 @@ public struct AndroidDevice: Identifiable, Hashable, Sendable {
     public var screenResolution: String?
     public var screenDensity: String?
     public var ipAddress: String?
+    public var socPlatform: String?
+    public var socManufacturer: String?
+    public var socModel: String?
+    public var boardPlatform: String?
+    public var hardwareChip: String?
+    public var cpuinfoHardware: String?
     
     public init(
         serial: String,
@@ -93,7 +99,13 @@ public struct AndroidDevice: Identifiable, Hashable, Sendable {
         bootloaderUnlocked: Bool? = nil,
         screenResolution: String? = nil,
         screenDensity: String? = nil,
-        ipAddress: String? = nil
+        ipAddress: String? = nil,
+        socPlatform: String? = nil,
+        socManufacturer: String? = nil,
+        socModel: String? = nil,
+        boardPlatform: String? = nil,
+        hardwareChip: String? = nil,
+        cpuinfoHardware: String? = nil
     ) {
         self.serial = serial
         self.mode = mode
@@ -112,6 +124,12 @@ public struct AndroidDevice: Identifiable, Hashable, Sendable {
         self.screenResolution = screenResolution
         self.screenDensity = screenDensity
         self.ipAddress = ipAddress
+        self.socPlatform = socPlatform
+        self.socManufacturer = socManufacturer
+        self.socModel = socModel
+        self.boardPlatform = boardPlatform
+        self.hardwareChip = hardwareChip
+        self.cpuinfoHardware = cpuinfoHardware
     }
     
     public var displayName: String {
@@ -136,5 +154,33 @@ public struct AndroidDevice: Identifiable, Hashable, Sendable {
         case "normal", "正常": return L10n("battery_normal")
         default: return batteryStatus.isEmpty || batteryStatus == "未知" ? L10n("common_unknown") : batteryStatus
         }
+    }
+    
+    @MainActor
+    public var socDisplayName: String {
+        let isChinese = LanguageManager.shared.currentLanguage.isChinese
+        let res = ChipsetDatabase.shared.resolve(
+            socModel: socModel,
+            boardPlatform: boardPlatform,
+            socManufacturer: socManufacturer,
+            hardware: hardwareChip,
+            cpuinfoHardware: cpuinfoHardware,
+            isChinese: isChinese
+        )
+        return res.displayName
+    }
+    
+    @MainActor
+    public var socCodeName: String? {
+        let isChinese = LanguageManager.shared.currentLanguage.isChinese
+        let res = ChipsetDatabase.shared.resolve(
+            socModel: socModel,
+            boardPlatform: boardPlatform,
+            socManufacturer: socManufacturer,
+            hardware: hardwareChip,
+            cpuinfoHardware: cpuinfoHardware,
+            isChinese: isChinese
+        )
+        return res.codeName
     }
 }

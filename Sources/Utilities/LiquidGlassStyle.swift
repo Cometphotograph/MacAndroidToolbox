@@ -704,16 +704,16 @@ public struct MacOS27HeaderBackgroundView: View {
             // Highly translucent tint layer so underlying button & card colors shine through
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(white: 0.10, alpha: 0.22)
+                    return NSColor(white: 0.10, alpha: 0.10)
                 } else {
-                    return NSColor(white: 0.98, alpha: 0.28)
+                    return NSColor(white: 0.98, alpha: 0.05)
                 }
             }))
             
             LinearGradient(
                 stops: [
-                    .init(color: Color.white.opacity(0.18), location: 0.0),
-                    .init(color: Color.white.opacity(0.04), location: 0.35),
+                    .init(color: Color.white.opacity(0.10), location: 0.0),
+                    .init(color: Color.white.opacity(0.02), location: 0.35),
                     .init(color: Color.clear, location: 0.65)
                 ],
                 startPoint: .top,
@@ -764,9 +764,9 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
             // 2. Translucent tone layer: vibrant and transparent so colors (blue, orange) glow through
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(white: 0.10, alpha: 0.32)
+                    return NSColor(white: 0.10, alpha: 0.18)
                 } else {
-                    return NSColor(white: 0.98, alpha: 0.35)
+                    return NSColor(white: 0.98, alpha: 0.08)
                 }
             }))
             
@@ -775,8 +775,8 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
                 .fill(
                     LinearGradient(
                         stops: [
-                            .init(color: Color.white.opacity(0.22), location: 0.0),
-                            .init(color: Color.white.opacity(0.05), location: 0.25),
+                            .init(color: Color.white.opacity(0.12), location: 0.0),
+                            .init(color: Color.white.opacity(0.02), location: 0.25),
                             .init(color: Color.clear, location: 0.50)
                         ],
                         startPoint: .top,
@@ -789,9 +789,9 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
                 .strokeBorder(
                     LinearGradient(
                         stops: [
-                            .init(color: Color.white.opacity(0.40), location: 0.0),
-                            .init(color: Color.white.opacity(0.12), location: 0.40),
-                            .init(color: Color.primary.opacity(0.10), location: 1.0)
+                            .init(color: Color.white.opacity(0.30), location: 0.0),
+                            .init(color: Color.white.opacity(0.08), location: 0.40),
+                            .init(color: Color.primary.opacity(0.08), location: 1.0)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
