@@ -73,6 +73,7 @@ public struct FastbootView: View {
                 variablesCard
             }
             .padding(20)
+            .padding(.bottom, 120)
         }
         .scrollContentBackground(.hidden)
         .confirmationDialog(

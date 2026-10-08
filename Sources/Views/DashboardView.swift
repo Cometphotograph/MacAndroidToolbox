@@ -36,6 +36,7 @@ public struct DashboardView: View {
                 }
             }
             .padding(20)
+            .padding(.bottom, 120)
         }
         .scrollContentBackground(.hidden)
         .alert(isPresented: $showAlert) {

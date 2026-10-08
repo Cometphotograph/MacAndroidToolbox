@@ -216,10 +216,9 @@ public struct MainView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.bottom, isConsoleExpanded ? 224 : 12)
             }
             
-            // Floating Liquid Glass Terminal Window (Fixed Bottom Position)
+            // Floating Liquid Glass Terminal Window (Overlaying directly over the controls!)
             if isConsoleExpanded {
                 VStack {
                     Spacer()
@@ -228,7 +227,7 @@ public struct MainView: View {
                             isConsoleExpanded = false
                         }
                     })
-                    .frame(height: 200)
+                    .frame(height: 195)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 16)
                 }
