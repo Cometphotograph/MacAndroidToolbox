@@ -156,7 +156,7 @@ public struct VisualEffectView: NSViewRepresentable {
     }
 }
 
-// MARK: - Sidebar Frosted Glass Background (Apple Settings style with subtle cool gray)
+// MARK: - Sidebar Frosted Glass Background (Apple Notes style with exact cool gray tone)
 public struct SidebarGlassBackgroundView: View {
     public init() {}
     
@@ -165,11 +165,183 @@ public struct SidebarGlassBackgroundView: View {
             // 1. Native macOS sidebar frosted glass (blurs wallpaper/windows behind)
             VisualEffectView(material: .sidebar, blendingMode: .behindWindow)
             
-            // 2. Apple System Settings subtle cool gray tint
-            Color(NSColor.windowBackgroundColor).opacity(0.55)
-            Color.primary.opacity(0.04)
+            // 2. Apple Notes sidebar exact neutral cool gray wash (media_1791449945375_2b78229a)
+            Color(NSColor(name: nil, dynamicProvider: { appearance in
+                if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                    return NSColor(white: 0.16, alpha: 0.60)
+                } else {
+                    return NSColor(red: 0.935, green: 0.935, blue: 0.950, alpha: 0.72)
+                }
+            }))
+            
+            // 3. Subtle depth separator line on the trailing edge (1px native divider)
+            HStack {
+                Spacer()
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(width: 1)
+            }
         }
         .ignoresSafeArea()
+    }
+}
+
+// MARK: - Liquid Glass Window Traffic Lights (Apple HIG Glossy Specular Buttons)
+public struct GlassTrafficLightsView: View {
+    @State private var isHoveringGroup: Bool = false
+    
+    public init() {}
+    
+    public var body: some View {
+        HStack(spacing: 8) {
+            // Close Button (Red)
+            trafficButton(
+                colorTop: Color(red: 1.0, green: 0.40, blue: 0.36),
+                colorBottom: Color(red: 0.95, green: 0.28, blue: 0.25),
+                glyphName: "xmark",
+                glyphSize: 6.5
+            ) {
+                if let window = NSApp.keyWindow ?? NSApp.mainWindow {
+                    window.performClose(nil)
+                }
+            }
+            
+            // Minimize Button (Yellow)
+            trafficButton(
+                colorTop: Color(red: 1.0, green: 0.78, blue: 0.24),
+                colorBottom: Color(red: 0.96, green: 0.68, blue: 0.16),
+                glyphName: "minus",
+                glyphSize: 7.5
+            ) {
+                if let window = NSApp.keyWindow ?? NSApp.mainWindow {
+                    window.miniaturize(nil)
+                }
+            }
+            
+            // Zoom / Fullscreen Button (Green)
+            trafficButton(
+                colorTop: Color(red: 0.22, green: 0.82, blue: 0.32),
+                colorBottom: Color(red: 0.16, green: 0.72, blue: 0.24),
+                glyphName: "arrow.up.left.and.arrow.down.right",
+                glyphSize: 5.5
+            ) {
+                if let window = NSApp.keyWindow ?? NSApp.mainWindow {
+                    window.zoom(nil)
+                }
+            }
+        }
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHoveringGroup = hovering
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func trafficButton(
+        colorTop: Color,
+        colorBottom: Color,
+        glyphName: String,
+        glyphSize: CGFloat,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            ZStack {
+                // Base glossy liquid gradient
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [colorTop, colorBottom],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                
+                // Specular top highlight crescent
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.55), location: 0.0),
+                                .init(color: Color.white.opacity(0.2), location: 0.4),
+                                .init(color: Color.black.opacity(0.12), location: 1.0)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.8
+                    )
+                
+                // Fine outer border
+                Circle()
+                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
+                
+                // macOS symbol glyph on hover
+                if isHoveringGroup {
+                    Image(systemName: glyphName)
+                        .font(.system(size: glyphSize, weight: .black))
+                        .foregroundColor(Color.black.opacity(0.65))
+                        .transition(.opacity)
+                }
+            }
+            .frame(width: 12, height: 12)
+            .shadow(color: Color.black.opacity(0.12), radius: 1, x: 0, y: 0.5)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Circular Glass Button (Apple Notes Header Style)
+public struct GlassCircleButton: View {
+    let systemImage: String
+    let tooltip: String
+    var size: CGFloat = 28
+    let action: () -> Void
+    
+    @State private var isHovered: Bool = false
+    
+    public init(systemImage: String, tooltip: String, size: CGFloat = 28, action: @escaping () -> Void) {
+        self.systemImage = systemImage
+        self.tooltip = tooltip
+        self.size = size
+        self.action = action
+    }
+    
+    public var body: some View {
+        Button(action: action) {
+            ZStack {
+                // Glass background
+                Circle()
+                    .fill(isHovered ? Color.primary.opacity(0.12) : Color.primary.opacity(0.06))
+                
+                // Specular glass rim
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.4),
+                                Color.primary.opacity(0.12)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.8
+                    )
+                
+                Image(systemName: systemImage)
+                    .font(.system(size: size * 0.44, weight: .medium))
+                    .foregroundColor(isHovered ? .primary : .primary.opacity(0.8))
+            }
+            .frame(width: size, height: size)
+            .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
+            .scaleEffect(isHovered ? 1.05 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: isHovered)
+        }
+        .buttonStyle(.plain)
+        .help(tooltip)
+        .onHover { hovering in
+            isHovered = hovering
+        }
     }
 }
 

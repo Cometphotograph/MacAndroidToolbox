@@ -13,12 +13,6 @@ public struct FileManagerView: View {
     @State private var remotePullPath: String = "/sdcard/"
     @State private var isPulling: Bool = false
     
-    // Sideload state
-    @State private var sideloadZipPath: String = ""
-    @State private var isSideloading: Bool = false
-    @State private var sideloadProgressText: String = ""
-    @State private var showSideloadConfirm: Bool = false
-    
     // Screenshot state
     @State private var capturedImage: NSImage? = nil
     @State private var isCapturing: Bool = false
@@ -28,8 +22,8 @@ public struct FileManagerView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Sideload Flasher Card
-                sideloadCard
+                // Quick Paths Card
+                quickPathsCard
                 
                 // File Push & Pull Cards
                 HStack(alignment: .top, spacing: 16) {
@@ -42,62 +36,46 @@ public struct FileManagerView: View {
             }
             .padding(16)
         }
-        .confirmationDialog(
-            L10n("file_sideload_confirm_title"),
-            isPresented: $showSideloadConfirm,
-            titleVisibility: .visible
-        ) {
-            Button(L10n("file_sideload_start_btn"), role: .destructive) {
-                executeSideload()
-            }
-            Button(L10n("common_cancel"), role: .cancel) {}
-        } message: {
-            Text(L10n("file_sideload_confirm_msg"))
-        }
     }
     
     // MARK: - Subviews
-    private var sideloadCard: some View {
+    private var quickPathsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label(L10n("file_sideload_title"), systemImage: "arrow.down.doc.fill")
-            .font(.headline)
-            
-            Text(L10n("file_sideload_desc"))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            Divider().opacity(0.4)
-            
-            HStack(spacing: 10) {
-                TextField(L10n("file_sideload_placeholder"), text: $sideloadZipPath)
-                    .textFieldStyle(.roundedBorder)
-                
-                Button(L10n("file_browse_zip")) {
-                    chooseZipFile()
-                }
-                .liquidGlassButton()
-                
-                Button {
-                    showSideloadConfirm = true
-                } label: {
-                    if isSideloading {
-                        ProgressView().scaleEffect(0.6)
-                            .frame(width: 80)
-                    } else {
-                        Label(L10n("file_sideload_btn"), systemImage: "bolt.fill")
-                    }
-                }
-                .liquidGlassButton(tint: .purple, prominent: true)
-                .disabled(sideloadZipPath.isEmpty || isSideloading)
+            HStack {
+                Label("常用目錄快捷填入", systemImage: "folder.badge.gearshape")
+                    .font(.headline)
+                Spacer()
+                Text("點選可快速填入推送/拉取路徑")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
-            if !sideloadProgressText.isEmpty {
-                Text("\(L10n("file_progress_current")) \(sideloadProgressText)")
-                    .font(.caption.monospaced())
-                    .foregroundColor(.blue)
+            Divider().opacity(0.3)
+            
+            HStack(spacing: 8) {
+                quickPathButton(name: "下載 (Download)", path: "/sdcard/Download/")
+                quickPathButton(name: "相簿 (DCIM)", path: "/sdcard/DCIM/Camera/")
+                quickPathButton(name: "截圖 (Screenshots)", path: "/sdcard/Pictures/Screenshots/")
+                quickPathButton(name: "文件 (Documents)", path: "/sdcard/Documents/")
+                quickPathButton(name: "根目錄 (SDCard)", path: "/sdcard/")
             }
         }
-        .liquidGlassCard(cornerRadius: 16, padding: 16)
+        .liquidGlassCard(cornerRadius: 16, padding: 14)
+    }
+    
+    private func quickPathButton(name: String, path: String) -> some View {
+        Button {
+            remoteDestinationPath = path
+            remotePullPath = path
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "folder")
+                    .font(.system(size: 11))
+                Text(name)
+                    .font(.system(size: 11))
+            }
+        }
+        .liquidGlassButton()
     }
     
     private var pushFileCard: some View {
@@ -242,18 +220,6 @@ public struct FileManagerView: View {
     }
     
     // MARK: - Actions
-    private func chooseZipFile() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowedContentTypes = [UTType(filenameExtension: "zip") ?? .data, .data]
-        panel.prompt = L10n("panel_choose_flash_zip")
-        
-        if panel.runModal() == .OK, let url = panel.url {
-            sideloadZipPath = url.path
-        }
-    }
-    
     private func chooseLocalFileToPush() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
@@ -303,27 +269,6 @@ public struct FileManagerView: View {
                 }
                 isPulling = false
             }
-        }
-    }
-    
-    private func executeSideload() {
-        guard let dev = deviceManager.selectedDevice else { return }
-        isSideloading = true
-        let zip = sideloadZipPath
-        
-        Task {
-            do {
-                deviceManager.appendLog(level: .info, text: "正在 Sideload 刷入 \(zip)...")
-                try await ADBService.shared.sideload(serial: dev.serial, zipPath: zip) { progress in
-                    DispatchQueue.main.async {
-                        self.sideloadProgressText = progress
-                    }
-                }
-                deviceManager.appendLog(level: .success, text: "Sideload 刷機完成！")
-            } catch {
-                deviceManager.appendLog(level: .error, text: "Sideload 刷機失敗: \(error.localizedDescription)")
-            }
-            isSideloading = false
         }
     }
     
