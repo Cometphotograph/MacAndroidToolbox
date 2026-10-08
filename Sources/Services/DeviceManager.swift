@@ -23,7 +23,7 @@ public class DeviceManager: ObservableObject {
             }
         }
         
-        appendLog(level: .info, text: "Mac Android 刷機與除錯工具箱已啟動")
+        appendLog(level: .info, text: L10n("log_toolbox_started"))
         startAutoPolling()
         refreshDevices()
     }
@@ -47,7 +47,19 @@ public class DeviceManager: ObservableObject {
         if isPolling && !GeneralSettingsManager.shared.isShowPollingLogsEnabled {
             return
         }
-        let entry = LogEntry(level: level, text: text, isPolling: isPolling)
+        
+        let currentLang = LanguageManager.shared.currentLanguage
+        let processedText: String
+        switch currentLang {
+        case .zhHans:
+            processedText = text.applyingTransform(StringTransform("Hant-Hans"), reverse: false) ?? text
+        case .zhHant:
+            processedText = text.applyingTransform(StringTransform("Hans-Hant"), reverse: false) ?? text
+        default:
+            processedText = text
+        }
+        
+        let entry = LogEntry(level: level, text: processedText, isPolling: isPolling)
         logs.append(entry)
         if logs.count > 1500 {
             logs.removeFirst(200)
@@ -56,13 +68,13 @@ public class DeviceManager: ObservableObject {
     
     public func clearLogs() {
         logs.removeAll()
-        appendLog(level: .info, text: "日誌已清空")
+        appendLog(level: .info, text: L10n("log_logs_cleared"))
     }
     
     public func refreshDevices(silent: Bool = false) {
         if !silent {
             isRefreshing = true
-            appendLog(level: .info, text: "正在掃描連接的 Android 設備 (ADB & Fastboot)...")
+            appendLog(level: .info, text: L10n("log_scanning_devices"))
         }
         
         Task {
@@ -99,9 +111,9 @@ public class DeviceManager: ObservableObject {
             if !silent {
                 self.isRefreshing = false
                 if allDevs.isEmpty {
-                    self.appendLog(level: .warning, text: "未檢測到任何連接的設備。請檢查 USB 線與調試授權。")
+                    self.appendLog(level: .warning, text: L10n("log_no_devices_found"))
                 } else {
-                    self.appendLog(level: .success, text: "檢測完成，找到 \(allDevs.count) 台設備。")
+                    self.appendLog(level: .success, text: String(format: L10n("log_devices_found_format"), allDevs.count))
                 }
             }
             

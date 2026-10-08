@@ -3,11 +3,17 @@ import SwiftUI
 public struct ConsoleView: View {
     @ObservedObject var deviceManager = DeviceManager.shared
     @ObservedObject var generalSettings = GeneralSettingsManager.shared
+    @ObservedObject var languageManager = LanguageManager.shared
+    
     @State private var searchText = ""
     @State private var selectedLevel: LogLevel? = nil
     @State private var autoScroll: Bool = true
     
-    public init() {}
+    public var onClose: (() -> Void)? = nil
+    
+    public init(onClose: (() -> Void)? = nil) {
+        self.onClose = onClose
+    }
     
     var filteredLogs: [LogEntry] {
         deviceManager.logs.filter { entry in
@@ -15,32 +21,58 @@ public struct ConsoleView: View {
                 return false
             }
             let matchesLevel = (selectedLevel == nil) || (entry.level == selectedLevel)
-            let matchesSearch = searchText.isEmpty || entry.text.localizedCaseInsensitiveContains(searchText)
+            let formatted = entry.formattedText(for: languageManager.currentLanguage)
+            let matchesSearch = searchText.isEmpty ||
+                                entry.text.localizedCaseInsensitiveContains(searchText) ||
+                                formatted.localizedCaseInsensitiveContains(searchText)
             return matchesLevel && matchesSearch
         }
     }
     
     public var body: some View {
         VStack(spacing: 0) {
-            // Header / Control bar (Frosted Glass)
-            HStack(spacing: 12) {
-                Label(L10n("console_title"), systemImage: "terminal.fill")
-                    .font(.subheadline.bold())
-                
-                Spacer()
-                
-                // Search box
-                HStack {
-                    Image(systemName: "magnifyingglass")
+            // Header / Control bar (macOS 27 Liquid Glass Toolbar)
+            HStack(spacing: 10) {
+                // Title + Terminal Icon + Count Capsule
+                HStack(spacing: 6) {
+                    Image(systemName: "terminal.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.accentColor)
+                    
+                    Text(L10n("console_title"))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                    
+                    Text("\(filteredLogs.count)")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
                         .foregroundColor(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1.5)
+                        .background(Capsule().fill(Color.primary.opacity(0.08)))
+                }
+                .fixedSize(horizontal: true, vertical: false)
+                
+                Spacer(minLength: 8)
+                
+                // Search box (Liquid Glass Pill)
+                HStack(spacing: 5) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                    
                     TextField(L10n("console_filter"), text: $searchText)
                         .textFieldStyle(.plain)
-                        .frame(width: 140)
+                        .font(.system(size: 11.5))
+                        .frame(minWidth: 90, maxWidth: 120)
+                    
                     if !searchText.isEmpty {
                         Button {
                             searchText = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 10.5))
                                 .foregroundColor(.secondary)
                         }
                         .buttonStyle(.plain)
@@ -49,8 +81,12 @@ public struct ConsoleView: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color(NSColor.controlBackgroundColor).opacity(0.8))
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color.primary.opacity(0.06))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
                 )
                 
                 // Level Picker
@@ -62,42 +98,72 @@ public struct ConsoleView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .frame(width: 120)
+                .frame(width: 100)
                 
+                // Toggle Show Polling
                 Toggle(L10n("console_show_polling"), isOn: $generalSettings.isShowPollingLogsEnabled)
                     .toggleStyle(.checkbox)
-                    .font(.caption)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                     .help(L10n("settings_show_polling_desc"))
                 
+                // Toggle Auto Scroll
                 Toggle(L10n("console_auto_scroll"), isOn: $autoScroll)
                     .toggleStyle(.checkbox)
-                    .font(.caption)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
                 
                 // Copy button
                 Button {
                     copyAllLogs()
                 } label: {
                     Image(systemName: "doc.on.doc")
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.85))
                 }
                 .help(L10n("console_copy_all"))
-                .buttonStyle(.borderless)
+                .buttonStyle(.plain)
+                .frame(width: 24, height: 24)
+                .background(Circle().fill(Color.primary.opacity(0.05)))
                 
                 // Clear button
                 Button {
                     deviceManager.clearLogs()
                 } label: {
                     Image(systemName: "trash")
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundColor(.primary.opacity(0.85))
                 }
                 .help(L10n("console_clear"))
-                .buttonStyle(.borderless)
+                .buttonStyle(.plain)
+                .frame(width: 24, height: 24)
+                .background(Circle().fill(Color.primary.opacity(0.05)))
+                
+                // Close / Fold Button
+                if let onClose = onClose {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 9.5, weight: .bold))
+                            .foregroundColor(.secondary)
+                    }
+                    .help("收起终端")
+                    .buttonStyle(.plain)
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(Color.primary.opacity(0.07)))
+                }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
-            .background(.ultraThinMaterial)
+            .background(Color.clear)
             
-            Divider().opacity(0.3)
+            // Subtle frosted separator line
+            Rectangle()
+                .fill(Color.primary.opacity(0.08))
+                .frame(height: 1)
             
-            // Console output area
+            // Console output area (Crisp high-contrast monospaced log stream)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 2) {
@@ -110,20 +176,20 @@ public struct ConsoleView: View {
                                 
                                 LogBadge(level: entry.level)
                                 
-                                Text(entry.text)
+                                Text(entry.formattedText(for: languageManager.currentLanguage))
                                     .font(.system(size: 12, design: .monospaced))
                                     .foregroundColor(textColor(for: entry.level))
                                     .textSelection(.enabled)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .id(entry.id)
-                            .padding(.horizontal, 10)
+                            .padding(.horizontal, 12)
                             .padding(.vertical, 1)
                         }
                     }
                     .padding(.vertical, 6)
                 }
-                .background(Color(NSColor.textBackgroundColor).opacity(0.8))
+                .background(Color.clear)
                 .onChange(of: deviceManager.logs.count) { _ in
                     if autoScroll, let last = filteredLogs.last {
                         withAnimation(.easeOut(duration: 0.1)) {
@@ -133,6 +199,8 @@ public struct ConsoleView: View {
                 }
             }
         }
+        .background(MacOS27FloatingTerminalGlassBackground(cornerRadius: 14))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
     
     private func textColor(for level: LogLevel) -> Color {
@@ -148,7 +216,7 @@ public struct ConsoleView: View {
     }
     
     private func copyAllLogs() {
-        let text = filteredLogs.map { "[\($0.level.rawValue)] \($0.text)" }.joined(separator: "\n")
+        let text = filteredLogs.map { "[\($0.level.rawValue)] \($0.formattedText(for: languageManager.currentLanguage))" }.joined(separator: "\n")
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
     }
@@ -184,3 +252,4 @@ struct LogBadge: View {
         }
     }
 }
+

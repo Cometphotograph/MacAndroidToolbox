@@ -35,7 +35,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.0"
-    public let appBuild = "20261008_135"
+    public let appBuild = "20261008_136"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -625,8 +625,8 @@ public final class LanguageManager: ObservableObject {
             .uk: "Показувати логи опитування"
         ],
         "console_title": [
-            .zhHant: "終端日誌 (Terminal Logs)",
-            .zhHans: "终端日志 (Terminal Logs)",
+            .zhHant: "終端日誌",
+            .zhHans: "终端日志",
             .en: "Terminal Logs",
             .fr: "Journaux du terminal",
             .ja: "ターミナルログ",
@@ -634,6 +634,61 @@ public final class LanguageManager: ObservableObject {
             .ko: "터미널 로그",
             .ru: "Терминал логов",
             .uk: "Термінал логів"
+        ],
+        "log_toolbox_started": [
+            .zhHant: "Mac Android 刷機與除錯工具箱已啟動",
+            .zhHans: "Mac Android 刷机与调试工具箱已启动",
+            .en: "Mac Android Toolbox initialized",
+            .fr: "Boîte à outils Mac Android initialisée",
+            .ja: "Mac Android ツールボックスが起動しました",
+            .es: "Caja de herramientas Mac Android iniciada",
+            .ko: "Mac Android 툴박스가 시작되었습니다",
+            .ru: "Mac Android Toolbox успешно запущен",
+            .uk: "Mac Android Toolbox успішно запущено"
+        ],
+        "log_scanning_devices": [
+            .zhHant: "正在掃描連接的 Android 設備 (ADB & Fastboot)...",
+            .zhHans: "正在扫描连接的 Android 设备 (ADB & Fastboot)...",
+            .en: "Scanning for connected Android devices (ADB & Fastboot)...",
+            .fr: "Recherche d'appareils Android connectés (ADB & Fastboot)...",
+            .ja: "接続された Android デバイスをスキャン中 (ADB & Fastboot)...",
+            .es: "Buscando dispositivos Android conectados (ADB y Fastboot)...",
+            .ko: "연결된 Android 기기 검색 중 (ADB & Fastboot)...",
+            .ru: "Сканирование подключенных устройств Android (ADB и Fastboot)...",
+            .uk: "Сканування підключених пристроїв Android (ADB та Fastboot)..."
+        ],
+        "log_no_devices_found": [
+            .zhHant: "未檢測到任何連接的設備。請檢查 USB 線與調試授權。",
+            .zhHans: "未检测到任何连接的设备。请检查 USB 数据线与调试授权。",
+            .en: "No connected devices detected. Please check USB cable and debugging authorization.",
+            .fr: "Aucun appareil connecté détecté. Veuillez vérifier le câble USB et l'autorisation de débogage.",
+            .ja: "接続されたデバイスが見つかりません。USB ケーブルとデバッグ認証を確認してください。",
+            .es: "No se detectaron dispositivos conectados. Compruebe el cable USB y la autorización de depuración.",
+            .ko: "연결된 기기가 감지되지 않았습니다. USB 케이블과 디버깅 승인을 확인하세요.",
+            .ru: "Подключенных устройств не обнаружено. Проверьте USB-кабель и авторизацию отладки.",
+            .uk: "Підключених пристроїв не виявлено. Перевірте USB-кабель та авторизацію налагодження."
+        ],
+        "log_devices_found_format": [
+            .zhHant: "檢測完成，找到 %d 台設備。",
+            .zhHans: "检测完成，找到 %d 台设备。",
+            .en: "Scan complete, found %d device(s).",
+            .fr: "Analyse terminée, %d appareil(s) trouvé(s).",
+            .ja: "スキャン完了、%d 台のデバイスを検出しました。",
+            .es: "Búsqueda finalizada, se encontraron %d dispositivo(s).",
+            .ko: "검색 완료, %d대 기기 발견됨.",
+            .ru: "Сканирование завершено, обнаружено устройств: %d.",
+            .uk: "Сканування завершено, знайдено пристроїв: %d."
+        ],
+        "log_logs_cleared": [
+            .zhHant: "日誌已清空",
+            .zhHans: "日志已清空",
+            .en: "Logs cleared",
+            .fr: "Journaux effacés",
+            .ja: "ログを消去しました",
+            .es: "Registros borrados",
+            .ko: "로그가 지워졌습니다",
+            .ru: "Логи очищены",
+            .uk: "Логи очищено"
         ],
         "dash_android_version": [
             .zhHant: "Android 版本",

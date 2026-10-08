@@ -733,3 +733,61 @@ public class WindowDragNSView: NSView {
         window?.performDrag(with: event)
     }
 }
+
+// MARK: - macOS 27 Floating Terminal Glass Background (Low-transparency Liquid Glass)
+public struct MacOS27FloatingTerminalGlassBackground: View {
+    var cornerRadius: CGFloat
+    
+    public init(cornerRadius: CGFloat = 14) {
+        self.cornerRadius = cornerRadius
+    }
+    
+    public var body: some View {
+        ZStack {
+            // 1. Native macOS within-window HUD / Popover material for physical frosted glass
+            VisualEffectView(material: .popover, blendingMode: .withinWindow)
+            
+            // 2. High-opacity tone layer for lower transparency (optimum readability for log text)
+            Color(NSColor(name: nil, dynamicProvider: { appearance in
+                if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                    return NSColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 0.90)
+                } else {
+                    return NSColor(white: 0.96, alpha: 0.92)
+                }
+            }))
+            
+            // 3. Specular liquid glass top sheen (Apple macOS 27 specular reflection)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color.white.opacity(0.18), location: 0.0),
+                            .init(color: Color.white.opacity(0.04), location: 0.22),
+                            .init(color: Color.clear, location: 0.45)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            
+            // 4. Subtle inner/outer specular stroke border
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color.white.opacity(0.35), location: 0.0),
+                            .init(color: Color.white.opacity(0.10), location: 0.40),
+                            .init(color: Color.primary.opacity(0.10), location: 1.0)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 1
+                )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        // 5. Multi-layer floating elevation shadow for genuine floating card feel
+        .shadow(color: Color.black.opacity(0.26), radius: 18, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.08), radius: 4, x: 0, y: 2)
+    }
+}

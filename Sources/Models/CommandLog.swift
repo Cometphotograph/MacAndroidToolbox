@@ -36,4 +36,15 @@ public struct LogEntry: Identifiable, Hashable, Sendable {
         self.text = text
         self.isPolling = isPolling
     }
+    
+    public func formattedText(for language: AppLanguage) -> String {
+        switch language {
+        case .zhHans:
+            return text.applyingTransform(StringTransform("Hant-Hans"), reverse: false) ?? text
+        case .zhHant:
+            return text.applyingTransform(StringTransform("Hans-Hant"), reverse: false) ?? text
+        default:
+            return text
+        }
+    }
 }

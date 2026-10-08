@@ -216,18 +216,33 @@ public struct MainView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
-                // Bottom Console Drawer (Liquid Glass)
-                if isConsoleExpanded {
-                    Divider().opacity(0.25)
-                    ConsoleView()
-                        .frame(height: 220)
+                .padding(.bottom, isConsoleExpanded ? 224 : 12)
+            }
+            
+            // Floating Liquid Glass Terminal Window (Fixed Bottom Position)
+            if isConsoleExpanded {
+                VStack {
+                    Spacer()
+                    ConsoleView(onClose: {
+                        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                            isConsoleExpanded = false
+                        }
+                    })
+                    .frame(height: 200)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
                 }
+                .transition(.asymmetric(
+                    insertion: .move(edge: .bottom).combined(with: .opacity),
+                    removal: .move(edge: .bottom).combined(with: .opacity)
+                ))
+                .zIndex(100)
             }
             
             // Top Unified Header Bar (Height: 52pt, frosted glass covering scrolled content)
             detailHeader
                 .frame(height: 52)
+                .zIndex(110)
         }
     }
     
