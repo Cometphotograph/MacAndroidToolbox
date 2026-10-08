@@ -14,6 +14,10 @@
 
 A modern native Android flashing and debugging graphical toolbox tailored for **macOS**. Developed natively with **Swift 6** and **SwiftUI**, it adopts the **Liquid Glass** skeuomorphic design language, strictly adhering to Apple's Human Interface Guidelines (HIG) with multi-layered depth, frosted glass materials, fluid light gradients, and smooth responsiveness.
 
+<p align="center">
+  <img src="docs/images/preview.jpg" alt="MacAndroidToolbox Preview" width="850">
+</p>
+
 ---
 
 ## ⚠️ Important Notices & Safety Warnings

@@ -14,6 +14,10 @@
 
 专为 **macOS** 用户量身打造的现代化原生 Android 刷机与调试图形化工具箱。使用 **Swift 6** 与 **SwiftUI** 开发，全面采用 **Liquid Glass（液态玻璃拟真视觉风格）** 设计语言，深度融合 Apple 人机界面指南（Human Interface Guidelines, HIG），具备高透光率、多图层景深毛玻璃、动态流光与细腻质感。
 
+<p align="center">
+  <img src="docs/images/preview.jpg" alt="麦安工具箱界面预览" width="850">
+</p>
+
 ---
 
 ## ⚠️ 重要声明与安全警示
