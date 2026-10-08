@@ -302,7 +302,7 @@ public struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         
-                        // Blue background white text Email control
+                        // Matching style Email control (blue tint with border)
                         Button {
                             copyAuthorEmail()
                         } label: {
@@ -314,10 +314,10 @@ public struct SettingsView: View {
                             }
                             .padding(.horizontal, 9)
                             .padding(.vertical, 3.5)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
+                            .background(Color.blue.opacity(0.12))
+                            .foregroundColor(.blue)
                             .clipShape(Capsule())
-                            .shadow(color: Color.blue.opacity(0.35), radius: 3, y: 1)
+                            .overlay(Capsule().stroke(Color.blue.opacity(0.3), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
                         .help("点击复制作者邮箱: magicalgirlkrea@gmail.com")
@@ -434,7 +434,7 @@ public struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         
-                        // Blue background white text Email control
+                        // Matching style Email control (blue tint with border)
                         Button {
                             copyAuthorEmail()
                         } label: {
@@ -446,10 +446,10 @@ public struct SettingsView: View {
                             }
                             .padding(.horizontal, 7)
                             .padding(.vertical, 2)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
+                            .background(Color.blue.opacity(0.12))
+                            .foregroundColor(.blue)
                             .clipShape(Capsule())
-                            .shadow(color: Color.blue.opacity(0.3), radius: 2, y: 1)
+                            .overlay(Capsule().stroke(Color.blue.opacity(0.3), lineWidth: 1))
                         }
                         .buttonStyle(.plain)
                         .help("点击复制作者邮箱: magicalgirlkrea@gmail.com")
