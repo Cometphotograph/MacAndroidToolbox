@@ -74,44 +74,64 @@ public struct MainView: View {
         ZStack {
             NavigationSplitView {
                 // MARK: - Sidebar (Apple Notes Style)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 3.5) {
-                        // Section 1: Main Navigation
-                        Text(L10n("nav_main_navigation"))
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.secondary.opacity(0.8))
-                            .padding(.horizontal, 14)
-                            .padding(.top, 10)
-                            .padding(.bottom, 2)
+                VStack(spacing: 0) {
+                    // Top Titlebar Row: Leaves space for native traffic lights, places Search and Toggle on the right
+                    HStack(spacing: 8) {
+                        // Reserved space for native macOS traffic lights (🔴 🟡 🟢)
+                        Spacer()
+                            .frame(width: 76)
                         
-                        // 7 Main Feature Sections
-                        ForEach(NavigationSection.allCases) { section in
-                            navigationItemRow(section)
-                        }
+                        Spacer()
                         
-                        // Section 2: Connected Devices
-                        connectedDevicesHeader
-                        connectedDevicesList
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 16)
-                }
-                .scrollContentBackground(.hidden)
-                .background(SidebarGlassBackgroundView())
-                .toolbar {
-                    // Global Search Glass Button placed directly in Sidebar Titlebar next to sidebar toggle
-                    ToolbarItem(placement: .primaryAction) {
+                        // Circular Glass Global Search Button (Cmd+K)
                         GlassCircleButton(
                             systemImage: "magnifyingglass",
                             tooltip: L10n("search_title") + " (Cmd+K)",
-                            size: 30
+                            size: 28
                         ) {
                             withAnimation(.easeOut(duration: 0.15)) {
                                 showSearchPalette = true
                             }
                         }
+                        
+                        // Circular Glass Sidebar Toggle Button
+                        GlassCircleButton(
+                            systemImage: "sidebar.leading",
+                            tooltip: L10n("tb_toggle_sidebar"),
+                            size: 28
+                        ) {
+                            toggleSidebar()
+                        }
                     }
+                    .padding(.trailing, 12)
+                    .frame(height: 52)
+                    
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 3.5) {
+                            // Section 1: Main Navigation
+                            Text(L10n("nav_main_navigation"))
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.secondary.opacity(0.8))
+                                .padding(.horizontal, 14)
+                                .padding(.top, 4)
+                                .padding(.bottom, 2)
+                            
+                            // 7 Main Feature Sections
+                            ForEach(NavigationSection.allCases) { section in
+                                navigationItemRow(section)
+                            }
+                            
+                            // Section 2: Connected Devices
+                            connectedDevicesHeader
+                            connectedDevicesList
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.bottom, 16)
+                    }
+                    .scrollContentBackground(.hidden)
                 }
+                .ignoresSafeArea(.container, edges: .top)
+                .background(SidebarGlassBackgroundView())
                 .navigationSplitViewColumnWidth(min: 230, ideal: 250, max: 300)
             } detail: {
                 // MARK: - Detail Content Canvas (Unified Titlebar)
@@ -437,6 +457,10 @@ public struct MainView: View {
             Capsule()
                 .stroke(Color.primary.opacity(0.1), lineWidth: 1)
         )
+    }
+    
+    private func toggleSidebar() {
+        NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
     }
     
     private func checkOnboardingStatus() {
