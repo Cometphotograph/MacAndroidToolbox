@@ -354,8 +354,14 @@ public struct LiquidDetailGlassBackgroundView: View {
             // 1. Native macOS behind-window frosted glass
             VisualEffectView(material: .underWindowBackground, blendingMode: .behindWindow)
             
-            // 2. Translucent control surface for contrast and legibility
-            Color(NSColor.controlBackgroundColor).opacity(0.68)
+            // 2. Translucent control surface for true Apple glass depth
+            Color(NSColor(name: nil, dynamicProvider: { appearance in
+                if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                    return NSColor(white: 0.10, alpha: 0.25)
+                } else {
+                    return NSColor(white: 0.98, alpha: 0.35)
+                }
+            }))
             
             // 3. Subtle ambient fluid light
             GeometryReader { proxy in

@@ -254,15 +254,46 @@ public struct RecoveryView: View {
     
     // MARK: - Recovery Guide Card
     private var recoveryGuideCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(L10n("rec_guide_title"), systemImage: "questionmark.circle.fill")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Image(systemName: "questionmark.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.blue)
+                
+                Text(L10n("rec_guide_title"))
+                    .font(.headline)
+            }
             
-            Text(L10n("rec_guide_body"))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .lineSpacing(4)
+            Divider().opacity(0.3)
+            
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top, spacing: 10) {
+                    Text("1️⃣")
+                        .font(.system(size: 14))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("軟體指令一鍵進入")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("在設備開機並授權 USB 調試的情況下，直接點選上方「重啟至 Recovery 模式」按鈕。")
+                            .font(.system(size: 12.5))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                
+                HStack(alignment: .top, spacing: 10) {
+                    Text("2️⃣")
+                        .font(.system(size: 14))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("實體硬體組合鍵進入")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text(L10n("rec_guide_body"))
+                            .font(.system(size: 12.5))
+                            .foregroundColor(.secondary)
+                            .lineSpacing(3)
+                    }
+                }
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .liquidGlassCard(cornerRadius: 16, padding: 16)
     }
     

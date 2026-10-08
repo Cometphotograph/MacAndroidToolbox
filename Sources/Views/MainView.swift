@@ -67,7 +67,6 @@ public struct MainView: View {
     @State private var showOnboarding: Bool = false
     @State private var showSearchPalette: Bool = false
     @State private var hoveredSection: NavigationSection? = nil
-    @State private var isSidebarVisible: Bool = true
     
     public init() {}
     
@@ -75,45 +74,77 @@ public struct MainView: View {
         ZStack {
             NavigationSplitView {
                 // MARK: - Native Apple Notes Style Sidebar
-                VStack(spacing: 0) {
-                    // Top Liquid Glass Header (Traffic lights + Search + Toggle)
-                    sidebarTopHeader
-                    
-                    // Navigation Items & Connected Devices
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 3.5) {
-                            // Section 1: Main Navigation Header
-                            Text(L10n("nav_main_navigation"))
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.secondary.opacity(0.8))
-                                .padding(.horizontal, 14)
-                                .padding(.top, 6)
-                                .padding(.bottom, 2)
-                            
-                            // 7 Feature Sections in Exact User Specified Order
-                            ForEach(NavigationSection.allCases) { section in
-                                navigationItemRow(section)
-                            }
-                            
-                            // Section 2: Connected Devices Header
-                            connectedDevicesHeader
-                            
-                            // Connected Devices List
-                            connectedDevicesList
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 3.5) {
+                        // Section 1: Main Navigation Header
+                        Text(L10n("nav_main_navigation"))
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary.opacity(0.8))
+                            .padding(.horizontal, 14)
+                            .padding(.top, 14)
+                            .padding(.bottom, 2)
+                        
+                        // 7 Feature Sections in Exact User Specified Order
+                        ForEach(NavigationSection.allCases) { section in
+                            navigationItemRow(section)
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.bottom, 16)
+                        
+                        // Section 2: Connected Devices Header
+                        connectedDevicesHeader
+                        
+                        // Connected Devices List
+                        connectedDevicesList
                     }
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 16)
                 }
                 .background(SidebarGlassBackgroundView())
+                .toolbar {
+                    // Global Search Button placed directly in Sidebar Titlebar next to sidebar toggle
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            withAnimation(.easeOut(duration: 0.15)) {
+                                showSearchPalette = true
+                            }
+                        } label: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        .help(L10n("search_title") + " (Cmd+K)")
+                    }
+                }
                 .navigationSplitViewColumnWidth(min: 230, ideal: 250, max: 300)
             } detail: {
-                // MARK: - Detail Content Canvas
-                ZStack {
-                    // Liquid Glass Background Ambient Glow
+                // MARK: - Detail Content Canvas with Frosted Header Bar
+                ZStack(alignment: .top) {
+                    // Liquid Glass Background
                     LiquidDetailGlassBackgroundView()
                     
                     VStack(spacing: 0) {
+                        // Frosted Header Bar: covers the top so scrolled content does not bleed through
+                        HStack(spacing: 12) {
+                            Text(L10n("app_name"))
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.primary)
+                            
+                            connectionStatusBadge
+                            
+                            Spacer()
+                        }
+                        .padding(.leading, 18)
+                        .padding(.trailing, 20)
+                        .frame(height: 52)
+                        .background(
+                            VisualEffectView(material: .headerView, blendingMode: .behindWindow)
+                                .overlay(
+                                    VStack {
+                                        Spacer()
+                                        Rectangle()
+                                            .fill(Color.primary.opacity(0.08))
+                                            .frame(height: 1)
+                                    }
+                                )
+                        )
+                        
                         // Main Detail Content Area
                         Group {
                             switch selectedSection ?? .dashboard {
@@ -140,43 +171,6 @@ public struct MainView: View {
                             Divider().opacity(0.3)
                             ConsoleView()
                                 .frame(height: 220)
-                        }
-                    }
-                }
-                .toolbar {
-                    // Apple HIG Header: Software Name + Connection Status
-                    ToolbarItem(placement: .navigation) {
-                        HStack(spacing: 12) {
-                            if !isSidebarVisible {
-                                // Glass Sidebar Expand Button when sidebar is collapsed
-                                GlassCircleButton(
-                                    systemImage: "sidebar.leading",
-                                    tooltip: L10n("tb_toggle_sidebar"),
-                                    size: 26
-                                ) {
-                                    toggleSidebar()
-                                }
-                            }
-                            
-                            Text(L10n("app_name"))
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.primary)
-                            
-                            connectionStatusBadge
-                        }
-                        .padding(.leading, 4)
-                    }
-                    
-                    // Quick Search Shortcut Trigger
-                    ToolbarItem(placement: .primaryAction) {
-                        GlassCircleButton(
-                            systemImage: "magnifyingglass",
-                            tooltip: L10n("search_title") + " (Cmd+K)",
-                            size: 26
-                        ) {
-                            withAnimation(.easeOut(duration: 0.15)) {
-                                showSearchPalette = true
-                            }
                         }
                     }
                 }
@@ -214,38 +208,6 @@ public struct MainView: View {
             .keyboardShortcut("k", modifiers: .command)
             .opacity(0)
         )
-    }
-    
-    // MARK: - Sidebar Top Header (Glass Traffic Lights + Search + Toggle)
-    private var sidebarTopHeader: some View {
-        HStack(alignment: .center, spacing: 8) {
-            // Liquid Glass Specular Traffic Lights (Apple HIG)
-            GlassTrafficLightsView()
-                .padding(.leading, 6)
-            
-            Spacer()
-            
-            // Circular Glass Global Search Button (Search in-app features)
-            GlassCircleButton(
-                systemImage: "magnifyingglass",
-                tooltip: L10n("search_title") + " (Cmd+K)"
-            ) {
-                withAnimation(.easeOut(duration: 0.15)) {
-                    showSearchPalette = true
-                }
-            }
-            
-            // Circular Glass Sidebar Toggle Button
-            GlassCircleButton(
-                systemImage: "sidebar.leading",
-                tooltip: L10n("tb_toggle_sidebar")
-            ) {
-                toggleSidebar()
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.top, 14)
-        .padding(.bottom, 10)
     }
     
     // MARK: - Navigation Item Row (Apple Notes / HIG Spacing & Style)
@@ -288,7 +250,7 @@ public struct MainView: View {
                 
                 Spacer()
                 
-                // Active Section Pill Indicator
+                // Active Section Pill Indicator for Recovery
                 if section == .recovery, let dev = deviceManager.selectedDevice, (dev.mode == .recovery || dev.mode == .sideload) {
                     Text("REC")
                         .font(.system(size: 9, weight: .bold))
@@ -397,14 +359,6 @@ public struct MainView: View {
                 .buttonStyle(.plain)
             }
         }
-    }
-    
-    // MARK: - Toggle Sidebar Action
-    private func toggleSidebar() {
-        withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
-            isSidebarVisible.toggle()
-        }
-        NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
     }
     
     // MARK: - Connection Status Badge (Apple HIG Style)
