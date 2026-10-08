@@ -23,7 +23,7 @@ MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
 echo "🔨 正在使用 Swift 編譯 Release 版本 ($APP_NAME $VERSION_STR)..."
-DEVELOPER_DIR=/Library/Developer/CommandLineTools swift build -c release
+swift build -c release
 
 echo "📦 建立 macOS 應用程式結構: $OUTPUT_BUNDLE_NAME"
 rm -rf "$BUNDLE_DIR"

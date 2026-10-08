@@ -73,78 +73,52 @@ public struct MainView: View {
     public var body: some View {
         ZStack {
             NavigationSplitView {
-                // MARK: - Native Apple Notes Style Sidebar
+                // MARK: - Sidebar (Apple Notes Style)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 3.5) {
-                        // Section 1: Main Navigation Header
+                        // Section 1: Main Navigation
                         Text(L10n("nav_main_navigation"))
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.secondary.opacity(0.8))
                             .padding(.horizontal, 14)
-                            .padding(.top, 14)
+                            .padding(.top, 10)
                             .padding(.bottom, 2)
                         
-                        // 7 Feature Sections in Exact User Specified Order
+                        // 7 Main Feature Sections
                         ForEach(NavigationSection.allCases) { section in
                             navigationItemRow(section)
                         }
                         
-                        // Section 2: Connected Devices Header
+                        // Section 2: Connected Devices
                         connectedDevicesHeader
-                        
-                        // Connected Devices List
                         connectedDevicesList
                     }
                     .padding(.horizontal, 10)
                     .padding(.bottom, 16)
                 }
+                .scrollContentBackground(.hidden)
                 .background(SidebarGlassBackgroundView())
                 .toolbar {
-                    // Global Search Button placed directly in Sidebar Titlebar next to sidebar toggle
+                    // Global Search Glass Button placed directly in Sidebar Titlebar next to sidebar toggle
                     ToolbarItem(placement: .primaryAction) {
-                        Button {
+                        GlassCircleButton(
+                            systemImage: "magnifyingglass",
+                            tooltip: L10n("search_title") + " (Cmd+K)",
+                            size: 30
+                        ) {
                             withAnimation(.easeOut(duration: 0.15)) {
                                 showSearchPalette = true
                             }
-                        } label: {
-                            Image(systemName: "magnifyingglass")
                         }
-                        .help(L10n("search_title") + " (Cmd+K)")
                     }
                 }
                 .navigationSplitViewColumnWidth(min: 230, ideal: 250, max: 300)
             } detail: {
-                // MARK: - Detail Content Canvas with Frosted Header Bar
-                ZStack(alignment: .top) {
-                    // Liquid Glass Background
+                // MARK: - Detail Content Canvas (Unified Titlebar)
+                ZStack {
                     LiquidDetailGlassBackgroundView()
                     
                     VStack(spacing: 0) {
-                        // Frosted Header Bar: covers the top so scrolled content does not bleed through
-                        HStack(spacing: 12) {
-                            Text(L10n("app_name"))
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.primary)
-                            
-                            connectionStatusBadge
-                            
-                            Spacer()
-                        }
-                        .padding(.leading, 18)
-                        .padding(.trailing, 20)
-                        .frame(height: 52)
-                        .background(
-                            VisualEffectView(material: .headerView, blendingMode: .behindWindow)
-                                .overlay(
-                                    VStack {
-                                        Spacer()
-                                        Rectangle()
-                                            .fill(Color.primary.opacity(0.08))
-                                            .frame(height: 1)
-                                    }
-                                )
-                        )
-                        
                         // Main Detail Content Area
                         Group {
                             switch selectedSection ?? .dashboard {
@@ -168,9 +142,43 @@ public struct MainView: View {
                         
                         // Bottom Console Drawer (Liquid Glass)
                         if isConsoleExpanded {
-                            Divider().opacity(0.3)
+                            Divider().opacity(0.25)
                             ConsoleView()
                                 .frame(height: 220)
+                        }
+                    }
+                }
+                .toolbar {
+                    // Single Unified Titlebar: Software Name + Status Badge
+                    ToolbarItem(placement: .navigation) {
+                        HStack(spacing: 10) {
+                            Text(L10n("app_name"))
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.primary)
+                            
+                            connectionStatusBadge
+                        }
+                        .padding(.leading, 2)
+                    }
+                    
+                    // Unified Toolbar Action Buttons (Apple Notes Style)
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        GlassCircleButton(
+                            systemImage: "arrow.clockwise",
+                            tooltip: L10n("tb_refresh") + " (Cmd+R)",
+                            size: 30
+                        ) {
+                            deviceManager.refreshDevices()
+                        }
+                        
+                        GlassCircleButton(
+                            systemImage: isConsoleExpanded ? "terminal.fill" : "terminal",
+                            tooltip: isConsoleExpanded ? "收起终端日志" : "展开终端日志",
+                            size: 30
+                        ) {
+                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                                isConsoleExpanded.toggle()
+                            }
                         }
                     }
                 }

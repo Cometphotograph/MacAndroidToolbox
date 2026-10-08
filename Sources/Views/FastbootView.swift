@@ -72,8 +72,9 @@ public struct FastbootView: View {
                 // Fastboot Variables Card
                 variablesCard
             }
-            .padding(16)
+            .padding(20)
         }
+        .scrollContentBackground(.hidden)
         .confirmationDialog(
             String(format: L10n("fb_confirm_flash_title"), effectivePartition),
             isPresented: $showFlashConfirmation,

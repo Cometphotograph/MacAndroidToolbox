@@ -34,8 +34,9 @@ public struct FileManagerView: View {
                 // Screenshot Capture Card
                 screenshotCard
             }
-            .padding(16)
+            .padding(20)
         }
+        .scrollContentBackground(.hidden)
     }
     
     // MARK: - Subviews

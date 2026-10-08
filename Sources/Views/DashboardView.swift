@@ -35,8 +35,9 @@ public struct DashboardView: View {
                     noDevicePlaceholder
                 }
             }
-            .padding(16)
+            .padding(20)
         }
+        .scrollContentBackground(.hidden)
         .alert(isPresented: $showAlert) {
             Alert(title: Text(L10n("common_alert")), message: Text(alertMessage ?? ""), dismissButton: .default(Text(L10n("common_ok"))))
         }
@@ -373,36 +374,132 @@ public struct DashboardView: View {
     }
     
     private var noDevicePlaceholder: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 22) {
+            // Frosted Glass Icon Badge
             ZStack {
                 Circle()
-                    .fill(Color.secondary.opacity(0.12))
-                    .frame(width: 100, height: 100)
-                Image(systemName: "iphone.slash")
-                    .font(.system(size: 48))
+                    .fill(.ultraThinMaterial)
+                    .frame(width: 80, height: 80)
+                
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.65), location: 0.0),
+                                .init(color: Color.primary.opacity(0.12), location: 1.0)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+                
+                Image(systemName: "cable.connector.slash")
+                    .font(.system(size: 34, weight: .light))
+                    .foregroundColor(.secondary)
+            }
+            .shadow(color: Color.black.opacity(0.06), radius: 10, y: 4)
+            
+            VStack(spacing: 6) {
+                Text(L10n("dash_no_device_title"))
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundColor(.primary)
+                
+                Text("請將 Android 設備透過 USB 傳輸線連接至 Mac")
+                    .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
             
-            Text(L10n("dash_no_device_title"))
-                .font(.title2.bold())
+            // Structured Connection Troubleshooting Card (Apple HIG)
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 8) {
+                    Image(systemName: "checklist")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.blue)
+                    
+                    Text("連線指引與排查事項")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                }
+                
+                Divider().opacity(0.3)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    guideStepRow(
+                        num: "1",
+                        color: .blue,
+                        title: "開啟 USB 調試",
+                        desc: "進入手機「設置 - 關於手機」連續點擊版本號以開啟開發者模式，隨後在「開發者選項」中啟用「USB 調試」。"
+                    )
+                    
+                    guideStepRow(
+                        num: "2",
+                        color: .orange,
+                        title: "USB 傳輸模式",
+                        desc: "連接傳輸線後，下拉手機通知欄將 USB 連接模式由「僅充電」切換為「傳輸文件 (MTP)」。"
+                    )
+                    
+                    guideStepRow(
+                        num: "3",
+                        color: .green,
+                        title: "授權電腦連接",
+                        desc: "手機彈出「一律允許此電腦進行 USB 調試」時勾選並點擊確定。"
+                    )
+                    
+                    guideStepRow(
+                        num: "4",
+                        color: .purple,
+                        title: "Fastboot 模式",
+                        desc: "如需進行底層刷機，可將手機關機後長按「音量減 + 電源鍵」進入 Fastboot 介面。"
+                    )
+                }
+            }
+            .frame(maxWidth: 520)
+            .liquidGlassCard(cornerRadius: 16, padding: 18)
             
-            Text(L10n("dash_no_device_guide"))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: 500)
-                .padding()
-                .liquidGlassCard(cornerRadius: 14, padding: 14)
-            
+            // Manual Scan Button (Liquid Glass)
             Button {
                 deviceManager.refreshDevices()
             } label: {
-                Label(L10n("dash_scan_manual"), systemImage: "arrow.clockwise")
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text(L10n("dash_scan_manual"))
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 8)
             }
-            .liquidGlassButton(tint: .blue, prominent: true)
-            .controlSize(.large)
+            .liquidGlassButton(tint: .accentColor, prominent: true)
         }
-        .padding(.vertical, 40)
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity)
+    }
+    
+    private func guideStepRow(num: String, color: Color, title: String, desc: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 20, height: 20)
+                Text(num)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(color)
+            }
+            .padding(.top, 1)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 12.5, weight: .semibold))
+                    .foregroundColor(.primary)
+                Text(desc)
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .lineSpacing(2)
+            }
+        }
     }
     
     // MARK: - Actions

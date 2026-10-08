@@ -37,8 +37,9 @@ public struct RecoveryView: View {
                 // 4. Recovery Manual Guide
                 recoveryGuideCard
             }
-            .padding(16)
+            .padding(20)
         }
+        .scrollContentBackground(.hidden)
         .confirmationDialog(
             L10n("file_sideload_confirm_title"),
             isPresented: $showSideloadConfirm,

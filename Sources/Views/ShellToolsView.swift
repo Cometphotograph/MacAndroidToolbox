@@ -39,8 +39,9 @@ public struct ShellToolsView: View {
                 // Custom Interactive Shell Card (Liquid Glass)
                 interactiveShellCard
             }
-            .padding(16)
+            .padding(20)
         }
+        .scrollContentBackground(.hidden)
     }
     
     // MARK: - Subviews

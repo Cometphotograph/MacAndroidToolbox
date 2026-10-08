@@ -29,8 +29,9 @@ public struct SettingsView: View {
                     toolBinariesSection
                 }
             }
-            .padding(16)
+            .padding(20)
         }
+        .scrollContentBackground(.hidden)
         .sheet(isPresented: $showOnboardingSheet) {
             OnboardingView()
                 .preferredColorScheme(generalSettings.selectedTheme.colorScheme)

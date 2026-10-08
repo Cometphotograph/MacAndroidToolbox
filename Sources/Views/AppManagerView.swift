@@ -67,7 +67,7 @@ public struct AppManagerView: View {
                 packageListView
             }
         }
-        .padding(16)
+        .padding(20)
         .onAppear {
             if packages.isEmpty && deviceManager.selectedDevice?.mode == .adb {
                 loadPackages()
@@ -261,6 +261,7 @@ public struct AppManagerView: View {
             }
         }
         .listStyle(.inset(alternatesRowBackgrounds: true))
+        .scrollContentBackground(.hidden)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
     

@@ -1,13 +1,14 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Liquid Glass Design System
+// MARK: - Liquid Glass Design System (Apple macOS HIG)
+
 public struct LiquidGlassCardModifier: ViewModifier {
     var cornerRadius: CGFloat
     var padding: CGFloat
     var isInteractive: Bool
     
-    public init(cornerRadius: CGFloat = 16, padding: CGFloat = 14, isInteractive: Bool = false) {
+    public init(cornerRadius: CGFloat = 16, padding: CGFloat = 16, isInteractive: Bool = false) {
         self.cornerRadius = cornerRadius
         self.padding = padding
         self.isInteractive = isInteractive
@@ -18,33 +19,31 @@ public struct LiquidGlassCardModifier: ViewModifier {
             .padding(padding)
             .background(
                 ZStack {
-                    // Frosted glass core
+                    // 1. Frosted glass core
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(.ultraThinMaterial)
                     
-                    // Subtle ambient fluid color wash
+                    // 2. Subtle translucent white surface
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.08),
-                                    Color.white.opacity(0.02),
-                                    Color.clear
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+                            Color(NSColor(name: nil, dynamicProvider: { appearance in
+                                if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                                    return NSColor(white: 0.18, alpha: 0.35)
+                                } else {
+                                    return NSColor(white: 1.0, alpha: 0.45)
+                                }
+                            }))
                         )
                     
-                    // Specular highlight edge
+                    // 3. Specular highlight border
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .strokeBorder(
                             LinearGradient(
                                 stops: [
-                                    .init(color: Color.white.opacity(0.45), location: 0.0),
-                                    .init(color: Color.white.opacity(0.15), location: 0.35),
-                                    .init(color: Color.white.opacity(0.05), location: 0.7),
-                                    .init(color: Color.white.opacity(0.2), location: 1.0)
+                                    .init(color: Color.white.opacity(0.55), location: 0.0),
+                                    .init(color: Color.white.opacity(0.20), location: 0.35),
+                                    .init(color: Color.primary.opacity(0.05), location: 0.7),
+                                    .init(color: Color.white.opacity(0.15), location: 1.0)
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -54,22 +53,7 @@ public struct LiquidGlassCardModifier: ViewModifier {
                 }
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 5)
-    }
-}
-
-public struct LiquidGlassGroupBoxStyle: GroupBoxStyle {
-    var cornerRadius: CGFloat = 16
-    
-    public func makeBody(configuration: Configuration) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            configuration.label
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            configuration.content
-        }
-        .liquidGlassCard(cornerRadius: cornerRadius, padding: 14)
+            .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
     }
 }
 
@@ -77,50 +61,124 @@ public struct LiquidGlassButtonStyle: ButtonStyle {
     var tintColor: Color? = nil
     var isProminent: Bool = false
     
+    public init(tintColor: Color? = nil, isProminent: Bool = false) {
+        self.tintColor = tintColor
+        self.isProminent = isProminent
+    }
+    
     public func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.system(size: 13, weight: .medium))
-            .padding(.horizontal, 14)
-            .padding(.vertical, 7)
+        let tint = tintColor ?? Color.accentColor
+        
+        return configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
             .background(
                 ZStack {
                     if isProminent {
+                        // 1. Frosted glass foundation
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                        
+                        // 2. Vibrant Apple translucent tint gradient
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
                             .fill(
                                 LinearGradient(
                                     colors: [
-                                        (tintColor ?? Color.accentColor).opacity(0.85),
-                                        (tintColor ?? Color.accentColor).opacity(0.7)
+                                        tint.opacity(configuration.isPressed ? 0.95 : 0.90),
+                                        tint.opacity(configuration.isPressed ? 0.85 : 0.78)
                                     ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
+                                    startPoint: .top,
+                                    endPoint: .bottom
                                 )
                             )
-                    } else {
+                        
+                        // 3. High-reflection specular liquid glass top sheen
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(.thinMaterial)
+                            .fill(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: Color.white.opacity(0.55), location: 0.0),
+                                        .init(color: Color.white.opacity(0.18), location: 0.42),
+                                        .init(color: Color.clear, location: 0.50)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                        
+                        // 4. Brilliant specular rim border
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: Color.white.opacity(0.85), location: 0.0),
+                                        .init(color: Color.white.opacity(0.30), location: 0.35),
+                                        .init(color: Color.black.opacity(0.20), location: 1.0)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 1
+                            )
+                    } else {
+                        // 1. Translucent frosted glass core
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                        
+                        // 2. Dynamic translucent surface
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(
+                                Color(NSColor(name: nil, dynamicProvider: { appearance in
+                                    if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                                        return NSColor(white: 0.25, alpha: configuration.isPressed ? 0.50 : 0.35)
+                                    } else {
+                                        return NSColor(white: 1.0, alpha: configuration.isPressed ? 0.80 : 0.60)
+                                    }
+                                }))
+                            )
+                        
+                        // 3. Subtle specular sheen
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: Color.white.opacity(0.35), location: 0.0),
+                                        .init(color: Color.white.opacity(0.08), location: 0.45),
+                                        .init(color: Color.clear, location: 0.52)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                        
+                        // 4. Specular glass rim
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: Color.white.opacity(0.70), location: 0.0),
+                                        .init(color: Color.white.opacity(0.20), location: 0.40),
+                                        .init(color: Color.black.opacity(0.08), location: 1.0)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ),
+                                lineWidth: 0.9
+                            )
                     }
-                    
-                    // Specular glass rim
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(isProminent ? 0.6 : 0.35),
-                                    Color.white.opacity(isProminent ? 0.15 : 0.08)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1
-                        )
                 }
             )
             .foregroundColor(isProminent ? .white : .primary)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .shadow(color: (tintColor ?? Color.black).opacity(isProminent ? 0.25 : 0.06), radius: 4, x: 0, y: 2)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .shadow(
+                color: isProminent ? tint.opacity(0.35) : Color.black.opacity(0.06),
+                radius: isProminent ? 7 : 3,
+                x: 0,
+                y: isProminent ? 2.5 : 1
+            )
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
@@ -156,7 +214,7 @@ public struct VisualEffectView: NSViewRepresentable {
     }
 }
 
-// MARK: - Sidebar Frosted Glass Background (Apple Notes style with exact cool gray tone)
+// MARK: - Sidebar Frosted Glass Background (Apple Notes Style)
 public struct SidebarGlassBackgroundView: View {
     public init() {}
     
@@ -165,7 +223,7 @@ public struct SidebarGlassBackgroundView: View {
             // 1. Native macOS sidebar frosted glass (blurs wallpaper/windows behind)
             VisualEffectView(material: .sidebar, blendingMode: .behindWindow)
             
-            // 2. Apple Notes sidebar exact neutral cool gray wash (media_1791449945375_2b78229a)
+            // 2. Apple Notes sidebar exact neutral cool gray wash
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
                     return NSColor(white: 0.16, alpha: 0.60)
@@ -186,165 +244,6 @@ public struct SidebarGlassBackgroundView: View {
     }
 }
 
-// MARK: - Liquid Glass Window Traffic Lights (Apple HIG Glossy Specular Buttons)
-public struct GlassTrafficLightsView: View {
-    @State private var isHoveringGroup: Bool = false
-    
-    public init() {}
-    
-    public var body: some View {
-        HStack(spacing: 8) {
-            // Close Button (Red)
-            trafficButton(
-                colorTop: Color(red: 1.0, green: 0.40, blue: 0.36),
-                colorBottom: Color(red: 0.95, green: 0.28, blue: 0.25),
-                glyphName: "xmark",
-                glyphSize: 6.5
-            ) {
-                if let window = NSApp.keyWindow ?? NSApp.mainWindow {
-                    window.performClose(nil)
-                }
-            }
-            
-            // Minimize Button (Yellow)
-            trafficButton(
-                colorTop: Color(red: 1.0, green: 0.78, blue: 0.24),
-                colorBottom: Color(red: 0.96, green: 0.68, blue: 0.16),
-                glyphName: "minus",
-                glyphSize: 7.5
-            ) {
-                if let window = NSApp.keyWindow ?? NSApp.mainWindow {
-                    window.miniaturize(nil)
-                }
-            }
-            
-            // Zoom / Fullscreen Button (Green)
-            trafficButton(
-                colorTop: Color(red: 0.22, green: 0.82, blue: 0.32),
-                colorBottom: Color(red: 0.16, green: 0.72, blue: 0.24),
-                glyphName: "arrow.up.left.and.arrow.down.right",
-                glyphSize: 5.5
-            ) {
-                if let window = NSApp.keyWindow ?? NSApp.mainWindow {
-                    window.zoom(nil)
-                }
-            }
-        }
-        .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
-                isHoveringGroup = hovering
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func trafficButton(
-        colorTop: Color,
-        colorBottom: Color,
-        glyphName: String,
-        glyphSize: CGFloat,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            ZStack {
-                // Base glossy liquid gradient
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [colorTop, colorBottom],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                
-                // Specular top highlight crescent
-                Circle()
-                    .strokeBorder(
-                        LinearGradient(
-                            stops: [
-                                .init(color: Color.white.opacity(0.55), location: 0.0),
-                                .init(color: Color.white.opacity(0.2), location: 0.4),
-                                .init(color: Color.black.opacity(0.12), location: 1.0)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 0.8
-                    )
-                
-                // Fine outer border
-                Circle()
-                    .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
-                
-                // macOS symbol glyph on hover
-                if isHoveringGroup {
-                    Image(systemName: glyphName)
-                        .font(.system(size: glyphSize, weight: .black))
-                        .foregroundColor(Color.black.opacity(0.65))
-                        .transition(.opacity)
-                }
-            }
-            .frame(width: 12, height: 12)
-            .shadow(color: Color.black.opacity(0.12), radius: 1, x: 0, y: 0.5)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Circular Glass Button (Apple Notes Header Style)
-public struct GlassCircleButton: View {
-    let systemImage: String
-    let tooltip: String
-    var size: CGFloat = 28
-    let action: () -> Void
-    
-    @State private var isHovered: Bool = false
-    
-    public init(systemImage: String, tooltip: String, size: CGFloat = 28, action: @escaping () -> Void) {
-        self.systemImage = systemImage
-        self.tooltip = tooltip
-        self.size = size
-        self.action = action
-    }
-    
-    public var body: some View {
-        Button(action: action) {
-            ZStack {
-                // Glass background
-                Circle()
-                    .fill(isHovered ? Color.primary.opacity(0.12) : Color.primary.opacity(0.06))
-                
-                // Specular glass rim
-                Circle()
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.4),
-                                Color.primary.opacity(0.12)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 0.8
-                    )
-                
-                Image(systemName: systemImage)
-                    .font(.system(size: size * 0.44, weight: .medium))
-                    .foregroundColor(isHovered ? .primary : .primary.opacity(0.8))
-            }
-            .frame(width: size, height: size)
-            .shadow(color: Color.black.opacity(0.06), radius: 2, x: 0, y: 1)
-            .scaleEffect(isHovered ? 1.05 : 1.0)
-            .animation(.easeOut(duration: 0.15), value: isHovered)
-        }
-        .buttonStyle(.plain)
-        .help(tooltip)
-        .onHover { hovering in
-            isHovered = hovering
-        }
-    }
-}
-
 // MARK: - Detail Liquid Glass Background (Translucent glass like Apple official)
 public struct LiquidDetailGlassBackgroundView: View {
     public init() {}
@@ -354,16 +253,16 @@ public struct LiquidDetailGlassBackgroundView: View {
             // 1. Native macOS behind-window frosted glass
             VisualEffectView(material: .underWindowBackground, blendingMode: .behindWindow)
             
-            // 2. Translucent control surface for true Apple glass depth
+            // 2. Translucent surface for authentic Apple desktop sampling
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(white: 0.10, alpha: 0.25)
+                    return NSColor(white: 0.10, alpha: 0.20)
                 } else {
-                    return NSColor(white: 0.98, alpha: 0.35)
+                    return NSColor(white: 0.98, alpha: 0.25)
                 }
             }))
             
-            // 3. Subtle ambient fluid light
+            // 3. Subtle ambient fluid lights
             GeometryReader { proxy in
                 let w = proxy.size.width
                 let h = proxy.size.height
@@ -371,28 +270,28 @@ public struct LiquidDetailGlassBackgroundView: View {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color.green.opacity(0.04), Color.cyan.opacity(0.02), Color.clear],
+                            colors: [Color.green.opacity(0.05), Color.cyan.opacity(0.02), Color.clear],
                             center: .center,
                             startRadius: 20,
                             endRadius: w * 0.35
                         )
                     )
                     .frame(width: w * 0.6, height: w * 0.6)
-                    .position(x: w * 0.85, y: h * 0.45)
-                    .blur(radius: 60)
+                    .position(x: w * 0.85, y: h * 0.35)
+                    .blur(radius: 70)
                 
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color.blue.opacity(0.04), Color.indigo.opacity(0.02), Color.clear],
+                            colors: [Color.blue.opacity(0.05), Color.indigo.opacity(0.02), Color.clear],
                             center: .center,
                             startRadius: 20,
                             endRadius: w * 0.4
                         )
                     )
                     .frame(width: w * 0.7, height: w * 0.7)
-                    .position(x: w * 0.15, y: h * 0.80)
-                    .blur(radius: 60)
+                    .position(x: w * 0.15, y: h * 0.75)
+                    .blur(radius: 70)
             }
         }
         .ignoresSafeArea()
@@ -407,9 +306,64 @@ public struct LiquidBackgroundView: View {
     }
 }
 
+// MARK: - Circular Glass Toolbar Button (Apple Notes Style)
+public struct GlassCircleButton: View {
+    let systemImage: String
+    let tooltip: String
+    var size: CGFloat = 30
+    let action: () -> Void
+    
+    @State private var isHovered: Bool = false
+    
+    public init(systemImage: String, tooltip: String, size: CGFloat = 30, action: @escaping () -> Void) {
+        self.systemImage = systemImage
+        self.tooltip = tooltip
+        self.size = size
+        self.action = action
+    }
+    
+    public var body: some View {
+        Button(action: action) {
+            ZStack {
+                // Glass background
+                Circle()
+                    .fill(isHovered ? Color.primary.opacity(0.14) : Color.primary.opacity(0.08))
+                
+                // Specular glass rim
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.55),
+                                Color.primary.opacity(0.12)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.8
+                    )
+                
+                Image(systemName: systemImage)
+                    .font(.system(size: size * 0.44, weight: .semibold))
+                    .foregroundColor(isHovered ? .primary : .primary.opacity(0.85))
+            }
+            .frame(width: size, height: size)
+            .contentShape(Circle())
+            .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .scaleEffect(isHovered ? 1.04 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: isHovered)
+        }
+        .buttonStyle(.plain)
+        .help(tooltip)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
 // View Extensions for convenience
 public extension View {
-    func liquidGlassCard(cornerRadius: CGFloat = 16, padding: CGFloat = 14) -> some View {
+    func liquidGlassCard(cornerRadius: CGFloat = 16, padding: CGFloat = 16) -> some View {
         self.modifier(LiquidGlassCardModifier(cornerRadius: cornerRadius, padding: padding))
     }
     
