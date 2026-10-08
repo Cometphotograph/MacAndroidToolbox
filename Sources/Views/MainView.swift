@@ -103,6 +103,7 @@ public struct MainView: View {
                 .zIndex(999)
             }
         }
+        .ignoresSafeArea()
         .preferredColorScheme(generalSettings.selectedTheme.colorScheme)
         .sheet(isPresented: $showOnboarding) {
             OnboardingView()
@@ -144,8 +145,8 @@ public struct MainView: View {
                 
                 Spacer()
                 
-                // Sidebar Collapse Button (Liquid Glass 36x36): Right Margin 12pt
-                MacOS27SidebarToggleButton(size: 36) {
+                // Sidebar Collapse Button (Liquid Glass Circular 32x32): Right Margin 12pt
+                MacOS27SidebarToggleButton(size: 32) {
                     withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
                         isSidebarVisible.toggle()
                     }

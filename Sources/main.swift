@@ -104,8 +104,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func configureWindow(_ window: NSWindow) {
+        window.title = ""
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
         window.styleMask.insert(.fullSizeContentView)
         window.isOpaque = false
         window.backgroundColor = .clear
@@ -144,6 +146,7 @@ struct MacAndroidToolboxApp: App {
         WindowGroup(L10n("app_name")) {
             MainView()
                 .frame(minWidth: 1000, minHeight: 680)
+                .ignoresSafeArea()
                 .environmentObject(languageManager)
                 .environmentObject(generalSettings)
                 .preferredColorScheme(generalSettings.selectedTheme.colorScheme)

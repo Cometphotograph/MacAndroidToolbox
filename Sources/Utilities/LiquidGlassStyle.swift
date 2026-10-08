@@ -485,13 +485,13 @@ public struct MacOS27StoplightsView: View {
     }
 }
 
-// MARK: - macOS 27 Liquid Glass Sidebar Toggle Button (36x36)
+// MARK: - macOS 27 Liquid Glass Circular Sidebar Toggle Button (32x32)
 public struct MacOS27SidebarToggleButton: View {
     let action: () -> Void
-    var size: CGFloat = 36
+    var size: CGFloat = 32
     @State private var isHovered: Bool = false
     
-    public init(size: CGFloat = 36, action: @escaping () -> Void) {
+    public init(size: CGFloat = 32, action: @escaping () -> Void) {
         self.size = size
         self.action = action
     }
@@ -499,32 +499,31 @@ public struct MacOS27SidebarToggleButton: View {
     public var body: some View {
         Button(action: action) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                Circle()
                     .fill(.ultraThinMaterial)
                 
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                Circle()
                     .fill(isHovered ? Color.primary.opacity(0.12) : Color.primary.opacity(0.05))
                 
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                Circle()
                     .fill(
                         LinearGradient(
                             stops: [
-                                .init(color: Color.white.opacity(0.40), location: 0.0),
-                                .init(color: Color.white.opacity(0.08), location: 0.45),
-                                .init(color: Color.clear, location: 0.55)
+                                .init(color: Color.white.opacity(0.45), location: 0.0),
+                                .init(color: Color.white.opacity(0.10), location: 0.50),
+                                .init(color: Color.clear, location: 0.60)
                             ],
                             startPoint: .top,
                             endPoint: .bottom
                         )
                     )
                 
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                Circle()
                     .strokeBorder(
                         LinearGradient(
                             stops: [
                                 .init(color: Color.white.opacity(0.60), location: 0.0),
-                                .init(color: Color.white.opacity(0.15), location: 0.50),
-                                .init(color: Color.primary.opacity(0.08), location: 1.0)
+                                .init(color: Color.primary.opacity(0.10), location: 1.0)
                             ],
                             startPoint: .top,
                             endPoint: .bottom
@@ -533,13 +532,13 @@ public struct MacOS27SidebarToggleButton: View {
                     )
                 
                 Image(systemName: "sidebar.leading")
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: size * 0.44, weight: .semibold))
                     .foregroundColor(isHovered ? .primary : .primary.opacity(0.85))
             }
             .frame(width: size, height: size)
-            .contentShape(Rectangle())
+            .contentShape(Circle())
             .shadow(color: Color.black.opacity(0.04), radius: 2, y: 1)
-            .scaleEffect(isHovered ? 1.03 : 1.0)
+            .scaleEffect(isHovered ? 1.04 : 1.0)
             .animation(.easeOut(duration: 0.15), value: isHovered)
         }
         .buttonStyle(.plain)
