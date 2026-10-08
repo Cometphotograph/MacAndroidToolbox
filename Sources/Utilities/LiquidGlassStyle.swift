@@ -16,6 +16,7 @@ public struct LiquidGlassCardModifier: ViewModifier {
     
     public func body(content: Content) -> some View {
         content
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(padding)
             .background(
                 ZStack {
@@ -379,5 +380,357 @@ public extension View {
         } else {
             self.focusable(false)
         }
+    }
+}
+
+// MARK: - macOS 27 Official Stoplights (Traffic Lights) Component
+public struct MacOS27StoplightsView: View {
+    @State private var isHoveringGroup: Bool = false
+    
+    public init() {}
+    
+    public var body: some View {
+        HStack(spacing: 9) {
+            // Close (14x14)
+            stoplightCircle(
+                baseColor: Color(red: 1.0, green: 0.36, blue: 0.38),
+                glyph: "xmark",
+                glyphSize: 7,
+                glyphColor: Color(red: 0.45, green: 0.05, blue: 0.08)
+            ) {
+                if let window = NSApp.keyWindow {
+                    window.performClose(nil)
+                } else {
+                    NSApp.terminate(nil)
+                }
+            }
+            
+            // Minimize (14x14)
+            stoplightCircle(
+                baseColor: Color(red: 0.98, green: 0.78, blue: 0.0),
+                glyph: "minus",
+                glyphSize: 7.5,
+                glyphColor: Color(red: 0.50, green: 0.30, blue: 0.0)
+            ) {
+                NSApp.keyWindow?.miniaturize(nil)
+            }
+            
+            // Zoom (14x14)
+            stoplightCircle(
+                baseColor: Color(red: 0.21, green: 0.78, blue: 0.35),
+                glyph: "arrow.up.left.and.arrow.down.right",
+                glyphSize: 6.5,
+                glyphColor: Color(red: 0.05, green: 0.38, blue: 0.12)
+            ) {
+                NSApp.keyWindow?.zoom(nil)
+            }
+        }
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.12)) {
+                isHoveringGroup = hovering
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func stoplightCircle(
+        baseColor: Color,
+        glyph: String,
+        glyphSize: CGFloat,
+        glyphColor: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(baseColor)
+                
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.60), location: 0.0),
+                                .init(color: Color.white.opacity(0.15), location: 0.45),
+                                .init(color: Color.clear, location: 0.60)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.50),
+                                Color.black.opacity(0.20)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.6
+                    )
+                
+                if isHoveringGroup {
+                    Image(systemName: glyph)
+                        .font(.system(size: glyphSize, weight: .bold))
+                        .foregroundColor(glyphColor)
+                        .transition(.opacity)
+                }
+            }
+            .frame(width: 14, height: 14)
+            .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - macOS 27 Liquid Glass Sidebar Toggle Button (36x36)
+public struct MacOS27SidebarToggleButton: View {
+    let action: () -> Void
+    var size: CGFloat = 36
+    @State private var isHovered: Bool = false
+    
+    public init(size: CGFloat = 36, action: @escaping () -> Void) {
+        self.size = size
+        self.action = action
+    }
+    
+    public var body: some View {
+        Button(action: action) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isHovered ? Color.primary.opacity(0.12) : Color.primary.opacity(0.05))
+                
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.40), location: 0.0),
+                                .init(color: Color.white.opacity(0.08), location: 0.45),
+                                .init(color: Color.clear, location: 0.55)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.60), location: 0.0),
+                                .init(color: Color.white.opacity(0.15), location: 0.50),
+                                .init(color: Color.primary.opacity(0.08), location: 1.0)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.8
+                    )
+                
+                Image(systemName: "sidebar.leading")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(isHovered ? .primary : .primary.opacity(0.85))
+            }
+            .frame(width: size, height: size)
+            .contentShape(Rectangle())
+            .shadow(color: Color.black.opacity(0.04), radius: 2, y: 1)
+            .scaleEffect(isHovered ? 1.03 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: isHovered)
+        }
+        .buttonStyle(.plain)
+        .help(L10n("tb_toggle_sidebar"))
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
+// MARK: - macOS 27 Liquid Glass Search Bar Button (⌘K)
+public struct MacOS27SearchBarButton: View {
+    let action: () -> Void
+    @State private var isHovered: Bool = false
+    
+    public init(action: @escaping () -> Void) {
+        self.action = action
+    }
+    
+    public var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(isHovered ? .primary : .secondary)
+                
+                Text(L10n("search_title"))
+                    .font(.system(size: 12.5, weight: .regular))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                Spacer(minLength: 4)
+                
+                HStack(spacing: 1.5) {
+                    Text("⌘")
+                        .font(.system(size: 11, weight: .medium))
+                    Text("K")
+                        .font(.system(size: 10, weight: .bold))
+                }
+                .foregroundColor(.secondary.opacity(0.8))
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(
+                    RoundedRectangle(cornerRadius: 4.5, style: .continuous)
+                        .fill(Color.primary.opacity(0.06))
+                )
+            }
+            .padding(.horizontal, 10)
+            .frame(width: 190, height: 32)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                    
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(isHovered ? Color.primary.opacity(0.08) : Color.primary.opacity(0.04))
+                    
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: Color.white.opacity(0.55), location: 0.0),
+                                    .init(color: Color.primary.opacity(0.10), location: 1.0)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 0.8
+                        )
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .shadow(color: Color.black.opacity(0.03), radius: 2, y: 1)
+            .scaleEffect(isHovered ? 1.02 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: isHovered)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
+// MARK: - macOS 27 Glass Circular Action Button (32x32)
+public struct MacOS27GlassCircleButton: View {
+    let systemImage: String
+    let tooltip: String
+    var size: CGFloat = 32
+    let action: () -> Void
+    
+    @State private var isHovered: Bool = false
+    
+    public init(systemImage: String, tooltip: String, size: CGFloat = 32, action: @escaping () -> Void) {
+        self.systemImage = systemImage
+        self.tooltip = tooltip
+        self.size = size
+        self.action = action
+    }
+    
+    public var body: some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(.ultraThinMaterial)
+                
+                Circle()
+                    .fill(isHovered ? Color.primary.opacity(0.12) : Color.primary.opacity(0.05))
+                
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.45), location: 0.0),
+                                .init(color: Color.white.opacity(0.10), location: 0.50),
+                                .init(color: Color.clear, location: 0.60)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                
+                Circle()
+                    .strokeBorder(
+                        LinearGradient(
+                            stops: [
+                                .init(color: Color.white.opacity(0.60), location: 0.0),
+                                .init(color: Color.primary.opacity(0.10), location: 1.0)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ),
+                        lineWidth: 0.8
+                    )
+                
+                Image(systemName: systemImage)
+                    .font(.system(size: size * 0.44, weight: .semibold))
+                    .foregroundColor(isHovered ? .primary : .primary.opacity(0.85))
+            }
+            .frame(width: size, height: size)
+            .contentShape(Circle())
+            .shadow(color: Color.black.opacity(0.04), radius: 2, y: 1)
+            .scaleEffect(isHovered ? 1.04 : 1.0)
+            .animation(.easeOut(duration: 0.15), value: isHovered)
+        }
+        .buttonStyle(.plain)
+        .help(tooltip)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
+// MARK: - macOS 27 Unified Header Background (Hard Scroll Edge Effect)
+public struct MacOS27HeaderBackgroundView: View {
+    public init() {}
+    
+    public var body: some View {
+        ZStack {
+            VisualEffectView(material: .headerView, blendingMode: .behindWindow)
+            
+            Color(NSColor(name: nil, dynamicProvider: { appearance in
+                if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                    return NSColor(white: 0.12, alpha: 0.65)
+                } else {
+                    return NSColor(white: 0.98, alpha: 0.75)
+                }
+            }))
+            
+            VStack {
+                Spacer()
+                Rectangle()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(height: 0.5)
+            }
+        }
+    }
+}
+
+// MARK: - Window Drag Area
+public struct WindowDragArea: NSViewRepresentable {
+    public init() {}
+    
+    public func makeNSView(context: Context) -> WindowDragNSView {
+        WindowDragNSView()
+    }
+    
+    public func updateNSView(_ nsView: WindowDragNSView, context: Context) {}
+}
+
+public class WindowDragNSView: NSView {
+    public override func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
     }
 }

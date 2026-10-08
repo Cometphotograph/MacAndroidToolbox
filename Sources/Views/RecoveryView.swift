@@ -95,7 +95,7 @@ public struct RecoveryView: View {
                     }
                 }
                 
-                Text(isDeviceInRecovery ? "設備已就緒，可隨時執行 Sideload 旁推或分區維護指令。" : "當前設備不在 Recovery 模式中。如需刷機或雙清，請先重啟進入 Recovery。")
+                Text(isDeviceInRecovery ? L10n("rec_status_ready") : L10n("rec_status_not_ready"))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -112,6 +112,7 @@ public struct RecoveryView: View {
                 .disabled(deviceManager.selectedDevice == nil || isOperating)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .liquidGlassCard(cornerRadius: 16, padding: 16)
     }
     
@@ -175,7 +176,7 @@ public struct RecoveryView: View {
             
             // Options
             HStack(spacing: 16) {
-                Toggle("刷入完成後自動重啟系統 (Reboot System)", isOn: $autoRebootAfterSideload)
+                Toggle(L10n("rec_auto_reboot"), isOn: $autoRebootAfterSideload)
                     .font(.subheadline)
                 
                 Spacer()
@@ -197,22 +198,23 @@ public struct RecoveryView: View {
                 .padding(.top, 4)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .liquidGlassCard(cornerRadius: 16, padding: 16)
     }
     
     // MARK: - Recovery Quick Actions
     private var recoveryActionsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Label("Recovery 常用電源與維護指令", systemImage: "gearshape.2.fill")
+            Label(L10n("rec_actions_title"), systemImage: "gearshape.2.fill")
                 .font(.headline)
             
-            Text("快速控制設備從 Recovery 切換至其他模式，或執行清理維護。")
+            Text(L10n("rec_actions_desc"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
             Divider().opacity(0.3)
             
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
                 Button {
                     rebootToSystem()
                 } label: {
@@ -250,6 +252,7 @@ public struct RecoveryView: View {
                 .disabled(deviceManager.selectedDevice == nil || isOperating)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .liquidGlassCard(cornerRadius: 16, padding: 16)
     }
     
@@ -272,9 +275,9 @@ public struct RecoveryView: View {
                     Text("1️⃣")
                         .font(.system(size: 14))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("軟體指令一鍵進入")
+                        Text(L10n("rec_guide_soft"))
                             .font(.system(size: 13, weight: .semibold))
-                        Text("在設備開機並授權 USB 調試的情況下，直接點選上方「重啟至 Recovery 模式」按鈕。")
+                        Text(L10n("rec_guide_soft_desc"))
                             .font(.system(size: 12.5))
                             .foregroundColor(.secondary)
                     }
@@ -284,7 +287,7 @@ public struct RecoveryView: View {
                     Text("2️⃣")
                         .font(.system(size: 14))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("實體硬體組合鍵進入")
+                        Text(L10n("rec_guide_hard"))
                             .font(.system(size: 13, weight: .semibold))
                         Text(L10n("rec_guide_body"))
                             .font(.system(size: 12.5))

@@ -35,7 +35,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.0"
-    public let appBuild = "20261008_133"
+    public let appBuild = "20261008_134"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -50,7 +50,28 @@ public final class LanguageManager: ObservableObject {
            let lang = AppLanguage(rawValue: saved) {
             self.currentLanguage = lang
         } else {
-            self.currentLanguage = .zhHant
+            let preferred = Locale.preferredLanguages.first?.lowercased() ?? ""
+            if preferred.starts(with: "zh-hans") || preferred.starts(with: "zh-cn") {
+                self.currentLanguage = .zhHans
+            } else if preferred.starts(with: "zh-hant") || preferred.starts(with: "zh-tw") || preferred.starts(with: "zh-hk") {
+                self.currentLanguage = .zhHant
+            } else if preferred.starts(with: "fr") {
+                self.currentLanguage = .fr
+            } else if preferred.starts(with: "ja") {
+                self.currentLanguage = .ja
+            } else if preferred.starts(with: "es") {
+                self.currentLanguage = .es
+            } else if preferred.starts(with: "ko") {
+                self.currentLanguage = .ko
+            } else if preferred.starts(with: "ru") {
+                self.currentLanguage = .ru
+            } else if preferred.starts(with: "uk") {
+                self.currentLanguage = .uk
+            } else if preferred.starts(with: "en") {
+                self.currentLanguage = .en
+            } else {
+                self.currentLanguage = .zhHans
+            }
         }
     }
     
@@ -2439,6 +2460,204 @@ public final class LanguageManager: ObservableObject {
             .ko: "전원이 꺼진 상태에서 복구 메뉴가 나타날 때까지 전원 + 볼륨 업 버튼을 길게 누릅니다.",
             .ru: "В выключенном состоянии удерживайте кнопки питания и увеличения громкости до появления меню Recovery.",
             .uk: "У вимкненому стані утримуйте кнопки живлення та збільшення гучності до появи меню Recovery."
+        ],
+        "rec_status_ready": [
+            .zhHant: "設備已就緒，可隨時執行 Sideload 旁推或分區維護指令。",
+            .zhHans: "设备已就绪，可随时执行 Sideload 旁推或分区维护指令。",
+            .en: "Device is ready in Recovery mode. You can now execute sideload or partition maintenance commands.",
+            .fr: "L'appareil est prêt en mode Recovery. Vous pouvez maintenant exécuter le sideload ou des commandes de maintenance.",
+            .ja: "デバイスは準備完了です。Sideload またはパーティション管理コマンドを実行できます。",
+            .es: "El dispositivo está listo en modo Recovery. Ya puede ejecutar sideload o comandos de mantenimiento.",
+            .ko: "기기가 준비되었습니다. Sideload 또는 파티션 유지 관리 명령을 실행할 수 있습니다.",
+            .ru: "Устройство готово. Теперь можно выполнять Sideload или команды обслуживания разделов.",
+            .uk: "Пристрій готовий. Тепер можна виконувати Sideload або команди обслуговування розділів."
+        ],
+        "rec_status_not_ready": [
+            .zhHant: "當前設備不在 Recovery 模式中。如需刷機或雙清，請先重啟進入 Recovery。",
+            .zhHans: "当前设备不在 Recovery 模式中。如需刷机或双清，请先重启进入 Recovery。",
+            .en: "Device is not currently in Recovery mode. To flash or wipe, reboot into Recovery first.",
+            .fr: "L'appareil n'est pas en mode Recovery. Pour flasher ou réinitialiser, redémarrez d'abord en Recovery.",
+            .ja: "デバイスは現在 Recovery モードではありません。フラッシュや初期化を行うには、先に Recovery へ再起動してください。",
+            .es: "El dispositivo no está en modo Recovery. Para flashear o limpiar, reinicie primero en Recovery.",
+            .ko: "기기가 현재 Recovery 모드가 아닙니다. 플래시나 초기화를 하려면 먼저 Recovery로 재부팅하세요.",
+            .ru: "Устройство не в режиме Recovery. Для прошивки или сброса сначала перезагрузитесь в Recovery.",
+            .uk: "Пристрій не в режимі Recovery. Для прошивки або скидання спочатку перезавантажтеся в Recovery."
+        ],
+        "rec_actions_title": [
+            .zhHant: "Recovery 常用電源與維護指令",
+            .zhHans: "Recovery 常用电源与维护指令",
+            .en: "Recovery Power & Maintenance Controls",
+            .fr: "Commandes d'alimentation et maintenance Recovery",
+            .ja: "Recovery 電源・メンテナンスコマンド",
+            .es: "Controles de energía y mantenimiento de Recovery",
+            .ko: "Recovery 전원 및 유지 관리 명령",
+            .ru: "Команды питания и обслуживания Recovery",
+            .uk: "Команди живлення та обслуговування Recovery"
+        ],
+        "rec_actions_desc": [
+            .zhHant: "快速控制設備從 Recovery 切換至其他模式，或執行清理維護。",
+            .zhHans: "快速控制设备从 Recovery 切换至其他模式，或执行清理维护。",
+            .en: "Quickly reboot device from Recovery to other modes, or perform wipe maintenance.",
+            .fr: "Redémarrez rapidement l'appareil depuis Recovery vers d'autres modes ou effectuez un nettoyage.",
+            .ja: "Recovery から他のモードへの再起動や、データ消去をすばやく実行します。",
+            .es: "Reinicie rápidamente el dispositivo desde Recovery a otros modos o realice limpieza de datos.",
+            .ko: "Recovery에서 다른 모드로 빠르게 재부팅하거나 데이터 삭제를 수행합니다.",
+            .ru: "Быстрая перезагрузка устройства из Recovery в другие режимы или очистка данных.",
+            .uk: "Швидке перезавантаження пристрою з Recovery в інші режими або очищення даних."
+        ],
+        "rec_auto_reboot": [
+            .zhHant: "刷入完成後自動重啟系統 (Reboot System)",
+            .zhHans: "刷入完成后自动重启系统 (Reboot System)",
+            .en: "Reboot system automatically after flashing",
+            .fr: "Redémarrer le système automatiquement après le flash",
+            .ja: "フラッシュ完了後にシステムを自動再起動",
+            .es: "Reiniciar el sistema automáticamente después de flashear",
+            .ko: "플래시 완료 후 시스템 자동 재부팅",
+            .ru: "Автоматически перезагрузить систему после прошивки",
+            .uk: "Автоматично перезавантажити систему після прошивки"
+        ],
+        "rec_guide_soft": [
+            .zhHant: "軟體指令一鍵進入",
+            .zhHans: "软件指令一键进入",
+            .en: "Software One-Click Entry",
+            .fr: "Accès en un clic via le logiciel",
+            .ja: "ソフトウェアワンクリック移行",
+            .es: "Entrada con un clic mediante software",
+            .ko: "소프트웨어 원클릭 진입",
+            .ru: "Вход в один клик через программу",
+            .uk: "Вхід в один клік через програму"
+        ],
+        "rec_guide_soft_desc": [
+            .zhHant: "在設備開機並授權 USB 調試的情況下，直接點選上方「重啟至 Recovery 模式」按鈕。",
+            .zhHans: "在设备开机并授权 USB 调试的情况下，直接点选上方“重启至 Recovery 模式”按钮。",
+            .en: "With the device powered on and USB debugging authorized, click 'Reboot to Recovery' above.",
+            .fr: "Lorsque l'appareil est allumé avec le débogage USB autorisé, cliquez sur 'Redémarrer en Recovery'.",
+            .ja: "端末が起動しUSBデバッグが許可された状態で、上の「Recoveryへ再起動」をクリックします。",
+            .es: "Con el dispositivo encendido y la depuración USB autorizada, pulse 'Reiniciar en Recovery'.",
+            .ko: "기기가 켜져 있고 USB 디버깅이 승인된 상태에서 위의 'Recovery로 재부팅'을 클릭합니다.",
+            .ru: "Когда устройство включено и отладка по USB разрешена, нажмите 'Перезагрузка в Recovery'.",
+            .uk: "Коли пристрій увімкнено та налагодження через USB дозволено, натисніть 'Перезавантаження в Recovery'."
+        ],
+        "rec_guide_hard": [
+            .zhHant: "實體硬體組合鍵進入",
+            .zhHans: "实体硬件组合键进入",
+            .en: "Physical Hardware Key Combination",
+            .fr: "Combinaison de boutons matériels",
+            .ja: "物理ボタンの組み合わせで移行",
+            .es: "Combinación de botones físicos",
+            .ko: "물리 하드웨어 버튼 조합으로 진입",
+            .ru: "Вход комбинацией физических кнопок",
+            .uk: "Вхід комбінацією фізичних кнопок"
+        ],
+        "dash_guide_title": [
+            .zhHant: "連線指引與排查事項",
+            .zhHans: "连接指引与排查事项",
+            .en: "Connection Guide & Troubleshooting",
+            .fr: "Guide de connexion et dépannage",
+            .ja: "接続ガイドとトラブルシューティング",
+            .es: "Guía de conexión y solución de problemas",
+            .ko: "연결 가이드 및 문제 해결",
+            .ru: "Инструкция по подключению и устранению неполадок",
+            .uk: "Інструкція з підключення та усунення несправностей"
+        ],
+        "dash_guide_subtitle": [
+            .zhHant: "請將 Android 設備透過 USB 傳輸線連接至 Mac，並確認：",
+            .zhHans: "请将 Android 设备通过 USB 数据线连接至 Mac，并确认：",
+            .en: "Connect your Android device to Mac via USB cable, and ensure:",
+            .fr: "Connectez votre appareil Android au Mac via un câble USB et vérifiez :",
+            .ja: "Android端末をUSBケーブルでMacに接続し、以下を確認してください：",
+            .es: "Conecte su dispositivo Android al Mac mediante cable USB y verifique:",
+            .ko: "Android 기기를 USB 케이블로 Mac에 연결하고 다음을 확인하세요:",
+            .ru: "Подключите устройство Android к Mac через USB-кабель и убедитесь:",
+            .uk: "Підключіть пристрій Android до Mac через USB-кабель та переконайтеся:"
+        ],
+        "dash_guide_s1_title": [
+            .zhHant: "開啟 USB 調試",
+            .zhHans: "开启 USB 调试",
+            .en: "Enable USB Debugging",
+            .fr: "Activer le débogage USB",
+            .ja: "USB デバッグを有効化",
+            .es: "Habilitar depuración por USB",
+            .ko: "USB 디버깅 활성화",
+            .ru: "Включить отладку по USB",
+            .uk: "Увімкнути налагодження через USB"
+        ],
+        "dash_guide_s1_desc": [
+            .zhHant: "進入手機「設定 - 關於手機」連續點擊版本號以開啟開發者模式，隨後在「開發者選項」中開啟「USB 調試」。",
+            .zhHans: "进入手机“设置 - 关于手机”连续点击版本号以开启开发者模式，随后在“开发者选项”中开启“USB 调试”。",
+            .en: "Go to Settings > About Phone, tap Build Number repeatedly to unlock Developer Options, then enable USB Debugging.",
+            .fr: "Accédez à Paramètres > À propos, appuyez plusieurs fois sur Numéro de build pour activer les Options développeur, puis activez le débogage USB.",
+            .ja: "「設定 - 端末情報」でビルド番号を連打して開発者オプションを有効にし、「USBデバッグ」をONにします。",
+            .es: "Vaya a Ajustes > Información del teléfono, toque varias veces el Número de compilación y active Depuración por USB.",
+            .ko: "설정 > 휴대전화 정보에서 빌드 번호를 연속으로 눌러 개발자 옵션을 켠 다음, 'USB 디버깅'을 활성화하세요.",
+            .ru: "Перейдите в Настройки > О телефоне, нажмите несколько раз на Номер сборки, затем включите Отладку по USB.",
+            .uk: "Перейдіть у Налаштування > Про телефон, торкніться кілька разів Номера збірки, потім увімкніть Налагодження через USB."
+        ],
+        "dash_guide_s2_title": [
+            .zhHant: "USB 傳輸模式",
+            .zhHans: "USB 传输模式",
+            .en: "USB Transfer Mode",
+            .fr: "Mode de transfert USB",
+            .ja: "USB 転送モード",
+            .es: "Modo de transferencia USB",
+            .ko: "USB 전송 모드",
+            .ru: "Режим передачи USB",
+            .uk: "Режим передачі USB"
+        ],
+        "dash_guide_s2_desc": [
+            .zhHant: "連接傳輸線後，下拉手機通知欄將 USB 連接模式由「僅充電」切換為「傳輸文件 (MTP)」。",
+            .zhHans: "连接数据线后，下拉手机通知栏将 USB 连接模式由“仅充电”切换为“传输文件 (MTP)”。",
+            .en: "After connecting cable, change USB mode in notification shade from 'Charge Only' to 'File Transfer (MTP)'.",
+            .fr: "Après branchement, changez le mode USB dans les notifications de 'Charge seule' à 'Transfert de fichiers (MTP)'.",
+            .ja: "ケーブル接続後、通知シェードでUSB接続モードを「充電のみ」から「ファイル転送 (MTP)」に切り替えます。",
+            .es: "Tras conectar el cable, cambie el modo USB en las notificaciones de 'Solo carga' a 'Transferencia de archivos (MTP)'.",
+            .ko: "케이블 연결 후 알림창에서 USB 모드를 '충전 전용'에서 '파일 전송 (MTP)'으로 변경하세요.",
+            .ru: "После подключения кабеля переключите режим USB с 'Только зарядка' на 'Передача файлов (MTP)'.",
+            .uk: "Після підключення кабелю змініть режим USB з 'Тільки заряджання' на 'Передача файлів (MTP)'."
+        ],
+        "dash_guide_s3_title": [
+            .zhHant: "授權電腦連接",
+            .zhHans: "授权电脑连接",
+            .en: "Authorize Computer Connection",
+            .fr: "Autoriser la connexion de l'ordinateur",
+            .ja: "パソコンの接続を許可",
+            .es: "Autorizar conexión del equipo",
+            .ko: "컴퓨터 연결 승인",
+            .ru: "Авторизовать подключение компьютера",
+            .uk: "Авторизувати підключення комп'ютера"
+        ],
+        "dash_guide_s3_desc": [
+            .zhHant: "手機彈出「一律允許此電腦進行 USB 調試」時勾選並點擊確定。",
+            .zhHans: "手机弹出“一律允许此电脑进行 USB 调试”时勾选并点击确定。",
+            .en: "When prompt appears on phone, check 'Always allow from this computer' and tap OK.",
+            .fr: "Lorsque la boîte de dialogue s'affiche sur le téléphone, cochez 'Toujours autoriser' et appuyez sur OK.",
+            .ja: "端末に「このパソコンからのUSBデバッグを常に許可する」が表示されたらチェックしてOKをタップします。",
+            .es: "Cuando aparezca el aviso en el teléfono, marque 'Permitir siempre' y toque Aceptar.",
+            .ko: "휴대전화에 '이 컴퓨터에서 항상 허용' 알림이 나타나면 체크하고 확인을 누르세요.",
+            .ru: "При появлении запроса на телефоне отметьте 'Всегда разрешать с этого компьютера' и нажмите OK.",
+            .uk: "Коли з'явиться запит на телефоні, позначте 'Завжди дозволяти з цього комп'ютера' та натисніть OK."
+        ],
+        "dash_guide_s4_title": [
+            .zhHant: "Fastboot 模式",
+            .zhHans: "Fastboot 模式",
+            .en: "Fastboot Mode",
+            .fr: "Mode Fastboot",
+            .ja: "Fastboot モード",
+            .es: "Modo Fastboot",
+            .ko: "Fastboot 모드",
+            .ru: "Режим Fastboot",
+            .uk: "Режим Fastboot"
+        ],
+        "dash_guide_s4_desc": [
+            .zhHant: "如需進行底層刷機，可將手機關機後長按「音量減 + 電源鍵」進入 Fastboot 介面。",
+            .zhHans: "如需进行底层刷机，可将手机关机后长按“音量减 + 电源键”进入 Fastboot 界面。",
+            .en: "For low-level partition flashing, power off device and hold 'Volume Down + Power' to enter Fastboot mode.",
+            .fr: "Pour flasher des partitions, éteignez l'appareil et maintenez 'Volume Bas + Marche/Arrêt' pour entrer en Fastboot.",
+            .ja: "パーティションフラッシュを行うには、電源オフ後「音量ダウン + 電源」を長押ししてFastbootに入ります。",
+            .es: "Para flasheo de particiones, apague el dispositivo y mantenga 'Volumen abajo + Encendido' para entrar a Fastboot.",
+            .ko: "파티션 플래시를 위해 기기를 끄고 '볼륨 다운 + 전원' 버튼을 길게 눌러 Fastboot 모드로 진입하세요.",
+            .ru: "Для низкоуровневой прошивки выключите устройство и удерживайте 'Громкость вниз + Питание'.",
+            .uk: "Для низькорівневої прошивки вимкніть пристрій і утримуйте 'Зменшення гучності + Живлення'."
         ],
         "search_title": [
             .zhHant: "全域功能搜尋",

@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 public enum NavigationSection: String, CaseIterable, Identifiable {
     case dashboard
@@ -63,6 +64,7 @@ public struct MainView: View {
     @ObservedObject var toolConfig = ToolConfig.shared
     
     @State private var selectedSection: NavigationSection? = .dashboard
+    @State private var isSidebarVisible: Bool = true
     @State private var isConsoleExpanded: Bool = true
     @State private var showOnboarding: Bool = false
     @State private var showSearchPalette: Bool = false
@@ -72,137 +74,20 @@ public struct MainView: View {
     
     public var body: some View {
         ZStack {
-            NavigationSplitView {
-                // MARK: - Sidebar (Apple Notes Style)
-                VStack(spacing: 0) {
-                    // Top Titlebar Row: Leaves space for native traffic lights, places Search and Toggle on the right
-                    HStack(spacing: 8) {
-                        // Reserved space for native macOS traffic lights (🔴 🟡 🟢)
-                        Spacer()
-                            .frame(width: 76)
-                        
-                        Spacer()
-                        
-                        // Circular Glass Global Search Button (Cmd+K)
-                        GlassCircleButton(
-                            systemImage: "magnifyingglass",
-                            tooltip: L10n("search_title") + " (Cmd+K)",
-                            size: 28
-                        ) {
-                            withAnimation(.easeOut(duration: 0.15)) {
-                                showSearchPalette = true
-                            }
-                        }
-                        
-                        // Circular Glass Sidebar Toggle Button
-                        GlassCircleButton(
-                            systemImage: "sidebar.leading",
-                            tooltip: L10n("tb_toggle_sidebar"),
-                            size: 28
-                        ) {
-                            toggleSidebar()
-                        }
-                    }
-                    .padding(.trailing, 12)
-                    .frame(height: 52)
-                    
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 3.5) {
-                            // Section 1: Main Navigation
-                            Text(L10n("nav_main_navigation"))
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.secondary.opacity(0.8))
-                                .padding(.horizontal, 14)
-                                .padding(.top, 4)
-                                .padding(.bottom, 2)
-                            
-                            // 7 Main Feature Sections
-                            ForEach(NavigationSection.allCases) { section in
-                                navigationItemRow(section)
-                            }
-                            
-                            // Section 2: Connected Devices
-                            connectedDevicesHeader
-                            connectedDevicesList
-                        }
-                        .padding(.horizontal, 10)
-                        .padding(.bottom, 16)
-                    }
-                    .scrollContentBackground(.hidden)
+            // Main Window Split Layout (macOS 27 Figma Conforming)
+            HStack(spacing: 0) {
+                // MARK: - Left Pane: macOS 27 Sidebar (240pt)
+                if isSidebarVisible {
+                    sidebarView
+                        .frame(width: 240)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
                 }
-                .ignoresSafeArea(.container, edges: .top)
-                .background(SidebarGlassBackgroundView())
-                .navigationSplitViewColumnWidth(min: 230, ideal: 250, max: 300)
-            } detail: {
-                // MARK: - Detail Content Canvas (Unified Titlebar)
-                ZStack {
-                    LiquidDetailGlassBackgroundView()
-                    
-                    VStack(spacing: 0) {
-                        // Main Detail Content Area
-                        Group {
-                            switch selectedSection ?? .dashboard {
-                            case .dashboard:
-                                DashboardView()
-                            case .fastboot:
-                                FastbootView()
-                            case .recovery:
-                                RecoveryView()
-                            case .shell:
-                                ShellToolsView()
-                            case .apps:
-                                AppManagerView()
-                            case .files:
-                                FileManagerView()
-                            case .settings:
-                                SettingsView()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        
-                        // Bottom Console Drawer (Liquid Glass)
-                        if isConsoleExpanded {
-                            Divider().opacity(0.25)
-                            ConsoleView()
-                                .frame(height: 220)
-                        }
-                    }
-                }
-                .toolbar {
-                    // Single Unified Titlebar: Software Name + Status Badge
-                    ToolbarItem(placement: .navigation) {
-                        HStack(spacing: 10) {
-                            Text(L10n("app_name"))
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.primary)
-                            
-                            connectionStatusBadge
-                        }
-                        .padding(.leading, 2)
-                    }
-                    
-                    // Unified Toolbar Action Buttons (Apple Notes Style)
-                    ToolbarItemGroup(placement: .primaryAction) {
-                        GlassCircleButton(
-                            systemImage: "arrow.clockwise",
-                            tooltip: L10n("tb_refresh") + " (Cmd+R)",
-                            size: 30
-                        ) {
-                            deviceManager.refreshDevices()
-                        }
-                        
-                        GlassCircleButton(
-                            systemImage: isConsoleExpanded ? "terminal.fill" : "terminal",
-                            tooltip: isConsoleExpanded ? "收起终端日志" : "展开终端日志",
-                            size: 30
-                        ) {
-                            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
-                                isConsoleExpanded.toggle()
-                            }
-                        }
-                    }
-                }
+                
+                // MARK: - Right Pane: Detail View + Unified Header
+                detailView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             // Global Feature Search Modal (Cmd+K)
             if showSearchPalette {
@@ -236,9 +121,182 @@ public struct MainView: View {
             .keyboardShortcut("k", modifiers: .command)
             .opacity(0)
         )
+        // Keyboard Shortcut Cmd+S / Cmd+Option+S for Toggle Sidebar
+        .background(
+            Button("") {
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                    isSidebarVisible.toggle()
+                }
+            }
+            .keyboardShortcut("s", modifiers: [.command, .option])
+            .opacity(0)
+        )
     }
     
-    // MARK: - Navigation Item Row (Apple Notes / HIG Spacing & Style)
+    // MARK: - Sidebar View (macOS 27 Official Kit: Width 240pt, Header 52pt)
+    private var sidebarView: some View {
+        VStack(spacing: 0) {
+            // Top Header (Height: 52pt) conforming to Figma 4358:6073
+            HStack(alignment: .center, spacing: 0) {
+                // Window Stoplights (Traffic Lights): Left Margin 19pt, 14x14 circles, 9pt gap
+                MacOS27StoplightsView()
+                    .padding(.leading, 19)
+                
+                Spacer()
+                
+                // Sidebar Collapse Button (Liquid Glass 36x36): Right Margin 12pt
+                MacOS27SidebarToggleButton(size: 36) {
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                        isSidebarVisible.toggle()
+                    }
+                }
+                .padding(.trailing, 12)
+            }
+            .frame(height: 52)
+            
+            // Sidebar Navigation Scroll Area
+            ScrollView {
+                VStack(alignment: .leading, spacing: 3.5) {
+                    // Section 1: Main Navigation
+                    Text(L10n("nav_main_navigation"))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.secondary.opacity(0.8))
+                        .padding(.horizontal, 14)
+                        .padding(.top, 6)
+                        .padding(.bottom, 2)
+                    
+                    // 7 Main Functional Sections
+                    ForEach(NavigationSection.allCases) { section in
+                        navigationItemRow(section)
+                    }
+                    
+                    // Section 2: Connected Devices
+                    connectedDevicesHeader
+                    connectedDevicesList
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 16)
+            }
+            .scrollContentBackground(.hidden)
+        }
+        .frame(width: 240)
+        .background(SidebarGlassBackgroundView())
+    }
+    
+    // MARK: - Detail Canvas View
+    private var detailView: some View {
+        ZStack(alignment: .top) {
+            // Canvas Glass Background
+            LiquidDetailGlassBackgroundView()
+            
+            // Detail Content Canvas (Under the 52pt Header)
+            VStack(spacing: 0) {
+                // Clearance for the 52pt frosted header
+                Color.clear
+                    .frame(height: 52)
+                
+                // Main Detail Content Area
+                Group {
+                    switch selectedSection ?? .dashboard {
+                    case .dashboard:
+                        DashboardView()
+                    case .fastboot:
+                        FastbootView()
+                    case .recovery:
+                        RecoveryView()
+                    case .shell:
+                        ShellToolsView()
+                    case .apps:
+                        AppManagerView()
+                    case .files:
+                        FileManagerView()
+                    case .settings:
+                        SettingsView()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                // Bottom Console Drawer (Liquid Glass)
+                if isConsoleExpanded {
+                    Divider().opacity(0.25)
+                    ConsoleView()
+                        .frame(height: 220)
+                }
+            }
+            
+            // Top Unified Header Bar (Height: 52pt, frosted glass covering scrolled content)
+            detailHeader
+                .frame(height: 52)
+        }
+    }
+    
+    // MARK: - Detail Header Toolbar (Height: 52pt)
+    private var detailHeader: some View {
+        ZStack {
+            // Frosted blur covering the window scroll edge
+            MacOS27HeaderBackgroundView()
+            
+            HStack(spacing: 12) {
+                // If sidebar is collapsed, show reopen button and window stoplights on leading side
+                if !isSidebarVisible {
+                    HStack(spacing: 12) {
+                        MacOS27StoplightsView()
+                            .padding(.leading, 19)
+                        
+                        MacOS27SidebarToggleButton(size: 32) {
+                            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                                isSidebarVisible.toggle()
+                            }
+                        }
+                    }
+                }
+                
+                // Software Name Title (14pt Bold)
+                Text(L10n("app_name"))
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.primary)
+                    .padding(.leading, isSidebarVisible ? 16 : 4)
+                
+                // Connection Status Badge
+                connectionStatusBadge
+                
+                Spacer()
+                
+                // Trailing Action Controls
+                HStack(spacing: 8) {
+                    // Global Search Bar Button (Cmd+K)
+                    MacOS27SearchBarButton {
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            showSearchPalette = true
+                        }
+                    }
+                    
+                    // Refresh Device Button (Cmd+R)
+                    MacOS27GlassCircleButton(
+                        systemImage: "arrow.clockwise",
+                        tooltip: L10n("tb_refresh") + " (Cmd+R)",
+                        size: 32
+                    ) {
+                        deviceManager.refreshDevices()
+                    }
+                    
+                    // Console Toggle Button
+                    MacOS27GlassCircleButton(
+                        systemImage: isConsoleExpanded ? "terminal.fill" : "terminal",
+                        tooltip: isConsoleExpanded ? "收起终端日志" : "展开终端日志",
+                        size: 32
+                    ) {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                            isConsoleExpanded.toggle()
+                        }
+                    }
+                }
+                .padding(.trailing, 16)
+            }
+        }
+    }
+    
+    // MARK: - Navigation Item Row (macOS 27 Row Height 34pt, Corner Radius 8pt)
     private func navigationItemRow(_ section: NavigationSection) -> some View {
         let isSelected = selectedSection == section
         let isHovered = hoveredSection == section
@@ -249,7 +307,7 @@ public struct MainView: View {
             }
         } label: {
             HStack(spacing: 10) {
-                // Apple Squircle Icon with Vibrant Gradient
+                // Continuous Squircle Icon with Vibrant Gradient
                 ZStack {
                     RoundedRectangle(cornerRadius: 6.5, style: .continuous)
                         .fill(
@@ -271,7 +329,7 @@ public struct MainView: View {
                     y: 1
                 )
                 
-                // Section Title (SF Pro 13pt Medium)
+                // Section Title (SF Pro 13pt)
                 Text(section.title)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? .white : .primary)
@@ -289,17 +347,18 @@ public struct MainView: View {
                 }
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.vertical, 4)
+            .frame(height: 34)
             .background(
                 ZStack {
                     if isSelected {
                         // Vibrant selection capsule with specular top highlight
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(Color.accentColor)
                             .shadow(color: Color.accentColor.opacity(0.35), radius: 4, x: 0, y: 1.5)
                     } else if isHovered {
                         // Subtle interactive hover highlight
-                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(Color.primary.opacity(0.06))
                     }
                 }
@@ -459,14 +518,8 @@ public struct MainView: View {
         )
     }
     
-    private func toggleSidebar() {
-        NSApp.sendAction(#selector(NSSplitViewController.toggleSidebar(_:)), to: nil, from: nil)
-    }
-    
     private func checkOnboardingStatus() {
-        // Show disclaimer if user hasn't checked "Never remind again" or hasn't accepted yet
         let needsDisclaimer = !generalSettings.neverShowDisclaimer || !generalSettings.hasAcceptedDisclaimer
-        // Show environment check if onboarding not completed and tools are missing
         let needsEnvCheck = !generalSettings.hasCompletedOnboarding && (!toolConfig.isAdbAvailable || !toolConfig.isFastbootAvailable)
         
         if needsDisclaimer || needsEnvCheck {

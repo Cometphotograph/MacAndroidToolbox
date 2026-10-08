@@ -111,6 +111,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.backgroundColor = .clear
         window.hasShadow = true
         window.isMovableByWindowBackground = true
+        
+        // Hide standard window buttons so our custom Figma macOS 27 glass stoplights render with pixel-perfect alignment
+        window.standardWindowButton(.closeButton)?.isHidden = true
+        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        window.standardWindowButton(.zoomButton)?.isHidden = true
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -143,10 +148,8 @@ struct MacAndroidToolboxApp: App {
                 .environmentObject(generalSettings)
                 .preferredColorScheme(generalSettings.selectedTheme.colorScheme)
         }
-        .windowStyle(.titleBar)
-        .windowToolbarStyle(.unified(showsTitle: false))
+        .windowStyle(.hiddenTitleBar)
         .commands {
-            SidebarCommands()
             CommandGroup(replacing: .newItem) {}
             CommandMenu(L10n("nav_connected_devices")) {
                 Button(L10n("tb_refresh")) {

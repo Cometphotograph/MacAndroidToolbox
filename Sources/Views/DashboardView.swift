@@ -405,7 +405,7 @@ public struct DashboardView: View {
                     .font(.system(size: 19, weight: .bold))
                     .foregroundColor(.primary)
                 
-                Text("請將 Android 設備透過 USB 傳輸線連接至 Mac")
+                Text(L10n("dash_guide_subtitle"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
@@ -417,7 +417,7 @@ public struct DashboardView: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.blue)
                     
-                    Text("連線指引與排查事項")
+                    Text(L10n("dash_guide_title"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(.primary)
                     
@@ -430,33 +430,33 @@ public struct DashboardView: View {
                     guideStepRow(
                         num: "1",
                         color: .blue,
-                        title: "開啟 USB 調試",
-                        desc: "進入手機「設置 - 關於手機」連續點擊版本號以開啟開發者模式，隨後在「開發者選項」中啟用「USB 調試」。"
+                        title: L10n("dash_guide_s1_title"),
+                        desc: L10n("dash_guide_s1_desc")
                     )
                     
                     guideStepRow(
                         num: "2",
                         color: .orange,
-                        title: "USB 傳輸模式",
-                        desc: "連接傳輸線後，下拉手機通知欄將 USB 連接模式由「僅充電」切換為「傳輸文件 (MTP)」。"
+                        title: L10n("dash_guide_s2_title"),
+                        desc: L10n("dash_guide_s2_desc")
                     )
                     
                     guideStepRow(
                         num: "3",
                         color: .green,
-                        title: "授權電腦連接",
-                        desc: "手機彈出「一律允許此電腦進行 USB 調試」時勾選並點擊確定。"
+                        title: L10n("dash_guide_s3_title"),
+                        desc: L10n("dash_guide_s3_desc")
                     )
                     
                     guideStepRow(
                         num: "4",
                         color: .purple,
-                        title: "Fastboot 模式",
-                        desc: "如需進行底層刷機，可將手機關機後長按「音量減 + 電源鍵」進入 Fastboot 介面。"
+                        title: L10n("dash_guide_s4_title"),
+                        desc: L10n("dash_guide_s4_desc")
                     )
                 }
             }
-            .frame(maxWidth: 520)
+            .frame(maxWidth: 560)
             .liquidGlassCard(cornerRadius: 16, padding: 18)
             
             // Manual Scan Button (Liquid Glass)

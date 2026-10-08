@@ -860,6 +860,11 @@ public struct GlobalSearchPaletteView: View {
             .shadow(color: Color.black.opacity(0.25), radius: 30, x: 0, y: 15)
             .padding(.bottom, 100)
         }
+        .onExitCommand {
+            withAnimation(.easeOut(duration: 0.15)) {
+                isPresented = false
+            }
+        }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isFieldFocused = true
