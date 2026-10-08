@@ -2,11 +2,12 @@
 
 **English** | [简体中文](README.md)
 
-[![Version](https://img.shields.io/badge/Version-v1.2.2-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.3.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
 [![Author](https://img.shields.io/badge/Author-bilibili%40EchoIM__-pink.svg?style=flat&logo=bilibili)](https://space.bilibili.com/432147890?spm_id_from=333.337.0.0)
+[![Email](https://img.shields.io/badge/Email-magicalgirlkrea%40gmail.com-blue.svg?style=flat&logo=gmail)](mailto:magicalgirlkrea@gmail.com)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717.svg?style=flat&logo=github)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Design](https://img.shields.io/badge/Design-Liquid%20Glass-purple.svg)](https://developer.apple.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -41,7 +42,7 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 * **Intelligent Mode Detection**: Automatically detects device connection states in real time (ADB Normal mode, Fastboot mode, FastbootD userspace partition mode, Recovery mode, Sideload mode, and Unauthorized state).
 * **Comprehensive Hardware & Software Specs**: Brand, model, codename, Android OS version, SDK API level, and security patch date.
 * **Live Hardware Sensors**: Battery remaining percentage, real-time temperature (°C), and charging/discharging state.
-* **Display Specifications**: Physical screen resolution and DPI density.
+* **Intelligent SoC Platform Recognition**: Automatically detects and maps chipset hardware platforms (Qualcomm Snapdragon, MediaTek Dimensity, Google Tensor, Samsung Exynos, Huawei Kirin, Unisoc, etc.) with commercial marketing names and chip codenames.
 * **Root Privilege Detection**: Probes for root frameworks (Magisk / KernelSU / APatch / SU).
 * **Quick Reboot Panel**: Reboot System, Reboot to Bootloader/Fastboot, Reboot to Recovery, and Reboot to FastbootD.
 * **Wireless ADB Setup Wizard**: One-click opening of TCP/IP port 5555 to debug without cables via IP and port.
@@ -155,7 +156,7 @@ MacAndroidToolbox includes a comprehensive built-in internationalization archite
 ## 📥 Download & Installation
 
 ### Option 1: 💿 DMG Disk Image (Recommended)
-1. Download `MacAndroidToolbox_v1.2.2.dmg` from the [Releases](../../releases) page.
+1. Download `MacAndroidToolbox_v1.3.0.dmg` from the [Releases](../../releases) page.
 2. Double-click to mount the DMG.
 3. Drag `MacAndroidToolbox.app` into the `Applications` shortcut folder.
 
@@ -169,7 +170,7 @@ cd MacAndroidToolbox
 ./build_app.sh
 
 # 3. Launch the built application
-open "releases/MacAndroidToolbox_v1.2.2.app"
+open "releases/MacAndroidToolbox_v1.3.0.app"
 ```
 
 ---

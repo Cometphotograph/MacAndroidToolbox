@@ -2,11 +2,12 @@
 
 [English](README_EN.md) | **简体中文**
 
-[![Version](https://img.shields.io/badge/Version-v1.2.2-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.3.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
 [![Author](https://img.shields.io/badge/Author-bilibili%40EchoIM__-pink.svg?style=flat&logo=bilibili)](https://space.bilibili.com/432147890?spm_id_from=333.337.0.0)
+[![Email](https://img.shields.io/badge/Email-magicalgirlkrea%40gmail.com-blue.svg?style=flat&logo=gmail)](mailto:magicalgirlkrea@gmail.com)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717.svg?style=flat&logo=github)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Design](https://img.shields.io/badge/Design-Liquid%20Glass-purple.svg)](https://developer.apple.com)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -39,9 +40,9 @@
 
 ### 📱 1. 设备仪表板与状态总览 (Dashboard)
 * **智能连接模式识别**：自动实时侦测设备连接状态（ADB 调试模式、Fastboot 引导模式、FastbootD 用户空间分区模式、Recovery 恢复模式、Sideload 旁推模式及未授权状态）。
-* **全面硬软件规格展示**：品牌、设备型号、研发代号、Android 系统版本、API 等级、安全补丁更新日期。
+* **全面硬软件规格展示**：品牌、设备型号、硬件代号、Android 系统版本、API 等级、安全补丁更新日期。
 * **实时硬件传感器监控**：电池剩余电量百分比、电池实时温度（°C）、充放电工作状态。
-* **屏幕物理参数检测**：物理分辨率、DPI 像素密度。
+* **芯片平台智能识别**：内置常见 SoC 数据库，智能解析高通骁龙（Snapdragon 全系列）、联发科天玑（Dimensity 全系列）、谷歌 Tensor、三星 Exynos、华为海思麒麟及紫光展锐等商业发布名称与底层芯片代号。
 * **Root 权限状态探针**：自动侦测底层 Root 授权状态（Magisk / KernelSU / APatch / SU）。
 * **快捷重启控制台**：正常重启系统、重启至 Bootloader/Fastboot 模式、重启至 Recovery 恢复模式、重启至 FastbootD 模式。
 * **无线 ADB 配对向导**：支持一键开启 TCP/IP 5555 调试端口，摆脱数据线束缚，支持通过 IP 与端口号无线连接管理。
@@ -157,7 +158,7 @@
 ## 📥 下载与安装
 
 ### 方式 1：💿 DMG 光盘映像安装（推荐）
-1. 在 [Releases](../../releases) 页面下载最新发布的 `MacAndroidToolbox_v1.2.2.dmg`。
+1. 在 [Releases](../../releases) 页面下载最新发布的 `MacAndroidToolbox_v1.3.0.dmg`。
 2. 双击打开挂载 DMG 镜像。
 3. 将 `MacAndroidToolbox.app` 拖入 `Applications`（应用程序）文件夹即可完成安装。
 
@@ -171,7 +172,7 @@ cd MacAndroidToolbox
 ./build_app.sh
 
 # 3. 运行已打包的应用
-open "releases/MacAndroidToolbox_v1.2.2.app"
+open "releases/MacAndroidToolbox_v1.3.0.app"
 ```
 
 ---
