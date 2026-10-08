@@ -37,8 +37,9 @@ public struct RecoveryView: View {
                 // 4. Recovery Manual Guide
                 recoveryGuideCard
             }
-            .padding(20)
-            .padding(.bottom, 120)
+            .padding(.horizontal, 20)
+            .padding(.top, 64)
+            .padding(.bottom, 220)
         }
         .scrollContentBackground(.hidden)
         .confirmationDialog(

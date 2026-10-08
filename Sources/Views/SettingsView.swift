@@ -29,7 +29,9 @@ public struct SettingsView: View {
                     toolBinariesSection
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 64)
+            .padding(.bottom, 220)
         }
         .scrollContentBackground(.hidden)
         .sheet(isPresented: $showOnboardingSheet) {

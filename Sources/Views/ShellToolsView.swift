@@ -39,7 +39,9 @@ public struct ShellToolsView: View {
                 // Custom Interactive Shell Card (Liquid Glass)
                 interactiveShellCard
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 64)
+            .padding(.bottom, 220)
         }
         .scrollContentBackground(.hidden)
     }

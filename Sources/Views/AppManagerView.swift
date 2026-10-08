@@ -67,7 +67,9 @@ public struct AppManagerView: View {
                 packageListView
             }
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.top, 64)
+        .padding(.bottom, 220)
         .onAppear {
             if packages.isEmpty && deviceManager.selectedDevice?.mode == .adb {
                 loadPackages()

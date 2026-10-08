@@ -190,33 +190,26 @@ public struct MainView: View {
             // Canvas Glass Background
             LiquidDetailGlassBackgroundView()
             
-            // Detail Content Canvas (Under the 52pt Header)
-            VStack(spacing: 0) {
-                // Clearance for the 52pt frosted header
-                Color.clear
-                    .frame(height: 52)
-                
-                // Main Detail Content Area
-                Group {
-                    switch selectedSection ?? .dashboard {
-                    case .dashboard:
-                        DashboardView()
-                    case .fastboot:
-                        FastbootView()
-                    case .recovery:
-                        RecoveryView()
-                    case .shell:
-                        ShellToolsView()
-                    case .apps:
-                        AppManagerView()
-                    case .files:
-                        FileManagerView()
-                    case .settings:
-                        SettingsView()
-                    }
+            // Detail Content Canvas (Extends full height so content scrolls behind frosted header & terminal)
+            Group {
+                switch selectedSection ?? .dashboard {
+                case .dashboard:
+                    DashboardView()
+                case .fastboot:
+                    FastbootView()
+                case .recovery:
+                    RecoveryView()
+                case .shell:
+                    ShellToolsView()
+                case .apps:
+                    AppManagerView()
+                case .files:
+                    FileManagerView()
+                case .settings:
+                    SettingsView()
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             // Floating Liquid Glass Terminal Window (Overlaying directly over the controls!)
             if isConsoleExpanded {

@@ -34,7 +34,9 @@ public struct FileManagerView: View {
                 // Screenshot Capture Card
                 screenshotCard
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.top, 64)
+            .padding(.bottom, 220)
         }
         .scrollContentBackground(.hidden)
     }

@@ -697,21 +697,24 @@ public struct MacOS27HeaderBackgroundView: View {
     
     public var body: some View {
         ZStack {
-            VisualEffectView(material: .popover, blendingMode: .withinWindow)
+            // Native SwiftUI ultra-thin frosted glass (samples & blurs SwiftUI views underneath)
+            Rectangle()
+                .fill(.ultraThinMaterial)
             
+            // Highly translucent tint layer so underlying button & card colors shine through
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 0.68)
+                    return NSColor(white: 0.10, alpha: 0.22)
                 } else {
-                    return NSColor(white: 0.96, alpha: 0.72)
+                    return NSColor(white: 0.98, alpha: 0.28)
                 }
             }))
             
             LinearGradient(
                 stops: [
-                    .init(color: Color.white.opacity(0.12), location: 0.0),
-                    .init(color: Color.white.opacity(0.02), location: 0.35),
-                    .init(color: Color.clear, location: 0.60)
+                    .init(color: Color.white.opacity(0.18), location: 0.0),
+                    .init(color: Color.white.opacity(0.04), location: 0.35),
+                    .init(color: Color.clear, location: 0.65)
                 ],
                 startPoint: .top,
                 endPoint: .bottom
@@ -744,7 +747,7 @@ public class WindowDragNSView: NSView {
     }
 }
 
-// MARK: - macOS 27 Floating Terminal Glass Background (Low-transparency Liquid Glass)
+// MARK: - macOS 27 Floating Terminal Glass Background (True Frosted Translucent Liquid Glass)
 public struct MacOS27FloatingTerminalGlassBackground: View {
     var cornerRadius: CGFloat
     
@@ -754,15 +757,16 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
     
     public var body: some View {
         ZStack {
-            // 1. Native macOS within-window HUD / Popover material for physical frosted glass
-            VisualEffectView(material: .popover, blendingMode: .withinWindow)
+            // 1. Native SwiftUI ultra-thin frosted glass (actively blurs buttons & cards directly underneath)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(.ultraThinMaterial)
             
-            // 2. Translucent tone layer matching top header (+10% transparency => alpha 0.68 dark / 0.72 light)
+            // 2. Translucent tone layer: vibrant and transparent so colors (blue, orange) glow through
             Color(NSColor(name: nil, dynamicProvider: { appearance in
                 if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                    return NSColor(red: 0.11, green: 0.11, blue: 0.13, alpha: 0.68)
+                    return NSColor(white: 0.10, alpha: 0.32)
                 } else {
-                    return NSColor(white: 0.96, alpha: 0.72)
+                    return NSColor(white: 0.98, alpha: 0.35)
                 }
             }))
             
@@ -771,9 +775,9 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
                 .fill(
                     LinearGradient(
                         stops: [
-                            .init(color: Color.white.opacity(0.18), location: 0.0),
-                            .init(color: Color.white.opacity(0.04), location: 0.22),
-                            .init(color: Color.clear, location: 0.45)
+                            .init(color: Color.white.opacity(0.22), location: 0.0),
+                            .init(color: Color.white.opacity(0.05), location: 0.25),
+                            .init(color: Color.clear, location: 0.50)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -785,8 +789,8 @@ public struct MacOS27FloatingTerminalGlassBackground: View {
                 .strokeBorder(
                     LinearGradient(
                         stops: [
-                            .init(color: Color.white.opacity(0.35), location: 0.0),
-                            .init(color: Color.white.opacity(0.10), location: 0.40),
+                            .init(color: Color.white.opacity(0.40), location: 0.0),
+                            .init(color: Color.white.opacity(0.12), location: 0.40),
                             .init(color: Color.primary.opacity(0.10), location: 1.0)
                         ],
                         startPoint: .top,
