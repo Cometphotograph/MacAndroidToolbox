@@ -180,9 +180,11 @@ public struct MainView: View {
                     connectedDevicesHeader
                     connectedDevicesList
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 16)
             }
+            .frame(maxWidth: .infinity)
             .scrollContentBackground(.hidden)
         }
         .frame(width: 240)
@@ -228,7 +230,8 @@ public struct MainView: View {
                         }
                     })
                     .frame(height: 195)
-                    .padding(.horizontal, 20)
+                    .padding(.leading, 20)
+                    .padding(.trailing, 40)
                     .padding(.bottom, 20)
                 }
                 .transition(.asymmetric(
@@ -349,7 +352,7 @@ public struct MainView: View {
                     .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
                     .foregroundColor(isSelected ? .white : .primary)
                 
-                Spacer()
+                Spacer(minLength: 0)
                 
                 // Active Section Pill Indicator for Recovery
                 if section == .recovery, let dev = deviceManager.selectedDevice, (dev.mode == .recovery || dev.mode == .sideload) {
@@ -370,14 +373,15 @@ public struct MainView: View {
                     .fill(
                         isSelected ? Color.accentColor :
                         isHovered ? Color.primary.opacity(0.06) :
-                        Color.clear
+                        Color.black.opacity(0.0001)
                     )
                     .shadow(color: isSelected ? Color.accentColor.opacity(0.35) : Color.clear, radius: 4, x: 0, y: 1.5)
             )
-            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .onHover { hovering in
             hoveredSection = hovering ? section : nil
         }
@@ -441,7 +445,7 @@ public struct MainView: View {
                                 .lineLimit(1)
                         }
                         
-                        Spacer()
+                        Spacer(minLength: 0)
                         
                         if deviceManager.selectedDevice?.serial == dev.serial {
                             Image(systemName: "checkmark.circle.fill")
@@ -454,12 +458,13 @@ public struct MainView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(deviceManager.selectedDevice?.serial == dev.serial ? Color.primary.opacity(0.06) : Color.clear)
+                            .fill(deviceManager.selectedDevice?.serial == dev.serial ? Color.primary.opacity(0.06) : Color.black.opacity(0.0001))
                     )
-                    .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
         }
     }
