@@ -38,6 +38,53 @@ public struct EDLEnvironmentStatus: Sendable {
     public var isReady: Bool {
         isPython3Available && isLibusbAvailable && isEdlAvailable
     }
+    
+    @MainActor
+    public var localizedPythonVersion: String {
+        if !isPython3Available {
+            return L10n("edl_env_not_found")
+        }
+        let currentLang = LanguageManager.shared.currentLanguage
+        if python3Version.contains("专属沙箱") || python3Version.contains("專屬沙箱") || python3Version.contains("Sandbox") {
+            let ver = python3Version.replacingOccurrences(of: "专属沙箱 ", with: "")
+                .replacingOccurrences(of: "專屬沙箱 ", with: "")
+                .replacingOccurrences(of: "Dedicated Sandbox ", with: "")
+            if currentLang.isChinese {
+                return (currentLang == .zhHant ? "專屬沙箱 " : "专属沙箱 ") + ver
+            } else {
+                return "Dedicated Sandbox " + ver
+            }
+        }
+        return python3Version
+    }
+    
+    @MainActor
+    public var localizedEdlVersion: String {
+        if !isEdlAvailable {
+            return L10n("edl_env_not_ready")
+        }
+        let currentLang = LanguageManager.shared.currentLanguage
+        if edlVersion.contains("CLI") {
+            if currentLang.isChinese {
+                return currentLang == .zhHant ? "CLI 獨立執行" : "CLI 独立运行"
+            } else {
+                return "Standalone CLI Executable"
+            }
+        } else if edlVersion.contains("edl.py") {
+            if currentLang.isChinese {
+                return currentLang == .zhHant ? "edl.py 腳本執行" : "edl.py 脚本运行"
+            } else {
+                return "edl.py Python Script"
+            }
+        } else if edlVersion.contains("edlclient") {
+            if currentLang.isChinese {
+                return currentLang == .zhHant ? "Python 模組 (edlclient)" : "Python 模块 (edlclient)"
+            } else {
+                return "Python Module (edlclient)"
+            }
+        }
+        return edlVersion
+    }
 }
 
 public struct EDLPartitionItem: Identifiable, Sendable {

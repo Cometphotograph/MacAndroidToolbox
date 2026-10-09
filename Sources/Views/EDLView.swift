@@ -296,7 +296,7 @@ public struct EDLView: View {
                             Text(L10n("edl_loader_file"))
                                 .font(.headline)
                             
-                            Text("192 款引导库")
+                            Text(L10n("edl_loader_count_badge"))
                                 .font(.caption2.bold())
                                 .foregroundColor(.orange)
                                 .padding(.horizontal, 6)
@@ -334,7 +334,7 @@ public struct EDLView: View {
                     HStack {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.orange)
-                        Text("9008 引导握手与签名避坑须知")
+                        Text(L10n("edl_loader_notice_btn"))
                             .font(.caption.bold())
                             .foregroundColor(.orange)
                     }
@@ -347,7 +347,7 @@ public struct EDLView: View {
                         HStack {
                             Image(systemName: "sparkles")
                                 .foregroundColor(.blue)
-                            Text("当前机型专属提示: \(modelNotice)")
+                            Text(String(format: L10n("edl_model_notice_prefix"), modelNotice))
                                 .font(.caption.bold())
                                 .foregroundColor(.blue)
                         }
@@ -383,9 +383,7 @@ public struct EDLView: View {
                                 }
                             } label: {
                                 HStack(spacing: 5) {
-                                    Image(systemName: group.iconSystemName)
-                                        .font(.system(size: 11))
-                                    Text(group.brandName)
+                                    Text(group.localizedDisplayName)
                                         .font(.system(size: 12, weight: .semibold))
                                     Text("\(group.models.count)")
                                         .font(.system(size: 10, weight: .bold))
@@ -445,7 +443,7 @@ public struct EDLView: View {
                     // Model Dropdown
                     Picker("", selection: $selectedModelId) {
                         ForEach(filteredModels) { model in
-                            Text(model.displayName).tag(model.id)
+                            Text(model.localizedDisplayName).tag(model.id)
                         }
                     }
                     .pickerStyle(.menu)
@@ -481,10 +479,11 @@ public struct EDLView: View {
             if let model = currentSelectedModel {
                 HStack(spacing: 8) {
                     if model.hasDigest || model.hasSign {
+                        let sigFiles = "\(model.hasDigest ? "Digest.elf " : "")\(model.hasSign ? "Sign.bin" : "")".trimmingCharacters(in: .whitespaces)
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.shield.fill")
                                 .foregroundColor(.green)
-                            Text("免授权签名已配备 (\(model.hasDigest ? "Digest.elf " : "")\(model.hasSign ? "Sign.bin" : ""))")
+                            Text(String(format: L10n("edl_signature_equipped"), sigFiles))
                                 .font(.caption2.bold())
                                 .foregroundColor(.green)
                         }
@@ -516,7 +515,7 @@ public struct EDLView: View {
             
             // 6. Manual File Path Input
             VStack(alignment: .leading, spacing: 6) {
-                Text("当前加载的 Firehose 引导文件绝对路径:")
+                Text(L10n("edl_loader_current_path"))
                     .font(.caption.bold())
                     .foregroundColor(.secondary)
                 
@@ -543,9 +542,9 @@ public struct EDLView: View {
                         .foregroundColor(.secondary)
                     
                     Picker("", selection: $selectedMemoryType) {
-                        Text("UFS (高通主流旗舰)").tag("ufs")
-                        Text("eMMC (早期机型)").tag("emmc")
-                        Text("Auto (自动侦测)").tag("auto")
+                        Text(L10n("edl_mem_ufs")).tag("ufs")
+                        Text(L10n("edl_mem_emmc")).tag("emmc")
+                        Text(L10n("edl_mem_auto")).tag("auto")
                     }
                     .pickerStyle(.menu)
                     .frame(width: 175)
@@ -554,17 +553,17 @@ public struct EDLView: View {
                 // LUN Selection (only shown for UFS)
                 if selectedMemoryType == "ufs" {
                     HStack(spacing: 8) {
-                        Text("LUN 分区:")
+                        Text(L10n("edl_lun_partition"))
                             .font(.caption.bold())
                             .foregroundColor(.secondary)
                         
                         Picker("", selection: $selectedLun) {
-                            Text("LUN 0 (用户数据区)").tag(0)
-                            Text("LUN 1 (引导槽位 A)").tag(1)
-                            Text("LUN 2 (引导槽位 B)").tag(2)
-                            Text("LUN 3 (系统配置)").tag(3)
-                            Text("LUN 4 (厂商保留)").tag(4)
-                            Text("LUN 5 (厂商保留)").tag(5)
+                            Text(L10n("edl_lun_0")).tag(0)
+                            Text(L10n("edl_lun_1")).tag(1)
+                            Text(L10n("edl_lun_2")).tag(2)
+                            Text(L10n("edl_lun_3")).tag(3)
+                            Text(L10n("edl_lun_4")).tag(4)
+                            Text(L10n("edl_lun_5")).tag(5)
                         }
                         .pickerStyle(.menu)
                         .frame(width: 165)
@@ -997,18 +996,18 @@ public struct EDLView: View {
                 // Status items
                 if let env = edlService.environmentStatus {
                     envStatusRow(
-                        title: "Python 3 解释器",
-                        detail: "\(env.python3Path) (\(env.python3Version))",
+                        title: L10n("edl_env_python3_title"),
+                        detail: env.isPython3Available ? "\(env.python3Path) (\(env.localizedPythonVersion))" : L10n("edl_env_not_found"),
                         isReady: env.isPython3Available
                     )
                     envStatusRow(
-                        title: "libusb 底层 USB 驱动库",
-                        detail: env.isLibusbAvailable ? "已检测到 libusb-1.0.dylib (Homebrew/系统路径)" : "未检测到，需要安装 libusb",
+                        title: L10n("edl_env_libusb_title"),
+                        detail: env.isLibusbAvailable ? L10n("edl_env_libusb_ready") : L10n("edl_env_libusb_missing"),
                         isReady: env.isLibusbAvailable
                     )
                     envStatusRow(
-                        title: "bkerler/edl 核心工具库",
-                        detail: env.isEdlAvailable ? "\(env.edlPath) (\(env.edlVersion))" : "未检测到 edl CLI 或 Python 模块",
+                        title: L10n("edl_env_core_title"),
+                        detail: env.isEdlAvailable ? "\(env.edlPath) (\(env.localizedEdlVersion))" : L10n("edl_env_core_missing"),
                         isReady: env.isEdlAvailable
                     )
                 }
@@ -1073,32 +1072,32 @@ public struct EDLView: View {
                 
                 guideSectionItem(
                     number: "1",
-                    title: "按键组合进入 (特定品牌)",
-                    content: "手机彻底关机，按住【音量加 + 音量减】不放，同时插入连接 Mac 的 USB 数据线；部分机型需长按【电源键 + 音量加 + 音量减】持续 10 秒黑屏震动瞬间松开。"
+                    title: L10n("edl_guide_step1_title"),
+                    content: L10n("edl_guide_step1_desc")
                 )
                 
                 guideSectionItem(
                     number: "2",
-                    title: "命令行指令进入 (设备可开机/可进 Fastboot)",
-                    content: "若设备在正常系统开机状态：终端运行 adb reboot edl\n若设备在 Fastboot 模式：终端运行 fastboot oem edl 或 fastboot reboot-edl"
+                    title: L10n("edl_guide_step2_title"),
+                    content: L10n("edl_guide_step2_desc")
                 )
                 
                 guideSectionItem(
                     number: "3",
-                    title: "深度救砖工程线 (EDL 专用线)",
-                    content: "采用内部短接 D+ 与 GND 的 9008 工程线（带按键式）。手机关机，按住工程线开关插入手机，保持 5 秒后松开开关，设备将强制被引导至 9008 模式。"
+                    title: L10n("edl_guide_step3_title"),
+                    content: L10n("edl_guide_step3_desc")
                 )
                 
                 guideSectionItem(
                     number: "4",
-                    title: "拆机短接测试点 (Test Point 终极救砖)",
-                    content: "当 Bootloader/分区彻底损坏、任何按键无响应（黑砖）时，拆开手机后盖，使用金属镊子短接主板上的两个 9008 测试点（Test Point），同时插入数据线即可 100% 触发芯片硬件级 9008 模式。"
+                    title: L10n("edl_guide_step4_title"),
+                    content: L10n("edl_guide_step4_desc")
                 )
                 
                 guideSectionItem(
                     number: "5",
-                    title: "Firehose 引导文件 (Loader) 校验提醒",
-                    content: "绝大部分骁龙机型（如小米、OPPO、一加等）要求使用与 CPU 芯片代号匹配的 prog_firehose_ddr.elf / .mbn 文件。部分新款高端芯片带厂商私钥校验（Auth），救砖时需配合免授权 No-Auth 引导包。"
+                    title: L10n("edl_guide_step5_title"),
+                    content: L10n("edl_guide_step5_desc")
                 )
             }
             .liquidGlassCard(cornerRadius: 16, padding: 18)
@@ -1186,7 +1185,7 @@ public struct EDLView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "选择 Firehose 引导文件 (prog_firehose_*.elf / .mbn / .bin)"
+        panel.message = L10n("panel_choose_firehose_loader")
         if panel.runModal() == .OK, let url = panel.url {
             firehoseLoaderPath = url.path
         }
@@ -1197,7 +1196,7 @@ public struct EDLView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "选择 rawprogram0.xml / rawprogram_unsparse.xml"
+        panel.message = L10n("panel_choose_rawprogram")
         if panel.runModal() == .OK, let url = panel.url {
             rawprogramPath = url.path
             // Auto match patch0.xml and image dir in same folder
@@ -1229,7 +1228,7 @@ public struct EDLView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "选择 patch0.xml"
+        panel.message = L10n("panel_choose_patch")
         if panel.runModal() == .OK, let url = panel.url {
             patchPath = url.path
         }
@@ -1240,7 +1239,7 @@ public struct EDLView: View {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.message = "选择线刷包镜像所在目录"
+        panel.message = L10n("panel_choose_images_folder")
         if panel.runModal() == .OK, let url = panel.url {
             imageDirPath = url.path
         }
@@ -1251,7 +1250,7 @@ public struct EDLView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "选择要刷入 \(effectivePartition) 分区的镜像文件"
+        panel.message = String(format: L10n("panel_choose_partition_image"), effectivePartition)
         if panel.runModal() == .OK, let url = panel.url {
             singleImagePath = url.path
         }
@@ -1259,7 +1258,7 @@ public struct EDLView: View {
     
     private func chooseDumpSaveLocation() {
         let panel = NSSavePanel()
-        panel.title = "选择 \(effectivePartition) 分区备份保存位置"
+        panel.title = String(format: L10n("panel_choose_dump_location"), effectivePartition)
         panel.nameFieldStringValue = "\(effectivePartition).img"
         if panel.runModal() == .OK, let url = panel.url {
             dumpOutputPath = url.path
@@ -1416,7 +1415,7 @@ public struct EDLView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        panel.message = "请选择 EDL 命令行可执行程序或 edl.py 脚本"
+        panel.message = L10n("edl_choose_edl_prompt")
         panel.prompt = L10n("common_select")
         
         if panel.runModal() == .OK, let url = panel.url {

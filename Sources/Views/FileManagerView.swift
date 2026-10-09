@@ -45,10 +45,10 @@ public struct FileManagerView: View {
     private var quickPathsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("常用目錄快捷填入", systemImage: "folder.badge.gearshape")
+                Label(L10n("file_quick_paths_title"), systemImage: "folder.badge.gearshape")
                     .font(.headline)
                 Spacer()
-                Text("點選可快速填入推送/拉取路徑")
+                Text(L10n("file_quick_paths_desc"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -56,11 +56,11 @@ public struct FileManagerView: View {
             Divider().opacity(0.3)
             
             HStack(spacing: 8) {
-                quickPathButton(name: "下載 (Download)", path: "/sdcard/Download/")
-                quickPathButton(name: "相簿 (DCIM)", path: "/sdcard/DCIM/Camera/")
-                quickPathButton(name: "截圖 (Screenshots)", path: "/sdcard/Pictures/Screenshots/")
-                quickPathButton(name: "文件 (Documents)", path: "/sdcard/Documents/")
-                quickPathButton(name: "根目錄 (SDCard)", path: "/sdcard/")
+                quickPathButton(name: L10n("file_quick_path_download"), path: "/sdcard/Download/")
+                quickPathButton(name: L10n("file_quick_path_dcim"), path: "/sdcard/DCIM/Camera/")
+                quickPathButton(name: L10n("file_quick_path_screenshots"), path: "/sdcard/Pictures/Screenshots/")
+                quickPathButton(name: L10n("file_quick_path_documents"), path: "/sdcard/Documents/")
+                quickPathButton(name: L10n("file_quick_path_sdcard"), path: "/sdcard/")
             }
         }
         .liquidGlassCard(cornerRadius: 16, padding: 14)

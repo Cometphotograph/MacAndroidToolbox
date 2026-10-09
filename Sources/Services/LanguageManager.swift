@@ -39,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.1"
-    public let appBuild = "20261009_153"
+    public let appBuild = "20261009_154"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -2003,6 +2003,83 @@ public final class LanguageManager: ObservableObject {
             .ru: "Отправка файлов на устройство",
             .uk: "Надсилання файлів на пристрій"
         ],
+        "file_quick_paths_title": [
+            .zhHant: "常用目錄快捷填入",
+            .zhHans: "常用目录快捷填入",
+            .en: "Quick Directory Fill",
+            .fr: "Remplissage rapide de dossier",
+            .ja: "よく使うディレクトリの自動入力",
+            .es: "Atajo de directorios frecuentes",
+            .ko: "자주 사용하는 디렉토리 빠른 입력",
+            .ru: "Быстрый ввод частых каталогов",
+            .uk: "Швидке введення частих каталогів"
+        ],
+        "file_quick_paths_desc": [
+            .zhHant: "點選可快速填入推送/拉取路徑",
+            .zhHans: "点击可快速填入推送/拉取路径",
+            .en: "Click to quickly populate push/pull paths",
+            .fr: "Cliquez pour remplir rapidement les chemins de transfert",
+            .ja: "クリックして送信/取得パスをすばやく入力",
+            .es: "Haga clic para rellenar rutas de envío/descarga",
+            .ko: "클릭하여 푸시/풀 경로를 빠르게 입력합니다",
+            .ru: "Нажмите для быстрой вставки путей",
+            .uk: "Натисніть для швидкого введення шляхів"
+        ],
+        "file_quick_path_download": [
+            .zhHant: "下載 (Download)",
+            .zhHans: "下载 (Download)",
+            .en: "Download",
+            .fr: "Téléchargements (Download)",
+            .ja: "ダウンロード (Download)",
+            .es: "Descargas (Download)",
+            .ko: "다운로드 (Download)",
+            .ru: "Загрузки (Download)",
+            .uk: "Завантаження (Download)"
+        ],
+        "file_quick_path_dcim": [
+            .zhHant: "相簿 (DCIM)",
+            .zhHans: "相册 (DCIM)",
+            .en: "Camera (DCIM)",
+            .fr: "Appareil photo (DCIM)",
+            .ja: "カメラ (DCIM)",
+            .es: "Cámara (DCIM)",
+            .ko: "사진 (DCIM)",
+            .ru: "Галерея (DCIM)",
+            .uk: "Галерея (DCIM)"
+        ],
+        "file_quick_path_screenshots": [
+            .zhHant: "截圖 (Screenshots)",
+            .zhHans: "截图 (Screenshots)",
+            .en: "Screenshots",
+            .fr: "Captures d'écran",
+            .ja: "スクリーンショット",
+            .es: "Capturas",
+            .ko: "스크린샷 (Screenshots)",
+            .ru: "Снимки экрана",
+            .uk: "Знімки екрана"
+        ],
+        "file_quick_path_documents": [
+            .zhHant: "文件 (Documents)",
+            .zhHans: "文档 (Documents)",
+            .en: "Documents",
+            .fr: "Documents",
+            .ja: "ドキュメント (Documents)",
+            .es: "Documentos",
+            .ko: "문서 (Documents)",
+            .ru: "Документы",
+            .uk: "Документи"
+        ],
+        "file_quick_path_sdcard": [
+            .zhHant: "根目錄 (SDCard)",
+            .zhHans: "根目录 (SDCard)",
+            .en: "SDCard Root",
+            .fr: "Racine (SDCard)",
+            .ja: "ルート (SDCard)",
+            .es: "Raíz (SDCard)",
+            .ko: "루트 디렉토리 (SDCard)",
+            .ru: "Корень (SDCard)",
+            .uk: "Корінь (SDCard)"
+        ],
         "file_save_screenshot": [
             .zhHant: "儲存截圖...",
             .zhHans: "保存截图...",
@@ -3069,6 +3146,523 @@ public final class LanguageManager: ObservableObject {
             .ko: "환경 폴더 열기",
             .ru: "Открыть папку окружения",
             .uk: "Відкрити теку середовища"
+        ],
+        "edl_loader_count_badge": [
+            .zhHant: "192 款引導庫",
+            .zhHans: "192 款引导库",
+            .en: "192 Loaders",
+            .fr: "192 Chargeurs",
+            .ja: "192種 ローダー",
+            .es: "192 Cargadores",
+            .ko: "192종 로더",
+            .ru: "192 загрузчика",
+            .uk: "192 завантажувачі"
+        ],
+        "edl_loader_notice_btn": [
+            .zhHant: "9008 引導握手與簽名避坑須知",
+            .zhHans: "9008 引导握手与签名避坑须知",
+            .en: "9008 Sahara Handshake & Auth Notice",
+            .fr: "Guide et avertissement de signature 9008",
+            .ja: "9008 ハンドシェイクと署名の注意事項",
+            .es: "Aviso de protocolo 9008 y firmas",
+            .ko: "9008 핸드셰이크 및 서명 주의사항",
+            .ru: "Инструкция по 9008 и подписям",
+            .uk: "Інструкція щодо 9008 та підписів"
+        ],
+        "edl_model_notice_prefix": [
+            .zhHant: "目前機型專屬提示：%@",
+            .zhHans: "当前机型专属提示：%@",
+            .en: "Model Specific Notice: %@",
+            .fr: "Avis spécifique au modèle : %@",
+            .ja: "この機種の特記事項: %@",
+            .es: "Aviso específico del modelo: %@",
+            .ko: "해당 기기 전용 주의사항: %@",
+            .ru: "Примечание для этой модели: %@",
+            .uk: "Примітка для цієї моделі: %@"
+        ],
+        "edl_loader_current_path": [
+            .zhHant: "目前載入的 Firehose 引導檔案絕對路徑：",
+            .zhHans: "当前加载的 Firehose 引导文件绝对路径:",
+            .en: "Current Loaded Firehose Loader Absolute Path:",
+            .fr: "Chemin absolu du chargeur Firehose actuel :",
+            .ja: "現在ロード中の Firehose ローダー絶対パス:",
+            .es: "Ruta absoluta del cargador Firehose cargado actualmente:",
+            .ko: "현재 로드된 Firehose 로더 절대 경로:",
+            .ru: "Абсолютный путь к загруженному Firehose:",
+            .uk: "Абсолютний шлях до завантаженого Firehose:"
+        ],
+        "edl_signature_equipped": [
+            .zhHant: "免授權簽名已配備 (%@)",
+            .zhHans: "免授权签名已配备 (%@)",
+            .en: "No-Auth Signatures Equipped (%@)",
+            .fr: "Signatures sans authentification équipées (%@)",
+            .ja: "認証回避署名適用済み (%@)",
+            .es: "Firmas sin autorización equipadas (%@)",
+            .ko: "인증 우회 서명 탑재됨 (%@)",
+            .ru: "Подписи без авторизации подключены (%@)",
+            .uk: "Підписи без авторизації підключено (%@)"
+        ],
+        "edl_mem_ufs": [
+            .zhHant: "UFS (高通主流旗艦)",
+            .zhHans: "UFS (高通主流旗舰)",
+            .en: "UFS (Qualcomm Flagships)",
+            .fr: "UFS (Haut de gamme Qualcomm)",
+            .ja: "UFS (Qualcomm 主力フラッグシップ)",
+            .es: "UFS (Gama alta Qualcomm)",
+            .ko: "UFS (퀄컴 주력 플래그십)",
+            .ru: "UFS (Флагманы Qualcomm)",
+            .uk: "UFS (Флагмани Qualcomm)"
+        ],
+        "edl_mem_emmc": [
+            .zhHant: "eMMC (早期機型)",
+            .zhHans: "eMMC (早期机型)",
+            .en: "eMMC (Older Models)",
+            .fr: "eMMC (Anciens modèles)",
+            .ja: "eMMC (旧型機種)",
+            .es: "eMMC (Modelos antiguos)",
+            .ko: "eMMC (구형 기종)",
+            .ru: "eMMC (Старые модели)",
+            .uk: "eMMC (Старі моделі)"
+        ],
+        "edl_mem_auto": [
+            .zhHant: "Auto (自動偵測)",
+            .zhHans: "Auto (自动侦测)",
+            .en: "Auto (Auto Detect)",
+            .fr: "Auto (Détection auto)",
+            .ja: "Auto (自動検出)",
+            .es: "Auto (Detección automática)",
+            .ko: "Auto (자동 감지)",
+            .ru: "Auto (Автоопределение)",
+            .uk: "Auto (Автовизначення)"
+        ],
+        "edl_lun_partition": [
+            .zhHant: "LUN 分區：",
+            .zhHans: "LUN 分区:",
+            .en: "LUN Drive:",
+            .fr: "Disque LUN :",
+            .ja: "LUN パーティション:",
+            .es: "Unidad LUN:",
+            .ko: "LUN 파티션:",
+            .ru: "Раздел LUN:",
+            .uk: "Розділ LUN:"
+        ],
+        "edl_lun_0": [
+            .zhHant: "LUN 0 (使用者資料區)",
+            .zhHans: "LUN 0 (用户数据区)",
+            .en: "LUN 0 (User Data / Main)",
+            .fr: "LUN 0 (Données utilisateur / Principal)",
+            .ja: "LUN 0 (ユーザーデータ領域)",
+            .es: "LUN 0 (Datos de usuario / Principal)",
+            .ko: "LUN 0 (사용자 데이터 영역)",
+            .ru: "LUN 0 (Пользовательские данные)",
+            .uk: "LUN 0 (Користувацькі дані)"
+        ],
+        "edl_lun_1": [
+            .zhHant: "LUN 1 (引導槽位 A)",
+            .zhHans: "LUN 1 (引导槽位 A)",
+            .en: "LUN 1 (Boot Slot A)",
+            .fr: "LUN 1 (Emplacement de démarrage A)",
+            .ja: "LUN 1 (ブートスロット A)",
+            .es: "LUN 1 (Ranura de arranque A)",
+            .ko: "LUN 1 (부팅 슬롯 A)",
+            .ru: "LUN 1 (Слот загрузки A)",
+            .uk: "LUN 1 (Слот завантаження A)"
+        ],
+        "edl_lun_2": [
+            .zhHant: "LUN 2 (引導槽位 B)",
+            .zhHans: "LUN 2 (引导槽位 B)",
+            .en: "LUN 2 (Boot Slot B)",
+            .fr: "LUN 2 (Emplacement de démarrage B)",
+            .ja: "LUN 2 (ブートスロット B)",
+            .es: "LUN 2 (Ranura de arranque B)",
+            .ko: "LUN 2 (부팅 슬롯 B)",
+            .ru: "LUN 2 (Слот загрузки B)",
+            .uk: "LUN 2 (Слот завантаження B)"
+        ],
+        "edl_lun_3": [
+            .zhHant: "LUN 3 (系統設定)",
+            .zhHans: "LUN 3 (系统配置)",
+            .en: "LUN 3 (System Config)",
+            .fr: "LUN 3 (Configuration système)",
+            .ja: "LUN 3 (システム構成)",
+            .es: "LUN 3 (Configuración del sistema)",
+            .ko: "LUN 3 (시스템 구성)",
+            .ru: "LUN 3 (Конфигурация системы)",
+            .uk: "LUN 3 (Конфігурація системи)"
+        ],
+        "edl_lun_4": [
+            .zhHant: "LUN 4 (廠商保留)",
+            .zhHans: "LUN 4 (厂商保留)",
+            .en: "LUN 4 (Vendor Reserved)",
+            .fr: "LUN 4 (Réservé constructeur)",
+            .ja: "LUN 4 (ベンダー予約領域)",
+            .es: "LUN 4 (Reservado por fabricante)",
+            .ko: "LUN 4 (제조사 예약 영역)",
+            .ru: "LUN 4 (Зарезервировано вендором)",
+            .uk: "LUN 4 (Зарезервовано виробником)"
+        ],
+        "edl_lun_5": [
+            .zhHant: "LUN 5 (廠商保留)",
+            .zhHans: "LUN 5 (厂商保留)",
+            .en: "LUN 5 (Vendor Reserved)",
+            .fr: "LUN 5 (Réservé constructeur)",
+            .ja: "LUN 5 (ベンダー予約領域)",
+            .es: "LUN 5 (Reservado por fabricante)",
+            .ko: "LUN 5 (제조사 예약 영역)",
+            .ru: "LUN 5 (Зарезервировано вендором)",
+            .uk: "LUN 5 (Зарезервовано виробником)"
+        ],
+        "edl_env_python3_title": [
+            .zhHant: "Python 3 直譯器",
+            .zhHans: "Python 3 解释器",
+            .en: "Python 3 Interpreter",
+            .fr: "Interpréteur Python 3",
+            .ja: "Python 3 インタプリタ",
+            .es: "Intérprete Python 3",
+            .ko: "Python 3 인터프리터",
+            .ru: "Интерпретатор Python 3",
+            .uk: "Інтерпретатор Python 3"
+        ],
+        "edl_env_libusb_title": [
+            .zhHant: "libusb 底層 USB 驅動庫",
+            .zhHans: "libusb 底层 USB 驱动库",
+            .en: "libusb Low-Level USB Driver",
+            .fr: "Pilote USB bas niveau libusb",
+            .ja: "libusb 低レベル USB ドライバ",
+            .es: "Controlador USB de bajo nivel libusb",
+            .ko: "libusb 저수준 USB 드라이버",
+            .ru: "Низкоуровневый USB-драйвер libusb",
+            .uk: "Низькорівневий USB-драйвер libusb"
+        ],
+        "edl_env_core_title": [
+            .zhHant: "bkerler/edl 核心工具庫",
+            .zhHans: "bkerler/edl 核心工具库",
+            .en: "bkerler/edl Core Tool Suite",
+            .fr: "Suite d'outils centrale bkerler/edl",
+            .ja: "bkerler/edl コアツール群",
+            .es: "Suite de herramientas bkerler/edl",
+            .ko: "bkerler/edl 핵심 도구 모음",
+            .ru: "Основной набор утилит bkerler/edl",
+            .uk: "Основний набір утиліт bkerler/edl"
+        ],
+        "edl_env_libusb_ready": [
+            .zhHant: "已偵測到 libusb-1.0.dylib (Homebrew/系統路徑)",
+            .zhHans: "已检测到 libusb-1.0.dylib (Homebrew/系统路径)",
+            .en: "Detected libusb-1.0.dylib (Homebrew/System path)",
+            .fr: "Détecté libusb-1.0.dylib (Homebrew/Système)",
+            .ja: "libusb-1.0.dylib を検出 (Homebrew/システムパス)",
+            .es: "Detectado libusb-1.0.dylib (Homebrew/Sistema)",
+            .ko: "libusb-1.0.dylib 감지됨 (Homebrew/시스템 경로)",
+            .ru: "Обнаружен libusb-1.0.dylib (Homebrew/Системный путь)",
+            .uk: "Виявлено libusb-1.0.dylib (Homebrew/Системний шлях)"
+        ],
+        "edl_env_libusb_missing": [
+            .zhHant: "未偵測到，需要安裝 libusb",
+            .zhHans: "未检测到，需要安装 libusb",
+            .en: "Not detected, libusb required",
+            .fr: "Non détecté, libusb requis",
+            .ja: "未検出。libusb が必要です",
+            .es: "No detectado, libusb requerido",
+            .ko: "미감지됨, libusb 설치 필요",
+            .ru: "Не обнаружен, требуется libusb",
+            .uk: "Не виявлено, потрібен libusb"
+        ],
+        "edl_env_core_missing": [
+            .zhHant: "未偵測到 edl CLI 或 Python 模組",
+            .zhHans: "未检测到 edl CLI 或 Python 模块",
+            .en: "edl CLI or Python module not detected",
+            .fr: "CLI edl ou module Python non détecté",
+            .ja: "edl CLI または Python モジュールが未検出",
+            .es: "CLI de edl o módulo Python no detectado",
+            .ko: "edl CLI 또는 Python 모듈 미감지됨",
+            .ru: "CLI edl или модуль Python не обнаружен",
+            .uk: "CLI edl або модуль Python не виявлено"
+        ],
+        "edl_choose_edl_prompt": [
+            .zhHant: "請選擇 EDL 命令列可執行檔或 edl.py 腳本",
+            .zhHans: "请选择 EDL 命令行可执行程序或 edl.py 脚本",
+            .en: "Please select EDL executable binary or edl.py script",
+            .fr: "Veuillez sélectionner le binaire EDL ou le script edl.py",
+            .ja: "EDL 実行可能バイナリまたは edl.py スクリプトを選択してください",
+            .es: "Seleccione el ejecutable de EDL o el script edl.py",
+            .ko: "EDL 실행 파일 또는 edl.py 스크립트를 선택하세요",
+            .ru: "Выберите исполняемый файл EDL или скрипт edl.py",
+            .uk: "Оберіть виконуваний файл EDL або скрипт edl.py"
+        ],
+        "edl_env_not_found": [
+            .zhHant: "未找到",
+            .zhHans: "未找到",
+            .en: "Not Found",
+            .fr: "Non trouvé",
+            .ja: "見つかりません",
+            .es: "No encontrado",
+            .ko: "찾을 수 없음",
+            .ru: "Не найдено",
+            .uk: "Не знайдено"
+        ],
+        "edl_env_not_ready": [
+            .zhHant: "未就緒",
+            .zhHans: "未就绪",
+            .en: "Not Ready",
+            .fr: "Non prêt",
+            .ja: "準備未完了",
+            .es: "No listo",
+            .ko: "준비되지 않음",
+            .ru: "Не готово",
+            .uk: "Не готово"
+        ],
+        "edl_brand_xiaomi": [
+            .zhHant: "小米",
+            .zhHans: "小米",
+            .en: "Xiaomi",
+            .fr: "Xiaomi",
+            .ja: "Xiaomi",
+            .es: "Xiaomi",
+            .ko: "Xiaomi",
+            .ru: "Xiaomi",
+            .uk: "Xiaomi"
+        ],
+        "edl_brand_oplus": [
+            .zhHant: "歐加",
+            .zhHans: "欧加",
+            .en: "OPLUS",
+            .fr: "OPLUS",
+            .ja: "OPLUS",
+            .es: "OPLUS",
+            .ko: "OPLUS",
+            .ru: "OPLUS",
+            .uk: "OPLUS"
+        ],
+        "edl_brand_meizu": [
+            .zhHant: "魅族",
+            .zhHans: "魅族",
+            .en: "Meizu",
+            .fr: "Meizu",
+            .ja: "Meizu",
+            .es: "Meizu",
+            .ko: "Meizu",
+            .ru: "Meizu",
+            .uk: "Meizu"
+        ],
+        "edl_brand_blackshark": [
+            .zhHant: "黑鯊",
+            .zhHans: "黑鲨",
+            .en: "Black Shark",
+            .fr: "Black Shark",
+            .ja: "Black Shark",
+            .es: "Black Shark",
+            .ko: "Black Shark",
+            .ru: "Black Shark",
+            .uk: "Black Shark"
+        ],
+        "edl_brand_nubia": [
+            .zhHant: "努比亞",
+            .zhHans: "努比亚",
+            .en: "Nubia",
+            .fr: "Nubia",
+            .ja: "Nubia",
+            .es: "Nubia",
+            .ko: "Nubia",
+            .ru: "Nubia",
+            .uk: "Nubia"
+        ],
+        "edl_brand_lenovo": [
+            .zhHant: "聯想",
+            .zhHans: "联想",
+            .en: "Lenovo",
+            .fr: "Lenovo",
+            .ja: "Lenovo",
+            .es: "Lenovo",
+            .ko: "Lenovo",
+            .ru: "Lenovo",
+            .uk: "Lenovo"
+        ],
+        "edl_brand_asus": [
+            .zhHant: "華碩",
+            .zhHans: "华硕",
+            .en: "ASUS",
+            .fr: "ASUS",
+            .ja: "ASUS",
+            .es: "ASUS",
+            .ko: "ASUS",
+            .ru: "ASUS",
+            .uk: "ASUS"
+        ],
+        "panel_choose_firehose_loader": [
+            .zhHant: "選擇 Firehose 引導檔案 (prog_firehose_*.elf / .mbn / .bin)",
+            .zhHans: "选择 Firehose 引导文件 (prog_firehose_*.elf / .mbn / .bin)",
+            .en: "Select Firehose Loader (prog_firehose_*.elf / .mbn / .bin)",
+            .fr: "Sélectionner le chargeur Firehose (prog_firehose_*.elf / .mbn / .bin)",
+            .ja: "Firehose ローダーファイルを選択 (prog_firehose_*.elf / .mbn / .bin)",
+            .es: "Seleccionar cargador Firehose (prog_firehose_*.elf / .mbn / .bin)",
+            .ko: "Firehose 로더 파일 선택 (prog_firehose_*.elf / .mbn / .bin)",
+            .ru: "Выберите загрузчик Firehose (prog_firehose_*.elf / .mbn / .bin)",
+            .uk: "Виберіть завантажувач Firehose (prog_firehose_*.elf / .mbn / .bin)"
+        ],
+        "panel_choose_rawprogram": [
+            .zhHant: "選擇 rawprogram0.xml / rawprogram_unsparse.xml",
+            .zhHans: "选择 rawprogram0.xml / rawprogram_unsparse.xml",
+            .en: "Select rawprogram0.xml / rawprogram_unsparse.xml",
+            .fr: "Sélectionner rawprogram0.xml / rawprogram_unsparse.xml",
+            .ja: "rawprogram0.xml / rawprogram_unsparse.xml を選択",
+            .es: "Seleccionar rawprogram0.xml / rawprogram_unsparse.xml",
+            .ko: "rawprogram0.xml / rawprogram_unsparse.xml 선택",
+            .ru: "Выберите rawprogram0.xml / rawprogram_unsparse.xml",
+            .uk: "Виберіть rawprogram0.xml / rawprogram_unsparse.xml"
+        ],
+        "panel_choose_patch": [
+            .zhHant: "選擇 patch0.xml",
+            .zhHans: "选择 patch0.xml",
+            .en: "Select patch0.xml",
+            .fr: "Sélectionner patch0.xml",
+            .ja: "patch0.xml を選択",
+            .es: "Seleccionar patch0.xml",
+            .ko: "patch0.xml 선택",
+            .ru: "Выберите patch0.xml",
+            .uk: "Виберіть patch0.xml"
+        ],
+        "panel_choose_images_folder": [
+            .zhHant: "選擇線刷包映像檔所在目錄",
+            .zhHans: "选择线刷包镜像所在目录",
+            .en: "Select Firmware Images Folder",
+            .fr: "Sélectionner le dossier des images du firmware",
+            .ja: "ファームウェアイメージ格納フォルダを選択",
+            .es: "Seleccionar carpeta de imágenes de firmware",
+            .ko: "펌웨어 이미지 폴더 선택",
+            .ru: "Выберите папку с образами прошивки",
+            .uk: "Виберіть теку з образами прошивки"
+        ],
+        "panel_choose_partition_image": [
+            .zhHant: "選擇要刷入 %@ 分區的映像檔",
+            .zhHans: "选择要刷入 %@ 分区的镜像文件",
+            .en: "Select image file to flash into %@ partition",
+            .fr: "Sélectionnez l'image à flasher sur la partition %@",
+            .ja: "%@ パーティションに書き込むイメージを選択",
+            .es: "Seleccione el archivo de imagen para la partición %@",
+            .ko: "%@ 파티션에 플래시할 이미지 파일 선택",
+            .ru: "Выберите образ для прошивки в раздел %@",
+            .uk: "Виберіть образ для запису в розділ %@"
+        ],
+        "panel_choose_dump_location": [
+            .zhHant: "選擇 %@ 分區備份儲存位置",
+            .zhHans: "选择 %@ 分区备份保存位置",
+            .en: "Select backup destination for %@ partition",
+            .fr: "Sélectionner l'emplacement de sauvegarde de la partition %@",
+            .ja: "%@ パーティションのバックアップ保存先を選択",
+            .es: "Seleccionar ubicación de guardado para la partición %@",
+            .ko: "%@ 파티션 백업 저장 위치 선택",
+            .ru: "Выберите путь сохранения резервной копии %@",
+            .uk: "Виберіть шлях збереження резервної копії %@"
+        ],
+        "edl_guide_step1_title": [
+            .zhHant: "按鍵組合進入 (特定品牌)",
+            .zhHans: "按键组合进入 (特定品牌)",
+            .en: "Hardware Key Combo (Brand Specific)",
+            .fr: "Combinaison de boutons (Marques spécifiques)",
+            .ja: "ハードウェアボタンでの進入 (特定ブランド)",
+            .es: "Combinación de botones (Marcas específicas)",
+            .ko: "물리 버튼 조합 진입 (특정 브랜드)",
+            .ru: "Комбинация клавиш (Определенные бренды)",
+            .uk: "Комбінація клавіш (Певні бренди)"
+        ],
+        "edl_guide_step1_desc": [
+            .zhHant: "手機徹底關機，按住【音量加 + 音量減】不放，同時插入連接 Mac 的 USB 傳輸線；部分機型需長按【電源鍵 + 音量加 + 音量減】持續 10 秒黑屏震動瞬間鬆開。",
+            .zhHans: "手机彻底关机，按住【音量加 + 音量减】不放，同时插入连接 Mac 的 USB 数据线；部分机型需长按【电源键 + 音量加 + 音量减】持续 10 秒黑屏震动瞬间松开。",
+            .en: "Power off device completely. Hold [Vol Up + Vol Down] and plug in the USB cable to Mac. Some models require holding [Power + Vol Up + Vol Down] for 10s until vibration, then release immediately.",
+            .fr: "Éteignez complètement le téléphone. Maintenez [Vol + et Vol -] enfoncés et branchez le câble USB sur le Mac. Certains modèles nécessitent [Power + Vol + et Vol -] pendant 10s.",
+            .ja: "端末を完全に電源オフにし、【音量上 + 音量下】を押したまま Mac に USB 接続します。一部機種は【電源 + 音量上 + 音量下】を約10秒間長押しし、画面暗転と振動の瞬間に離します。",
+            .es: "Apague completamente el dispositivo. Mantenga presionado [Volumen Arriba + Abajo] y conecte el cable USB al Mac. Algunos modelos requieren [Encendido + Vol Arriba + Vol Abajo] durante 10 segundos.",
+            .ko: "기기를 완전히 끈 후 【볼륨 상 + 볼륨 하】를 누른 채 Mac에 USB 케이블을 연결합니다. 일부 기종은 【전원 + 볼륨 상 + 볼륨 하】를 10초간 길게 눌러 진동 직후 손을 뗍니다.",
+            .ru: "Полностью выключите устройство, зажмите [Громкость + и Громкость -] и подключите USB к Mac. На некоторых устройствах удерживайте [Питание + Громкость + и Громкость -] 10 секунд.",
+            .uk: "Повністю вимкніть пристрій, затисніть [Гучність + і Гучність -] та підключіть USB до Mac. На деяких пристроях тримайте [Живлення + Гучність + і Гучність -] 10 секунд."
+        ],
+        "edl_guide_step2_title": [
+            .zhHant: "命令列指令進入 (設備可開機/可進 Fastboot)",
+            .zhHans: "命令行指令进入 (设备可开机/可进 Fastboot)",
+            .en: "Command Trigger (System Booted / Fastboot)",
+            .fr: "Déclenchement par commande (Système démarré / Fastboot)",
+            .ja: "コマンドによる進入 (起動可能/Fastboot可能)",
+            .es: "Comando de terminal (Sistema iniciado / Fastboot)",
+            .ko: "명령어 진입 (정상 부팅 / Fastboot 진입 가능 시)",
+            .ru: "Команды терминала (Система / Fastboot)",
+            .uk: "Команди терміналу (Система / Fastboot)"
+        ],
+        "edl_guide_step2_desc": [
+            .zhHant: "若設備在正常系統開機狀態：終端執行 adb reboot edl\n若設備在 Fastboot 模式：終端執行 fastboot oem edl 或 fastboot reboot-edl",
+            .zhHans: "若设备在正常系统开机状态：终端运行 adb reboot edl\n若设备在 Fastboot 模式：终端运行 fastboot oem edl 或 fastboot reboot-edl",
+            .en: "If booted into normal system: run 'adb reboot edl'\nIf in Fastboot mode: run 'fastboot oem edl' or 'fastboot reboot-edl'",
+            .fr: "Si le système fonctionne : lancez 'adb reboot edl'\nEn mode Fastboot : lancez 'fastboot oem edl' ou 'fastboot reboot-edl'",
+            .ja: "通常起動中の場合: ターミナルで adb reboot edl を実行\nFastboot モードの場合: ターミナルで fastboot oem edl または fastboot reboot-edl を実行",
+            .es: "Si el sistema inicia normalmente: ejecute 'adb reboot edl'\nEn modo Fastboot: ejecute 'fastboot oem edl' o 'fastboot reboot-edl'",
+            .ko: "정상 부팅 상태: 터미널에서 adb reboot edl 실행\nFastboot 모드: 터미널에서 fastboot oem edl 또는 fastboot reboot-edl 실행",
+            .ru: "В работающей системе: выполните adb reboot edl\nВ режиме Fastboot: выполните fastboot oem edl или fastboot reboot-edl",
+            .uk: "У працюючій системі: виконайте adb reboot edl\nУ режимі Fastboot: виконайте fastboot oem edl або fastboot reboot-edl"
+        ],
+        "edl_guide_step3_title": [
+            .zhHant: "深度救磚工程線 (EDL 專用線)",
+            .zhHans: "深度救砖工程线 (EDL 专用线)",
+            .en: "Deep Flash / EDL Engineering Cable",
+            .fr: "Câble de secours d'ingénierie EDL",
+            .ja: "EDL 救済専用エンジニアリングケーブル",
+            .es: "Cable de ingeniería EDL (Deep Flash)",
+            .ko: "EDL 전용 엔지니어링 케이블 (딥 플래시)",
+            .ru: "Инженерный кабель EDL (Deep Flash Cable)",
+            .uk: "Інженерний кабель EDL (Deep Flash Cable)"
+        ],
+        "edl_guide_step3_desc": [
+            .zhHant: "採用內部短接 D+ 與 GND 的 9008 工程線（帶按鍵式）。手機關機，按住工程線開關插入手機，保持 5 秒後鬆開開關，設備將強制被引導至 9008 模式。",
+            .zhHans: "采用内部短接 D+ 与 GND 的 9008 工程线（带按键式）。手机关机，按住工程线开关插入手机，保持 5 秒后松开开关，设备将强制被引导至 9008 模式。",
+            .en: "Use a 9008 deep flash cable (with button shorting D+ and GND). Power off phone, press and hold the button while plugging into phone, hold 5 seconds and release. Device will be forced into 9008 EDL.",
+            .fr: "Utilisez un câble 9008 (court-circuitant D+ et GND). Éteignez le téléphone, maintenez le bouton du câble enfoncé pendant 5 secondes lors du branchement.",
+            .ja: "D+ と GND を内部短絡するスイッチ付き 9008 専用ケーブルを使用します。電源オフの端末にスイッチを押しながら接続し、5秒後に離すと 9008 に強制突入します。",
+            .es: "Use un cable de ingeniería 9008 (con botón que puentea D+ y GND). Apague el teléfono, mantenga presionado el botón mientras lo conecta durante 5 segundos y suéltelo.",
+            .ko: "D+와 GND를 단락시키는 스위치형 9008 케이블을 사용합니다. 전원을 끈 후 스위치를 누른 채 연결하고 5초 후 놓으면 9008 모드로 강제 진입합니다.",
+            .ru: "Используйте инженерный кабель 9008 (замыкающий D+ и GND). Выключите телефон, зажмите кнопку кабеля на 5 секунд при подключении, затем отпустите.",
+            .uk: "Використовуйте інженерний кабель 9008 (замикаючий D+ і GND). Вимкніть телефон, затисніть кнопку кабелю на 5 секунд при підключенні, потім відпустіть."
+        ],
+        "edl_guide_step4_title": [
+            .zhHant: "拆機短接測試點 (Test Point 終極救磚)",
+            .zhHans: "拆机短接测试点 (Test Point 终极救砖)",
+            .en: "Test Point Shorting (Hardware Ultimate Rescue)",
+            .fr: "Court-circuit des points de test (Test Point ultime)",
+            .ja: "テストポイント短絡 (Test Point 究極のハードウェア救出)",
+            .es: "Puente de puntos de prueba (Test Point rescate definitivo)",
+            .ko: "테스트 포인트 단락 (Test Point 최종 벽돌 복구)",
+            .ru: "Замыкание тестпоинтов (Test Point)",
+            .uk: "Замикання тестпоінтів (Test Point)"
+        ],
+        "edl_guide_step4_desc": [
+            .zhHant: "當 Bootloader/分區徹底損壞、任何按鍵無響應（黑磚）時，拆開手機後蓋，使用金屬鑷子短接主機板上的兩個 9008 測試點（Test Point），同時插入傳輸線即可 100% 觸發晶片硬體級 9008 模式。",
+            .zhHans: "当 Bootloader/分区彻底损坏、任何按键无响应（黑砖）时，拆开手机后盖，使用金属镊子短接主板上的两个 9008 测试点（Test Point），同时插入数据线即可 100% 触发芯片硬件级 9008 模式。",
+            .en: "When bootloader is corrupted or hard bricked, remove back cover and use metallic tweezers to short the two motherboard 9008 Test Points while plugging in the cable to trigger hardware EDL mode.",
+            .fr: "En cas de brique complète sans réponse, ouvrez le capot arrière et court-circuitez les deux points de test 9008 avec une pince métallique lors du branchement du câble.",
+            .ja: "ブートローダー破損や完全文鎮化（無反応）時、背面カバーを外し、マザーボード上の 2 つの 9008 テストポイントをピンセットで短絡しながらケーブルを挿入すると確実に 9008 が起動します。",
+            .es: "Cuando el bootloader está dañado o no responde, retire la tapa trasera y use pinzas metálicas para puentear los dos puntos de prueba (Test Point) 9008 mientras conecta el cable.",
+            .ko: "부트로더 파손 등으로 완전 벽돌(무반응) 시, 뒷면 커버를 분해하고 메인보드의 9008 테스트 포인트 두 곳을 핀셋으로 단락한 상태에서 케이블을 꽂아 100% 하드웨어 9008로 진입합니다.",
+            .ru: "При полном окирпичивании снимите заднюю крышку и замкните металлическим пинцетом два тестпоинта (Test Point) 9008 на плате при подключении кабеля.",
+            .uk: "При повному зацегленні зніміть задню кришку та замкніть металевим пінцетом два тестпоінти (Test Point) 9008 на платі під час підключення кабелю."
+        ],
+        "edl_guide_step5_title": [
+            .zhHant: "Firehose 引導檔案 (Loader) 校驗提醒",
+            .zhHans: "Firehose 引导文件 (Loader) 校验提醒",
+            .en: "Firehose Loader Compatibility & Auth Notice",
+            .fr: "Avertissement de validation du chargeur Firehose",
+            .ja: "Firehose ローダーの検証と注意事項",
+            .es: "Aviso de compatibilidad y firma de Firehose",
+            .ko: "Firehose 로더 호환성 및 인증 주의사항",
+            .ru: "Проверка загрузчика Firehose и цифровая подпись",
+            .uk: "Перевірка завантажувача Firehose та цифровий підпис"
+        ],
+        "edl_guide_step5_desc": [
+            .zhHant: "絕大部分驍龍機型（如小米、OPPO、一加等）要求使用與 CPU 晶片代號匹配的 prog_firehose_ddr.elf / .mbn 檔案。部分新款高端晶片帶廠商私鑰校驗（Auth），救磚時需配合免授權 No-Auth 引導包。",
+            .zhHans: "绝大部分骁龙机型（如小米、OPPO、一加等）要求使用与 CPU 芯片代号匹配的 prog_firehose_ddr.elf / .mbn 文件。部分新款高端芯片带厂商私钥校验（Auth），救砖时需配合免授权 No-Auth 引导包。",
+            .en: "Most Snapdragon devices require a prog_firehose_ddr.elf / .mbn matched with the SoC. Newer high-end chipsets enforce vendor cryptographic auth; rescue requires a No-Auth patched loader.",
+            .fr: "La plupart des appareils Snapdragon nécessitent un fichier prog_firehose correspondant au processeur. Les puces récentes avec sécurité renforcée requièrent un chargeur sans authentification (No-Auth).",
+            .ja: "多くの Snapdragon 端末では CPU コードネームと合致する prog_firehose_ddr.elf / .mbn が必要です。一部の新型ハイエンド機はメーカー暗号認証が課されるため、No-Auth (認証回避) パッチ済みローダーを使用してください。",
+            .es: "La mayoría de los terminales Snapdragon requieren un prog_firehose correspondiente al SoC. Modelos recientes con verificación criptográfica requieren un cargador No-Auth.",
+            .ko: "대부분의 스냅드래곤 기기는 CPU 칩셋 코드명과 일치하는 prog_firehose_ddr.elf / .mbn 파일이 필요합니다. 최신 고급 칩셋은 제조사 인증(Auth)이 걸려 있으므로 No-Auth 패치 로더를 사용해야 합니다.",
+            .ru: "Для большинства устройств Snapdragon требуется файл prog_firehose, соответствующий процессору. Новые флагманы с проверкой подписи требуют No-Auth загрузчик.",
+            .uk: "Для більшості пристроїв Snapdragon потрібен файл prog_firehose, відповідний процесору. Нові флагмани з перевіркою підпису вимагають No-Auth завантажувач."
         ],
         "edl_guide_title": [
             .zhHant: "Qualcomm 9008 深度救磚實用指南",

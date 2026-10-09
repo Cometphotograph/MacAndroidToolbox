@@ -51,6 +51,64 @@ public struct EDLTargetModel: Identifiable, Hashable, Sendable {
             ?? loaders.first { $0.fileName.contains("prog_firehose") }
             ?? loaders.first
     }
+    
+    @MainActor
+    public var localizedDisplayName: String {
+        var text = displayName
+        let currentLang = LanguageManager.shared.currentLanguage
+        if currentLang == .zhHant {
+            text = text.replacingOccurrences(of: "骁龙", with: "驍龍")
+                .replacingOccurrences(of: "至尊版", with: "至尊版")
+                .replacingOccurrences(of: "领先版", with: "領先版")
+                .replacingOccurrences(of: "多机型通用", with: "多機型通用")
+                .replacingOccurrences(of: "红魔", with: "紅魔")
+                .replacingOccurrences(of: "努比亚", with: "努比亞")
+                .replacingOccurrences(of: "中兴", with: "中興")
+                .replacingOccurrences(of: "天机", with: "天機")
+                .replacingOccurrences(of: "电竞平板", with: "電競平板")
+                .replacingOccurrences(of: "探索版", with: "探索版")
+                .replacingOccurrences(of: "远航", with: "遠航")
+                .replacingOccurrences(of: "路由器", with: "路由器")
+                .replacingOccurrences(of: "联想", with: "聯想")
+                .replacingOccurrences(of: "乐檬", with: "樂檬")
+                .replacingOccurrences(of: "青春版", with: "青春版")
+                .replacingOccurrences(of: "拯救者", with: "拯救者")
+                .replacingOccurrences(of: "运存", with: "記憶體")
+        } else if !currentLang.isChinese {
+            // Replace Chinese chipset name with Snapdragon
+            text = text.replacingOccurrences(of: "骁龙", with: "Snapdragon")
+                .replacingOccurrences(of: "驍龍", with: "Snapdragon")
+                .replacingOccurrences(of: "至尊版", with: "Leading / Elite")
+                .replacingOccurrences(of: "领先版", with: "Leading Edition")
+                .replacingOccurrences(of: "多机型通用", with: "Multi-Model Generic")
+                .replacingOccurrences(of: "多機型通用", with: "Multi-Model Generic")
+                .replacingOccurrences(of: "红魔", with: "RedMagic")
+                .replacingOccurrences(of: "紅魔", with: "RedMagic")
+                .replacingOccurrences(of: "努比亚", with: "Nubia")
+                .replacingOccurrences(of: "努比亞", with: "Nubia")
+                .replacingOccurrences(of: "中兴", with: "ZTE")
+                .replacingOccurrences(of: "中興", with: "ZTE")
+                .replacingOccurrences(of: "天机", with: "Axon")
+                .replacingOccurrences(of: "天機", with: "Axon")
+                .replacingOccurrences(of: "电竞平板", with: "Gaming Tablet")
+                .replacingOccurrences(of: "電競平板", with: "Gaming Tablet")
+                .replacingOccurrences(of: "一代", with: "Gen 1")
+                .replacingOccurrences(of: "二代", with: "Gen 2")
+                .replacingOccurrences(of: "探索版", with: "Explorer Edition")
+                .replacingOccurrences(of: "远航系列", with: "Voyage Series")
+                .replacingOccurrences(of: "远航", with: "Voyage")
+                .replacingOccurrences(of: "路由器", with: "Router")
+                .replacingOccurrences(of: "联想", with: "Lenovo")
+                .replacingOccurrences(of: "聯想", with: "Lenovo")
+                .replacingOccurrences(of: "乐檬", with: "Lemon")
+                .replacingOccurrences(of: "樂檬", with: "Lemon")
+                .replacingOccurrences(of: "青春版", with: "Youth Edition")
+                .replacingOccurrences(of: "拯救者", with: "Legion")
+                .replacingOccurrences(of: "运存", with: "RAM")
+                .replacingOccurrences(of: "記憶體", with: "RAM")
+        }
+        return text
+    }
 }
 
 /// Brand group containing models and chipsets
@@ -62,6 +120,21 @@ public struct EDLBrandGroup: Identifiable, Hashable, Sendable {
     
     public var totalLoaderCount: Int {
         models.reduce(0) { $0 + $1.loaders.count }
+    }
+    
+    @MainActor
+    public var localizedDisplayName: String {
+        switch brandName {
+        case "小米": return L10n("edl_brand_xiaomi")
+        case "欧加", "歐加": return L10n("edl_brand_oplus")
+        case "魅族": return L10n("edl_brand_meizu")
+        case "黑鲨", "黑鯊": return L10n("edl_brand_blackshark")
+        case "努比亚", "努比亞": return L10n("edl_brand_nubia")
+        case "联想", "聯想": return L10n("edl_brand_lenovo")
+        case "华硕", "華碩": return L10n("edl_brand_asus")
+        case "LG": return "LG"
+        default: return brandName
+        }
     }
 }
 
