@@ -6,6 +6,8 @@ public final class ToolConfig: ObservableObject {
     
     private let kAdbPathKey = "kCustomAdbPath"
     private let kFastbootPathKey = "kCustomFastbootPath"
+    private let kEdlPathKey = "kCustomEdlPath"
+    private let kPython3PathKey = "kCustomPython3Path"
     
     @Published public var adbPath: String {
         didSet {
@@ -19,10 +21,26 @@ public final class ToolConfig: ObservableObject {
         }
     }
     
+    @Published public var edlPath: String {
+        didSet {
+            UserDefaults.standard.set(edlPath, forKey: kEdlPathKey)
+        }
+    }
+    
+    @Published public var python3Path: String {
+        didSet {
+            UserDefaults.standard.set(python3Path, forKey: kPython3PathKey)
+        }
+    }
+    
     @Published public var adbVersionString: String = ""
     @Published public var fastbootVersionString: String = ""
+    @Published public var edlVersionString: String = ""
+    @Published public var python3VersionString: String = ""
     @Published public var isAdbAvailable: Bool = false
     @Published public var isFastbootAvailable: Bool = false
+    @Published public var isEdlAvailable: Bool = false
+    @Published public var isPython3Available: Bool = false
     @Published public var homebrewPath: String? = nil
     
     public var isHomebrewAvailable: Bool {
@@ -32,9 +50,13 @@ public final class ToolConfig: ObservableObject {
     public init() {
         let savedAdb = UserDefaults.standard.string(forKey: kAdbPathKey)
         let savedFastboot = UserDefaults.standard.string(forKey: kFastbootPathKey)
+        let savedEdl = UserDefaults.standard.string(forKey: kEdlPathKey)
+        let savedPython3 = UserDefaults.standard.string(forKey: kPython3PathKey)
         
         self.adbPath = savedAdb ?? ToolConfig.autoDetectPath(binary: "adb")
         self.fastbootPath = savedFastboot ?? ToolConfig.autoDetectPath(binary: "fastboot")
+        self.edlPath = savedEdl ?? ToolConfig.autoDetectPath(binary: "edl")
+        self.python3Path = savedPython3 ?? ToolConfig.autoDetectPath(binary: "python3")
         self.homebrewPath = ToolConfig.detectHomebrewPath()
         
         checkTools()
@@ -101,6 +123,8 @@ public final class ToolConfig: ObservableObject {
     public func resetToDefaults() {
         adbPath = ToolConfig.autoDetectPath(binary: "adb")
         fastbootPath = ToolConfig.autoDetectPath(binary: "fastboot")
+        edlPath = ToolConfig.autoDetectPath(binary: "edl")
+        python3Path = ToolConfig.autoDetectPath(binary: "python3")
         homebrewPath = ToolConfig.detectHomebrewPath()
         checkTools()
     }
@@ -108,16 +132,24 @@ public final class ToolConfig: ObservableObject {
     public func checkTools() {
         let adb = self.adbPath
         let fb = self.fastbootPath
+        let edl = self.edlPath
+        let py3 = self.python3Path
         
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let adbVer = ToolConfig.runVersionCheck(path: adb, arg: "version")
             let fastbootVer = ToolConfig.runVersionCheck(path: fb, arg: "--version")
+            let py3Ver = ToolConfig.runVersionCheck(path: py3, arg: "--version")
+            let edlVer = ToolConfig.runVersionCheck(path: edl, arg: "-h")
             
             DispatchQueue.main.async {
                 self?.adbVersionString = adbVer ?? "未找到 ADB 二進位檔案"
                 self?.isAdbAvailable = adbVer != nil
                 self?.fastbootVersionString = fastbootVer ?? "未找到 Fastboot 二進位檔案"
                 self?.isFastbootAvailable = fastbootVer != nil
+                self?.python3VersionString = py3Ver ?? "未找到 Python 3"
+                self?.isPython3Available = py3Ver != nil
+                self?.edlVersionString = (edlVer != nil) ? "EDL 可用" : "未找到 EDL 模組"
+                self?.isEdlAvailable = edlVer != nil
             }
         }
     }

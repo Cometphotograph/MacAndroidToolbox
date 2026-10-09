@@ -362,6 +362,92 @@ public struct GlobalSearchPaletteView: View {
             keywords: ["wipe", "data", "恢复出厂", "恢復原廠", "重置", "reset"]
         ),
         
+        // 3.5. Qualcomm 9008 (EDL)
+        LocalizedSearchItem(
+            titles: [
+                .zhHans: "Qualcomm 9008 QFIL 全盘底层线刷",
+                .zhHant: "Qualcomm 9008 QFIL 全盤底層線刷",
+                .en: "Qualcomm 9008 QFIL Full Firmware Flash",
+                .fr: "Flash complet QFIL Qualcomm 9008",
+                .ja: "Qualcomm 9008 QFIL フルファームウェアフラッシュ",
+                .es: "Flash completo de firmware QFIL Qualcomm 9008",
+                .ko: "Qualcomm 9008 QFIL 전체 펌웨어 플래시",
+                .ru: "Полная прошивка QFIL Qualcomm 9008",
+                .uk: "Повна прошивка QFIL Qualcomm 9008"
+            ],
+            subtitles: [
+                .zhHans: "高通紧急下载模式 (EDL) 下通过 rawprogram XML 全盘救砖线刷",
+                .zhHant: "高通緊急下載模式 (EDL) 下透過 rawprogram XML 全盤救磚線刷",
+                .en: "Flash full firmware via rawprogram XML in Qualcomm Emergency Download (EDL) mode",
+                .fr: "Flashez le firmware complet via XML en mode Qualcomm EDL 9008",
+                .ja: "Qualcomm EDLモードでrawprogram XML経由でフルフラッシュ復旧",
+                .es: "Flashee firmware completo vía rawprogram XML en modo Qualcomm EDL 9008",
+                .ko: "Qualcomm EDL 모드에서 rawprogram XML을 통한 복구 펌웨어 플래시",
+                .ru: "Полная прошивка через rawprogram XML в режиме Qualcomm EDL 9008",
+                .uk: "Повна прошивка через rawprogram XML в режимі Qualcomm EDL 9008"
+            ],
+            section: .edl,
+            icon: "flame.fill",
+            gradientColors: [Color(red: 0.92, green: 0.22, blue: 0.24), Color(red: 0.70, green: 0.10, blue: 0.18)],
+            keywords: ["9008", "edl", "qfil", "firehose", "高通", "救砖", "救磚", "qualcomm", "rawprogram"]
+        ),
+        LocalizedSearchItem(
+            titles: [
+                .zhHans: "Qualcomm 9008 单分区读写与救砖",
+                .zhHant: "Qualcomm 9008 單分區讀寫與救磚",
+                .en: "Qualcomm 9008 Partition Read/Write & Dump",
+                .fr: "Lecture/Écriture de partition Qualcomm 9008",
+                .ja: "Qualcomm 9008 パーティション読み書きとダンプ",
+                .es: "Lectura/Escritura de partición Qualcomm 9008",
+                .ko: "Qualcomm 9008 파티션 읽기/쓰기 및 덤프",
+                .ru: "Чтение и запись разделов Qualcomm 9008",
+                .uk: "Читання та запис розділів Qualcomm 9008"
+            ],
+            subtitles: [
+                .zhHans: "在 9008 模式下向单个物理分区直接写入或导出备份镜像",
+                .zhHant: "在 9008 模式下向單個物理分區直接寫入或導出備份映像檔",
+                .en: "Directly write or dump images to specific physical partitions in 9008 EDL mode",
+                .fr: "Écrivez ou sauvegardez des partitions en mode 9008 EDL",
+                .ja: "9008 EDLモードで特定の物理パーティションを直接書き込みまたはダンプ",
+                .es: "Escriba o extraiga particiones específicas en modo 9008 EDL",
+                .ko: "9008 EDL 모드에서 특정 물리 파티션 직접 쓰기 및 덤프",
+                .ru: "Прямая запись или дамп разделов в режиме 9008 EDL",
+                .uk: "Прямий запис або дамп розділів у режимі 9008 EDL"
+            ],
+            section: .edl,
+            icon: "square.split.2x2.fill",
+            gradientColors: [Color(red: 0.92, green: 0.22, blue: 0.24), Color(red: 0.70, green: 0.10, blue: 0.18)],
+            keywords: ["9008", "edl", "boot", "dump", "提取", "写入", "寫入", "分区", "分區", "erase"]
+        ),
+        LocalizedSearchItem(
+            titles: [
+                .zhHans: "读取高通 GPT 分区表 (Print GPT)",
+                .zhHant: "讀取高通 GPT 分區表 (Print GPT)",
+                .en: "Read Qualcomm GPT Partition Table",
+                .fr: "Lire la table de partitions GPT Qualcomm",
+                .ja: "Qualcomm GPT パーティションテーブルを読み取る",
+                .es: "Leer tabla de particiones GPT de Qualcomm",
+                .ko: "Qualcomm GPT 파티션 테이블 읽기",
+                .ru: "Чтение таблицы разделов GPT Qualcomm",
+                .uk: "Читання таблиці розділів GPT Qualcomm"
+            ],
+            subtitles: [
+                .zhHans: "在 9008 模式下解析设备内置 UFS / eMMC 物理分区表与扇区分布",
+                .zhHant: "在 9008 模式下解析裝置內建 UFS / eMMC 物理分區表與磁區分佈",
+                .en: "Parse UFS / eMMC partition layout and sector ranges in 9008 EDL mode",
+                .fr: "Analysez la disposition des partitions UFS/eMMC en mode 9008 EDL",
+                .ja: "9008 EDLモードでUFS/eMMCパーティション配置とセクタ範囲を解析",
+                .es: "Analice el diseño de particiones UFS/eMMC en modo 9008 EDL",
+                .ko: "9008 EDL 모드에서 UFS/eMMC 파티션 레이아웃 및 섹터 범위 분석",
+                .ru: "Анализ разметки UFS/eMMC в режиме 9008 EDL",
+                .uk: "Аналіз розмітки UFS/eMMC у режимі 9008 EDL"
+            ],
+            section: .edl,
+            icon: "tablecells.fill",
+            gradientColors: [Color(red: 0.92, green: 0.22, blue: 0.24), Color(red: 0.70, green: 0.10, blue: 0.18)],
+            keywords: ["gpt", "printgpt", "9008", "edl", "分区表", "分區表", "扇区", "ufs", "emmc"]
+        ),
+        
         // 4. Shell
         LocalizedSearchItem(
             titles: [

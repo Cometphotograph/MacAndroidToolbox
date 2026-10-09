@@ -5,6 +5,7 @@ public enum NavigationSection: String, CaseIterable, Identifiable {
     case dashboard
     case fastboot
     case recovery
+    case edl
     case shell
     case apps
     case files
@@ -18,6 +19,7 @@ public enum NavigationSection: String, CaseIterable, Identifiable {
         case .dashboard: return L10n("nav_dashboard")
         case .fastboot: return L10n("nav_fastboot")
         case .recovery: return L10n("nav_recovery")
+        case .edl: return L10n("nav_edl")
         case .shell: return L10n("nav_shell")
         case .apps: return L10n("nav_apps")
         case .files: return L10n("nav_files")
@@ -30,6 +32,7 @@ public enum NavigationSection: String, CaseIterable, Identifiable {
         case .dashboard: return "iphone.gen3"
         case .fastboot: return "bolt.horizontal.fill"
         case .recovery: return "cross.case.fill"
+        case .edl: return "cpu.fill"
         case .shell: return "apple.terminal"
         case .apps: return "app.badge.fill"
         case .files: return "folder.fill"
@@ -45,6 +48,8 @@ public enum NavigationSection: String, CaseIterable, Identifiable {
             return [Color(red: 1.0, green: 0.58, blue: 0.0), Color(red: 1.0, green: 0.38, blue: 0.0)]
         case .recovery:
             return [Color(red: 0.68, green: 0.32, blue: 0.88), Color(red: 0.52, green: 0.22, blue: 0.78)]
+        case .edl:
+            return [Color(red: 0.92, green: 0.22, blue: 0.24), Color(red: 0.70, green: 0.10, blue: 0.18)]
         case .shell:
             return [Color(red: 0.20, green: 0.32, blue: 0.45), Color(red: 0.12, green: 0.22, blue: 0.35)]
         case .apps:
@@ -199,6 +204,8 @@ public struct MainView: View {
                     FastbootView()
                 case .recovery:
                     RecoveryView()
+                case .edl:
+                    EDLView()
                 case .shell:
                     ShellToolsView()
                 case .apps:

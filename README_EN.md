@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.md)
 
-[![Version](https://img.shields.io/badge/Version-v1.3.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.4.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
@@ -43,7 +43,7 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 ## ✨ Core Feature Modules
 
 ### 📱 1. Device Dashboard & Status Overview (Dashboard)
-* **Intelligent Mode Detection**: Automatically detects device connection states in real time (ADB Normal mode, Fastboot mode, FastbootD userspace partition mode, Recovery mode, Sideload mode, and Unauthorized state).
+* **Intelligent Mode Detection**: Automatically detects device connection states in real time (ADB Normal mode, Fastboot mode, FastbootD userspace partition mode, Recovery mode, Sideload mode, Qualcomm 9008 mode, and Unauthorized state).
 * **Comprehensive Hardware & Software Specs**: Brand, model, codename, Android OS version, SDK API level, and security patch date.
 * **Live Hardware Sensors**: Battery remaining percentage, real-time temperature (°C), and charging/discharging state.
 * **Intelligent SoC Platform Recognition**: Automatically detects and maps chipset hardware platforms (Qualcomm Snapdragon, MediaTek Dimensity, Google Tensor, Samsung Exynos, Huawei Kirin, Unisoc, etc.) with commercial marketing names and chip codenames.
@@ -73,7 +73,25 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 
 ---
 
-### 📦 3. App Manager & APK Deployment (App Manager)
+### 🧯 3. Qualcomm 9008 Emergency Flasher (Qualcomm EDL 9008)
+* **USB Hardware 9008 Mode Auto-Detection**: Uses macOS low-level IOKit to rapidly detect Qualcomm devices in Emergency Download mode (VID `0x05c6` PID `0x9008` / `0x900e`).
+* **QFIL Emulation Full Firmware Flashing**:
+  - Full support for Qualcomm factory `rawprogram*.xml` partition mappings and `patch*.xml` sector patches.
+  - Supports modern UFS and eMMC storage types with automated firmware folder matching.
+* **Single Partition Read, Write & Erase**:
+  - Directly write images into individual physical partitions (`boot`, `init_boot`, `recovery`, `vbmeta`, `modem`, `abl`, `xbl`, `super`, `persist`, etc.).
+  - Dump / backup any physical partition directly from flash memory.
+  - Securely erase corrupted partitions.
+* **GPT Physical Partition Table Explorer (Print GPT)**:
+  - Directly reads partition layouts from hardware flash memory, displaying partition names, start/end LBAs, and sizes with live keyword search.
+* **One-Click Exit 9008 / Reboot Device**: Sends hardware reset command (`edl reset`) to safely reboot the device.
+* **Environment Diagnostics & Unbricking Guide**:
+  - Automatic diagnostics for Python 3, `libusb`, and `edl` toolsuite, with one-click dependency installer.
+  - Comprehensive guide covering key combinations, CLI commands, EDL deep flash cables, and motherboard Test Points.
+
+---
+
+### 📦 4. App Manager & APK Deployment (App Manager)
 * **Categorized App List & Instant Search**: Filter by All, Third-party User Apps, or System Built-in Apps with real-time package name searching.
 * **Multi-Format APK Installation**: Drag and drop `.apk`, `.apks`, or `.xapk` packages for silent background installation.
 * **Comprehensive App Operations**: Launch app, force stop, clear app data/cache, uninstall, and disable/freeze system apps.
@@ -81,7 +99,7 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 
 ---
 
-### 📁 4. File Manager & Recovery Sideload (Files & Sideload)
+### 📁 5. File Manager & Recovery Sideload (Files & Sideload)
 * **Remote Device File Explorer**: Browse Android internal storage (`/sdcard/Download`, DCIM, Documents, etc.) with file size and timestamp inspection.
 * **Bidirectional File Transfers**:
   - **Push**: Send Mac files directly to any destination on the device.
@@ -91,7 +109,7 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 
 ---
 
-### 💻 5. Shell Terminal & System Tweaks (Shell & Tweaks)
+### 💻 6. Shell Terminal & System Tweaks (Shell & Tweaks)
 * **Interactive ADB Shell Console**: Integrated shell terminal to run Android commands with auto-scrolling, output clearing, and copying.
 * **Handy System Tweaks**:
   - Open hidden native developer settings and System UI Tuner.
@@ -101,15 +119,15 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 
 ---
 
-### 🔰 6. Onboarding Wizard & Environment Auto-Configuration (Onboarding)
-* **Automatic Dependency Detection**: Verifies presence of `adb`, `fastboot`, and Homebrew on the host system.
+### 🔰 7. Onboarding Wizard & Environment Auto-Configuration (Onboarding)
+* **Automatic Dependency Detection**: Verifies presence of `adb`, `fastboot`, `edl`, and Homebrew on the host system.
 * **One-Click Homebrew Installation**: Automatically installs `android-platform-tools` via Homebrew when tools are missing, streaming live terminal installation logs.
 * **Browser Links & Manual Commands**: One-click link to the official Homebrew portal (`brew.sh`) or command clipboard copying.
 * Re-accessible anytime in Settings.
 
 ---
 
-### 🎨 7. Modern Appearance & Theme Adaptability (Appearance Themes)
+### 🎨 8. Modern Appearance & Theme Adaptability (Appearance Themes)
 * **Three Theme Modes**:
   - Light Mode
   - Dark Mode
@@ -118,7 +136,7 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 
 ---
 
-### 🌐 8. Internationalization & Supported Languages (Supported Languages)
+### 🌐 9. Internationalization & Supported Languages (Supported Languages)
 
 MacAndroidToolbox includes a comprehensive built-in internationalization architecture, allowing immediate language changes across the entire interface without restarting the app. The following languages are currently supported:
 
@@ -160,7 +178,7 @@ MacAndroidToolbox includes a comprehensive built-in internationalization archite
 ## 📥 Download & Installation
 
 ### Option 1: 💿 DMG Disk Image (Recommended)
-1. Download `MacAndroidToolbox_v1.3.0.dmg` from the [Releases](../../releases) page.
+1. Download `MacAndroidToolbox_v1.4.0.dmg` from the [Releases](../../releases) page.
 2. Double-click to mount the DMG.
 3. Drag `MacAndroidToolbox.app` into the `Applications` shortcut folder.
 
@@ -174,7 +192,7 @@ cd MacAndroidToolbox
 ./build_app.sh
 
 # 3. Launch the built application
-open "releases/MacAndroidToolbox_v1.3.0.app"
+open "releases/MacAndroidToolbox_v1.4.0.app"
 ```
 
 ---

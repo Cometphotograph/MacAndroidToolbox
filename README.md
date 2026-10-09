@@ -2,7 +2,7 @@
 
 [English](README_EN.md) | **简体中文**
 
-[![Version](https://img.shields.io/badge/Version-v1.3.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.4.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
@@ -43,7 +43,7 @@
 ## ✨ 核心功能模块
 
 ### 📱 1. 设备仪表板与状态总览 (Dashboard)
-* **智能连接模式识别**：自动实时侦测设备连接状态（ADB 调试模式、Fastboot 引导模式、FastbootD 用户空间分区模式、Recovery 恢复模式、Sideload 旁推模式及未授权状态）。
+* **智能连接模式识别**：自动实时侦测设备连接状态（ADB 调试模式、Fastboot 引导模式、FastbootD 用户空间分区模式、Recovery 恢复模式、Sideload 旁推模式、Qualcomm 9008 模式及未授权状态）。
 * **全面硬软件规格展示**：品牌、设备型号、硬件代号、Android 系统版本、API 等级、安全补丁更新日期。
 * **实时硬件传感器监控**：电池剩余电量百分比、电池实时温度（°C）、充放电工作状态。
 * **芯片平台智能识别**：内置常见 SoC 数据库，智能解析高通骁龙（Snapdragon 全系列）、联发科天玑（Dimensity 全系列）、谷歌 Tensor、三星 Exynos、华为海思麒麟及紫光展锐等商业发布名称与底层芯片代号。
@@ -74,7 +74,25 @@
 
 ---
 
-### 📦 3. 应用管理与 APK 部署 (App Manager)
+### 🧯 3. Qualcomm 9008 深度救砖与底层刷机 (Qualcomm EDL 9008)
+* **USB 硬件级 9008 模式自动侦测**：通过 macOS 底层 IOKit 毫秒级快速识别处于 Emergency Download（VID `0x05c6` PID `0x9008` / `0x900e`）状态的高通设备。
+* **QFIL 仿真全盘线刷**：
+  - 完整支持高通官方原厂 `rawprogram*.xml` 分区表映射与 `patch*.xml` 扇区补丁。
+  - 支持 UFS（现代主流）与 eMMC 闪存颗粒类型，支持自动关联整套固件镜像。
+* **单物理分区直接擦写与导出**：
+  - 支持向单个物理分区（`boot`、`init_boot`、`recovery`、`vbmeta`、`modem`、`abl`、`xbl`、`super`、`persist` 等）直接写入镜像。
+  - 支持一键提取导出任意分区进行底层无损备份。
+  - 支持安全擦除故障分区。
+* **GPT 物理分区表探针 (Print GPT)**：
+  - 直连闪存颗粒读取底层 GPT 结构，实时展示各物理分区的名称、起始扇区、结束扇区与容量，支持关键词即时过滤搜索。
+* **一键退出 9008 模式**：发送底层复位指令（`edl reset`），安全重启退出紧急下载状态。
+* **环境自检与实战救砖指南**：
+  - 自动检测 Python 3、底层驱动 `libusb` 与 `edl` 核心套件状态，支持一键自动化安装环境。
+  - 内置按键组合、命令行指令、EDL 工程线与主板短接点（Test Point）详尽实战救砖指南。
+
+---
+
+### 📦 4. 应用管理与 APK 部署 (App Manager)
 * **应用分类与极速搜索**：支持按「全部应用」、「第三方用户应用」与「系统内置应用」分类筛选，支持包名及应用名即时搜索。
 * **多格式安装支持**：支持拖拽或选取 `.apk`、`.apks`、`.xapk` 等安装包一键静默部署。
 * **丰富应用控制操作**：启动应用、强行停止进程、清除应用缓存与数据、卸载应用、停用/冻结系统应用。
@@ -82,7 +100,7 @@
 
 ---
 
-### 📁 4. 文件管理与 Recovery Sideload (Files & Sideload)
+### 📁 5. 文件管理与 Recovery Sideload (Files & Sideload)
 * **远程设备文件浏览器**：直观浏览 Android 设备内置存储空间（`/sdcard/Download`、相册、文档等）。
 * **双向极速传输**：
   - **推送到设备 (Push)**：Mac 本地文件一键传输至手机指定目录。
@@ -93,7 +111,7 @@
 
 ---
 
-### 💻 5. Shell 终端与系统微调 (Shell & Tweaks)
+### 💻 6. Shell 终端与系统微调 (Shell & Tweaks)
 * **交互式 ADB Shell 终端**：原生终端体验，实时执行任何 Linux/Android 命令行指令，支持日志自动滚动与一键清空/复制。
 * **实用系统级微调 (Tweaks)**：
   - 一键开启原生隐藏开发者设置与系统界面调节器。
@@ -103,7 +121,7 @@
 
 ---
 
-### 🔰 6. 首次启动向导与环境自动配置 (Onboarding)
+### 🔰 7. 首次启动向导与环境自动配置 (Onboarding)
 * **环境依赖自动检测**：自动侦测系统内 `adb` 与 `fastboot` 二进制文件与 Homebrew 包管理器安装状态。
 * **一键无感安装**：若检测到 Homebrew 但缺失 Android 工具包，支持在界面中一键通过 Homebrew 安装 `android-platform-tools`，实时输出安装日志。
 * **浏览器直达与脚本复制**：未安装 Homebrew 时，提供一键打开官网（`brew.sh`）或复制终端安装命令。
@@ -111,7 +129,7 @@
 
 ---
 
-### 🎨 7. 现代外观与主题自适应 (Appearance Themes)
+### 🎨 8. 现代外观与主题自适应 (Appearance Themes)
 * **三档外观自由选择**：
   - 浅色模式 (Light Mode)
   - 深色模式 (Dark Mode)
@@ -120,7 +138,7 @@
 
 ---
 
-### 🌐 8. 多语言国际化支持 (Supported Languages)
+### 🌐 9. 多语言国际化支持 (Supported Languages)
 
 麦安工具箱内置全功能国际化语言系统，无需重启即刻实时切换界面语言。目前完整支持以下语言：
 
@@ -147,7 +165,7 @@
      ```bash
      brew install --cask android-platform-tools
      ```
-   - 亦可在软件「设置」->「工具路径」中自定义手动指定 `adb` / `fastboot` 路径。
+   - 亦可在软件「设置」->「工具路径」中自定义手动指定 `adb` / `fastboot` / `edl` 路径。
 
 ### 源码编译环境（开发者适用）
 - macOS 26.0+
@@ -162,7 +180,7 @@
 ## 📥 下载与安装
 
 ### 方式 1：💿 DMG 光盘映像安装（推荐）
-1. 在 [Releases](../../releases) 页面下载最新发布的 `MacAndroidToolbox_v1.3.0.dmg`。
+1. 在 [Releases](../../releases) 页面下载最新发布的 `MacAndroidToolbox_v1.4.0.dmg`。
 2. 双击打开挂载 DMG 镜像。
 3. 将 `MacAndroidToolbox.app` 拖入 `Applications`（应用程序）文件夹即可完成安装。
 
@@ -176,7 +194,7 @@ cd MacAndroidToolbox
 ./build_app.sh
 
 # 3. 运行已打包的应用
-open "releases/MacAndroidToolbox_v1.3.0.app"
+open "releases/MacAndroidToolbox_v1.4.0.app"
 ```
 
 ---

@@ -555,6 +555,60 @@ public struct SettingsView: View {
                     }
                 }
                 
+                // EDL (Qualcomm 9008) Path
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(L10n("settings_edl_path"))
+                            .font(.caption.bold())
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(toolConfig.isEdlAvailable ? Color.green : Color.orange)
+                                .frame(width: 8, height: 8)
+                            Text(toolConfig.edlVersionString)
+                                .font(.caption)
+                                .foregroundColor(toolConfig.isEdlAvailable ? .green : .orange)
+                        }
+                    }
+                    
+                    HStack(spacing: 10) {
+                        TextField(L10n("settings_edl_path"), text: $toolConfig.edlPath)
+                            .textFieldStyle(.roundedBorder)
+                        
+                        Button(L10n("fb_browse")) {
+                            chooseEdlPath()
+                        }
+                        .liquidGlassButton()
+                    }
+                }
+                
+                // Python 3 Path
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(L10n("settings_python3_path"))
+                            .font(.caption.bold())
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(toolConfig.isPython3Available ? Color.green : Color.red)
+                                .frame(width: 8, height: 8)
+                            Text(toolConfig.python3VersionString)
+                                .font(.caption)
+                                .foregroundColor(toolConfig.isPython3Available ? .green : .red)
+                        }
+                    }
+                    
+                    HStack(spacing: 10) {
+                        TextField(L10n("settings_python3_path"), text: $toolConfig.python3Path)
+                            .textFieldStyle(.roundedBorder)
+                        
+                        Button(L10n("fb_browse")) {
+                            choosePython3Path()
+                        }
+                        .liquidGlassButton()
+                    }
+                }
+                
                 HStack(spacing: 12) {
                     Button(L10n("settings_recheck")) {
                         toolConfig.checkTools()
@@ -660,6 +714,30 @@ public struct SettingsView: View {
         
         if panel.runModal() == .OK, let url = panel.url {
             toolConfig.fastbootPath = url.path
+            toolConfig.checkTools()
+        }
+    }
+    
+    private func chooseEdlPath() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.prompt = "選擇 edl 執行檔或 edl.py 腳本"
+        
+        if panel.runModal() == .OK, let url = panel.url {
+            toolConfig.edlPath = url.path
+            toolConfig.checkTools()
+        }
+    }
+    
+    private func choosePython3Path() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.prompt = "選擇 python3 二進位檔案"
+        
+        if panel.runModal() == .OK, let url = panel.url {
+            toolConfig.python3Path = url.path
             toolConfig.checkTools()
         }
     }

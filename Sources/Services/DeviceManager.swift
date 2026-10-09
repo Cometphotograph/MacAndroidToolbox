@@ -99,6 +99,21 @@ public class DeviceManager: ObservableObject {
                 }
             }
             
+            // Check for Qualcomm 9008 EDL mode device
+            let edlDev = await EDLService.shared.detectConnected9008Device()
+            if let edl = edlDev {
+                let dev = AndroidDevice(
+                    serial: edl.id,
+                    mode: .edl,
+                    model: edl.name,
+                    brand: "Qualcomm"
+                )
+                if !seenSerials.contains(dev.serial) {
+                    allDevs.append(dev)
+                    seenSerials.insert(dev.serial)
+                }
+            }
+            
             self.devices = allDevs
             
             // Maintain selection or select first
