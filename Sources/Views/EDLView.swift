@@ -1013,22 +1013,44 @@ public struct EDLView: View {
                     )
                 }
                 
-                // One-click install button
-                HStack(spacing: 12) {
-                    Button {
-                        executeInstallDependencies()
-                    } label: {
-                        HStack(spacing: 6) {
-                            if isInstallingDeps {
-                                ProgressView().scaleEffect(0.8)
-                            } else {
-                                Image(systemName: "arrow.down.circle.fill")
+                // Action Buttons: One-click install, Browse local edl, Open folder
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 10) {
+                        Button {
+                            executeInstallDependencies()
+                        } label: {
+                            HStack(spacing: 6) {
+                                if isInstallingDeps {
+                                    ProgressView().scaleEffect(0.8)
+                                } else {
+                                    Image(systemName: "arrow.down.circle.fill")
+                                }
+                                Text(L10n("edl_btn_install_deps"))
                             }
-                            Text(L10n("edl_btn_install_deps"))
                         }
+                        .liquidGlassButton(tint: .blue, prominent: true)
+                        .disabled(isInstallingDeps)
+                        
+                        Button {
+                            chooseLocalEdlPath()
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "folder.badge.gearshape")
+                                Text(L10n("edl_btn_browse_path"))
+                            }
+                        }
+                        .liquidGlassButton()
+                        
+                        Button {
+                            openAppSupportDirectory()
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "arrow.up.right.square")
+                                Text(L10n("edl_btn_open_folder"))
+                            }
+                        }
+                        .liquidGlassButton()
                     }
-                    .liquidGlassButton(tint: .blue, prominent: true)
-                    .disabled(isInstallingDeps)
                     
                     Text(L10n("edl_install_deps_tip"))
                         .font(.caption2)
@@ -1387,5 +1409,29 @@ public struct EDLView: View {
             }
             isInstallingDeps = false
         }
+    }
+    
+    private func chooseLocalEdlPath() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.message = "请选择 EDL 命令行可执行程序或 edl.py 脚本"
+        panel.prompt = L10n("common_select")
+        
+        if panel.runModal() == .OK, let url = panel.url {
+            ToolConfig.shared.edlPath = url.path
+            Task {
+                _ = await edlService.checkEnvironment()
+                ToolConfig.shared.checkTools()
+            }
+        }
+    }
+    
+    private func openAppSupportDirectory() {
+        let path = EDLService.appSupportDirectory
+        try? FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
+        let url = URL(fileURLWithPath: path)
+        NSWorkspace.shared.open(url)
     }
 }

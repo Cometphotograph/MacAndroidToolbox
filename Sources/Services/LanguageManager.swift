@@ -39,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.1"
-    public let appBuild = "20261009_152"
+    public let appBuild = "20261009_153"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -3038,15 +3038,37 @@ public final class LanguageManager: ObservableObject {
             .uk: "Встановити залежності"
         ],
         "edl_install_deps_tip": [
-            .zhHant: "將透過 Homebrew 安裝 libusb，並透過 pip3 安裝 pyusb, pyserial 及 edl",
-            .zhHans: "将通过 Homebrew 安装 libusb，并通过 pip3 安装 pyusb, pyserial 及 edl",
-            .en: "Installs libusb via Homebrew and pyusb, pyserial, edl via pip3",
-            .fr: "Installe libusb via Homebrew et pyusb, pyserial, edl via pip3",
-            .ja: "Homebrew で libusb を、pip3 で pyusb, pyserial, edl をインストールします",
-            .es: "Instala libusb vía Homebrew y pyusb, pyserial, edl vía pip3",
-            .ko: "Homebrew로 libusb를, pip3로 pyusb, pyserial, edl을 설치합니다",
-            .ru: "Устанавливает libusb через Homebrew и pyusb, pyserial, edl через pip3",
-            .uk: "Встановлює libusb через Homebrew і pyusb, pyserial, edl через pip3"
+            .zhHant: "自動建立獨立 Python 沙箱虛擬環境 (edl_env)，規避 PEP 668 系統鎖定，安裝 libusb 及 bkerler/edl 核心套件",
+            .zhHans: "自动创建独立 Python 沙箱虚拟环境 (edl_env)，规避 PEP 668 系统锁定，安装 libusb 及 bkerler/edl 核心套件",
+            .en: "Creates an isolated Python venv (edl_env) to bypass PEP 668 lock, installing libusb and bkerler/edl suite",
+            .fr: "Crée un venv Python isolé (edl_env) pour contourner PEP 668, installant libusb et bkerler/edl",
+            .ja: "PEP 668を回避する独立したPython仮想環境 (edl_env) を作成し、libusb と bkerler/edl を導入します",
+            .es: "Crea un venv Python aislado (edl_env) para evitar PEP 668, instalando libusb y la suite bkerler/edl",
+            .ko: "PEP 668 충돌을 피하기 위해 전용 가상환경 (edl_env)을 구성하고 libusb 및 bkerler/edl을 설치합니다",
+            .ru: "Создает изолированный venv Python (edl_env) для обхода PEP 668, устанавливая libusb и bkerler/edl",
+            .uk: "Створює ізольований venv Python (edl_env) для обходу PEP 668, встановлюючи libusb та bkerler/edl"
+        ],
+        "edl_btn_browse_path": [
+            .zhHant: "指定本地 edl.py / CLI",
+            .zhHans: "指定本地 edl.py / CLI",
+            .en: "Choose Local edl.py / CLI",
+            .fr: "Choisir edl.py / CLI local",
+            .ja: "ローカル edl.py / CLI を指定",
+            .es: "Seleccionar edl.py / CLI local",
+            .ko: "로컬 edl.py / CLI 지정",
+            .ru: "Выбрать локальный edl.py / CLI",
+            .uk: "Обрати локальний edl.py / CLI"
+        ],
+        "edl_btn_open_folder": [
+            .zhHant: "開啟環境目錄",
+            .zhHans: "打开环境目录",
+            .en: "Open Env Folder",
+            .fr: "Ouvrir le dossier d'env",
+            .ja: "環境フォルダを開く",
+            .es: "Abrir carpeta de entorno",
+            .ko: "환경 폴더 열기",
+            .ru: "Открыть папку окружения",
+            .uk: "Відкрити теку середовища"
         ],
         "edl_guide_title": [
             .zhHant: "Qualcomm 9008 深度救磚實用指南",

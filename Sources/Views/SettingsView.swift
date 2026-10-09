@@ -609,6 +609,33 @@ public struct SettingsView: View {
                     }
                 }
                 
+                // EDL Path
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(L10n("settings_edl_path"))
+                            .font(.caption.bold())
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(toolConfig.isEdlAvailable ? Color.green : Color.red)
+                                .frame(width: 8, height: 8)
+                            Text(toolConfig.edlVersionString)
+                                .font(.caption)
+                                .foregroundColor(toolConfig.isEdlAvailable ? .green : .red)
+                        }
+                    }
+                    
+                    HStack(spacing: 10) {
+                        TextField(L10n("settings_edl_path"), text: $toolConfig.edlPath)
+                            .textFieldStyle(.roundedBorder)
+                        
+                        Button(L10n("fb_browse")) {
+                            chooseEdlPath()
+                        }
+                        .liquidGlassButton()
+                    }
+                }
+                
                 HStack(spacing: 12) {
                     Button(L10n("settings_recheck")) {
                         toolConfig.checkTools()

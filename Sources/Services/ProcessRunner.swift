@@ -47,7 +47,7 @@ public final class ProcessRunner: @unchecked Sendable {
         logHandler?(.command, "$ \(cmdString)", isPolling)
         
         return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: executable)
                 process.arguments = arguments
@@ -120,9 +120,9 @@ public final class ProcessRunner: @unchecked Sendable {
                     
                     let code = process.terminationStatus
                     if code == 0 {
-                        self.logHandler?(.success, "指令執行完成 (結束代碼 0)", isPolling)
+                        self?.logHandler?(.success, "指令執行完成 (結束代碼 0)", isPolling)
                     } else {
-                        self.logHandler?(.error, "指令執行失敗 (結束代碼 \(code))", isPolling)
+                        self?.logHandler?(.error, "指令執行失敗 (結束代碼 \(code))", isPolling)
                     }
                     
                     let result = CommandResult(stdout: outString, stderr: errString, exitCode: code)
@@ -130,7 +130,7 @@ public final class ProcessRunner: @unchecked Sendable {
                 } catch {
                     outPipe.fileHandleForReading.readabilityHandler = nil
                     errPipe.fileHandleForReading.readabilityHandler = nil
-                    self.logHandler?(.error, "無法啟動處理序: \(error.localizedDescription)", isPolling)
+                    self?.logHandler?(.error, "無法啟動處理序: \(error.localizedDescription)", isPolling)
                     continuation.resume(throwing: error)
                 }
             }

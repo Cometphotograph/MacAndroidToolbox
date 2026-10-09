@@ -63,16 +63,38 @@ public final class ToolConfig: ObservableObject {
     }
     
     public nonisolated static func autoDetectPath(binary: String) -> String {
-        let searchLocations = [
-            "/opt/homebrew/bin/\(binary)",
-            "/usr/local/bin/\(binary)",
-            "\(NSHomeDirectory())/Library/Android/sdk/platform-tools/\(binary)",
-            "/Applications/Android Studio.app/Contents/plugins/android/lib/platform-tools/\(binary)",
-            "/usr/bin/\(binary)"
-        ]
+        let appSupport = "\(NSHomeDirectory())/Library/Application Support/MacAndroidToolbox"
+        var searchLocations: [String] = []
+        
+        if binary == "edl" {
+            searchLocations = [
+                "\(appSupport)/edl_env/bin/edl",
+                "\(appSupport)/edl_repo/edl.py",
+                "/opt/homebrew/bin/edl",
+                "/usr/local/bin/edl"
+            ]
+        } else if binary == "python3" {
+            searchLocations = [
+                "\(appSupport)/edl_env/bin/python3",
+                "/opt/homebrew/bin/python3",
+                "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+                "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+                "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
+                "/usr/local/bin/python3",
+                "/usr/bin/python3"
+            ]
+        } else {
+            searchLocations = [
+                "/opt/homebrew/bin/\(binary)",
+                "/usr/local/bin/\(binary)",
+                "\(NSHomeDirectory())/Library/Android/sdk/platform-tools/\(binary)",
+                "/Applications/Android Studio.app/Contents/plugins/android/lib/platform-tools/\(binary)",
+                "/usr/bin/\(binary)"
+            ]
+        }
         
         for location in searchLocations {
-            if FileManager.default.fileExists(atPath: location) && FileManager.default.isExecutableFile(atPath: location) {
+            if FileManager.default.fileExists(atPath: location) && (FileManager.default.isExecutableFile(atPath: location) || location.hasSuffix(".py")) {
                 return location
             }
         }
@@ -139,7 +161,13 @@ public final class ToolConfig: ObservableObject {
             let adbVer = ToolConfig.runVersionCheck(path: adb, arg: "version")
             let fastbootVer = ToolConfig.runVersionCheck(path: fb, arg: "--version")
             let py3Ver = ToolConfig.runVersionCheck(path: py3, arg: "--version")
-            let edlVer = ToolConfig.runVersionCheck(path: edl, arg: "-h")
+            
+            var edlVer: String? = nil
+            if edl.hasSuffix(".py") && FileManager.default.fileExists(atPath: edl) {
+                edlVer = ToolConfig.runProcessOutput(executable: py3, arguments: [edl, "-h"])
+            } else if FileManager.default.isExecutableFile(atPath: edl) {
+                edlVer = ToolConfig.runVersionCheck(path: edl, arg: "-h")
+            }
             
             DispatchQueue.main.async {
                 self?.adbVersionString = adbVer ?? "未找到 ADB 二進位檔案"
@@ -154,14 +182,20 @@ public final class ToolConfig: ObservableObject {
         }
     }
     
-    private nonisolated static func runVersionCheck(path: String, arg: String) -> String? {
+    public nonisolated static func runProcessOutput(executable: String, arguments: [String]) -> String? {
         let process = Process()
         let pipe = Pipe()
         
-        process.executableURL = URL(fileURLWithPath: path)
-        process.arguments = [arg]
+        process.executableURL = URL(fileURLWithPath: executable)
+        process.arguments = arguments
         process.standardOutput = pipe
         process.standardError = pipe
+        
+        var env = ProcessInfo.processInfo.environment
+        env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + (env["PATH"] ?? "")
+        let appSupport = "\(NSHomeDirectory())/Library/Application Support/MacAndroidToolbox"
+        env["PYTHONPATH"] = "\(appSupport)/edl_repo:" + (env["PYTHONPATH"] ?? "")
+        process.environment = env
         
         do {
             try process.run()
@@ -175,5 +209,9 @@ public final class ToolConfig: ObservableObject {
             return nil
         }
         return nil
+    }
+    
+    private nonisolated static func runVersionCheck(path: String, arg: String) -> String? {
+        return runProcessOutput(executable: path, arguments: [arg])
     }
 }

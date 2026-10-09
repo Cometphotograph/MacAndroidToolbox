@@ -139,49 +139,99 @@ public final class EDLService: ObservableObject {
         return nil
     }
     
+    // MARK: - Dedicated Environment Paths
+    public static var appSupportDirectory: String {
+        let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        if let base = urls.first {
+            return base.appendingPathComponent("MacAndroidToolbox").path
+        }
+        return "\(NSHomeDirectory())/Library/Application Support/MacAndroidToolbox"
+    }
+    
+    public static var edlEnvDirectory: String {
+        return "\(appSupportDirectory)/edl_env"
+    }
+    
+    public static var edlRepoDirectory: String {
+        return "\(appSupportDirectory)/edl_repo"
+    }
+    
+    public static var edlVenvPython: String {
+        return "\(edlEnvDirectory)/bin/python3"
+    }
+    
+    public static var edlVenvPip: String {
+        return "\(edlEnvDirectory)/bin/pip"
+    }
+    
+    public static var edlVenvEdlBinary: String {
+        return "\(edlEnvDirectory)/bin/edl"
+    }
+    
+    public static var edlRepoScript: String {
+        return "\(edlRepoDirectory)/edl.py"
+    }
+    
     // MARK: - Environment Check
     
     public func checkEnvironment() async -> EDLEnvironmentStatus {
         let config = ToolConfig.shared
         
-        // 1. Check Python 3
+        // 1. Check Python 3 (prefer dedicated venv if available)
         var pyPath = config.python3Path
         var pyVer = ""
         var isPyOk = false
         
-        do {
-            let pyRes = try await ProcessRunner.shared.execute(
-                executable: pyPath,
+        let venvPy = Self.edlVenvPython
+        if FileManager.default.isExecutableFile(atPath: venvPy) {
+            if let venvRes = try? await ProcessRunner.shared.execute(
+                executable: venvPy,
                 arguments: ["--version"],
                 isPolling: true
-            )
-            if pyRes.isSuccess {
-                pyVer = pyRes.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+            ), venvRes.isSuccess {
+                pyPath = venvPy
+                pyVer = "专属沙箱 " + venvRes.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
                 isPyOk = true
+                config.python3Path = venvPy
             }
-        } catch {
-            // fallback check
-            let autoPy = ToolConfig.autoDetectPath(binary: "python3")
-            if autoPy != pyPath {
-                if let pyRes = try? await ProcessRunner.shared.execute(
-                    executable: autoPy,
+        }
+        
+        if !isPyOk {
+            do {
+                let pyRes = try await ProcessRunner.shared.execute(
+                    executable: pyPath,
                     arguments: ["--version"],
                     isPolling: true
-                ), pyRes.isSuccess {
+                )
+                if pyRes.isSuccess {
                     pyVer = pyRes.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
-                    pyPath = autoPy
                     isPyOk = true
+                }
+            } catch {
+                let autoPy = ToolConfig.autoDetectPath(binary: "python3")
+                if autoPy != pyPath {
+                    if let pyRes = try? await ProcessRunner.shared.execute(
+                        executable: autoPy,
+                        arguments: ["--version"],
+                        isPolling: true
+                    ), pyRes.isSuccess {
+                        pyVer = pyRes.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+                        pyPath = autoPy
+                        isPyOk = true
+                        config.python3Path = autoPy
+                    }
                 }
             }
         }
         
-        // 2. Check libusb (via brew or filesystem)
+        // 2. Check libusb (via filesystem paths or system frameworks)
         var isLibusbOk = false
         let libusbPaths = [
             "/opt/homebrew/opt/libusb/lib/libusb-1.0.dylib",
             "/usr/local/opt/libusb/lib/libusb-1.0.dylib",
             "/opt/homebrew/lib/libusb-1.0.dylib",
-            "/usr/local/lib/libusb-1.0.dylib"
+            "/usr/local/lib/libusb-1.0.dylib",
+            "/usr/lib/libusb-1.0.dylib"
         ]
         for p in libusbPaths {
             if FileManager.default.fileExists(atPath: p) {
@@ -191,25 +241,52 @@ public final class EDLService: ObservableObject {
         }
         
         // 3. Check EDL tool availability
-        let edlPath = config.edlPath
+        var edlPath = config.edlPath
         var isEdlOk = false
         var edlVer = ""
         
-        // Check if edl executable directly exists
-        if FileManager.default.isExecutableFile(atPath: edlPath) {
-            isEdlOk = true
-            edlVer = "CLI Executable"
-        } else {
-            // Check if edl python module is runnable
+        let venvEdl = Self.edlVenvEdlBinary
+        let repoEdl = Self.edlRepoScript
+        
+        if !FileManager.default.fileExists(atPath: edlPath) {
+            if FileManager.default.isExecutableFile(atPath: venvEdl) {
+                edlPath = venvEdl
+                config.edlPath = venvEdl
+            } else if FileManager.default.fileExists(atPath: repoEdl) {
+                edlPath = repoEdl
+                config.edlPath = repoEdl
+            }
+        }
+        
+        let env = ["PYTHONPATH": "\(Self.edlRepoDirectory):" + (ProcessInfo.processInfo.environment["PYTHONPATH"] ?? "")]
+        
+        if FileManager.default.isExecutableFile(atPath: edlPath) && !edlPath.hasSuffix(".py") {
+            if let res = try? await ProcessRunner.shared.execute(executable: edlPath, arguments: ["-h"], isPolling: true),
+               (res.isSuccess || res.stdout.contains("Qualcomm") || res.stdout.contains("edl.py") || res.stdout.contains("usage:")) {
+                isEdlOk = true
+                edlVer = "CLI 独立运行"
+            }
+        } else if edlPath.hasSuffix(".py") && FileManager.default.fileExists(atPath: edlPath) {
             if isPyOk {
-                if let modRes = try? await ProcessRunner.shared.execute(
+                if let res = try? await ProcessRunner.shared.execute(
                     executable: pyPath,
-                    arguments: ["-c", "import edl; print('OK')"],
+                    arguments: [edlPath, "-h"],
+                    environment: env,
                     isPolling: true
-                ), modRes.stdout.contains("OK") {
+                ), (res.isSuccess || res.stdout.contains("Qualcomm") || res.stdout.contains("edl.py") || res.stdout.contains("usage:")) {
                     isEdlOk = true
-                    edlVer = "Python Module"
+                    edlVer = "edl.py 脚本运行"
                 }
+            }
+        } else if isPyOk {
+            if let modRes = try? await ProcessRunner.shared.execute(
+                executable: pyPath,
+                arguments: ["-c", "import edlclient; print('OK')"],
+                environment: env,
+                isPolling: true
+            ), modRes.stdout.contains("OK") {
+                isEdlOk = true
+                edlVer = "Python 模块 (edlclient)"
             }
         }
         
@@ -226,57 +303,255 @@ public final class EDLService: ObservableObject {
         return status
     }
     
-    // MARK: - Dependency Auto-Installer
+    // MARK: - Dependency Auto-Installer (PEP 668 Isolated Environment)
     
     public func installDependenciesViaBrew(onOutput: (@Sendable (String) -> Void)? = nil) async throws -> Bool {
-        guard let brew = ToolConfig.detectHomebrewPath() else {
-            throw NSError(domain: "EDLServiceError", code: 1, userInfo: [NSLocalizedDescriptionKey: "系统中未检测到 Homebrew，请先安装 Homebrew 或手动安装 libusb 与 edl。"])
+        // Step 1: Ensure libusb
+        onOutput?("==> [1/5] 检查底层 USB 驱动库 libusb-1.0...")
+        var hasLibusb = false
+        let libusbPaths = [
+            "/opt/homebrew/opt/libusb/lib/libusb-1.0.dylib",
+            "/usr/local/opt/libusb/lib/libusb-1.0.dylib",
+            "/opt/homebrew/lib/libusb-1.0.dylib",
+            "/usr/local/lib/libusb-1.0.dylib"
+        ]
+        for p in libusbPaths {
+            if FileManager.default.fileExists(atPath: p) {
+                hasLibusb = true
+                break
+            }
         }
         
-        onOutput?("==> [EDL] 正在通过 Homebrew 安装底层驱动库 libusb...")
-        let libusbRes = try await ProcessRunner.shared.execute(
-            executable: brew,
-            arguments: ["install", "libusb"],
-            environment: ["HOMEBREW_NO_AUTO_UPDATE": "1"],
-            onOutput: onOutput
-        )
+        if hasLibusb {
+            onOutput?("✅ [EDL] 检测到系统已存在 libusb-1.0 驱动，跳过重复安装。")
+        } else if let brew = ToolConfig.detectHomebrewPath() {
+            onOutput?("==> [EDL] 正在通过 Homebrew 安装底层驱动库 libusb...")
+            let libusbRes = try await ProcessRunner.shared.execute(
+                executable: brew,
+                arguments: ["install", "libusb"],
+                environment: ["HOMEBREW_NO_AUTO_UPDATE": "1"],
+                onOutput: onOutput
+            )
+            if !libusbRes.isSuccess {
+                onOutput?("⚠️ [EDL] libusb 安装警告: \(libusbRes.stderr.isEmpty ? libusbRes.stdout : libusbRes.stderr)")
+            } else {
+                onOutput?("✅ [EDL] libusb 安装成功！")
+            }
+        } else {
+            onOutput?("⚠️ [EDL] 未检测到 Homebrew，请确认系统已安装 libusb 或前往 brew.sh 安装。")
+        }
         
-        if !libusbRes.isSuccess {
-            onOutput?("⚠️ [EDL] libusb 安装失败，请检查终端网络或权限。")
+        // Step 2: Determine Base Python
+        onOutput?("==> [2/5] 检测系统 Python 3 解释器...")
+        let pyCandidates = [
+            ToolConfig.shared.python3Path,
+            "/opt/homebrew/bin/python3",
+            "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
+            "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
+            "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3",
+            "/usr/local/bin/python3",
+            "/usr/bin/python3"
+        ]
+        
+        var validBasePy: String? = nil
+        for candidate in pyCandidates {
+            guard FileManager.default.fileExists(atPath: candidate) else { continue }
+            if let verRes = try? await ProcessRunner.shared.execute(executable: candidate, arguments: ["--version"], isPolling: true),
+               verRes.isSuccess {
+                validBasePy = candidate
+                onOutput?("✅ [EDL] 找到基础 Python 3: \(candidate) (\(verRes.stdout.trimmingCharacters(in: .whitespacesAndNewlines)))")
+                break
+            }
+        }
+        
+        guard let resolvedPy = validBasePy else {
+            onOutput?("❌ [EDL] 未在系统中检测到可用的 Python 3，请先安装 Python 3。")
             return false
         }
         
-        let py = ToolConfig.shared.python3Path
-        onOutput?("==> [EDL] 正在通过 pip3 安装 pyusb, pyserial 及 edl 核心套件...")
-        let pipRes = try await ProcessRunner.shared.execute(
-            executable: py,
-            arguments: ["-m", "pip", "install", "--upgrade", "pyusb", "pyserial", "edl"],
+        // Step 3: Setup App Support directory & Python virtual environment (venv)
+        onOutput?("==> [3/5] 准备专属沙箱虚拟环境 (彻底规避 PEP 668 系统环境锁定)...")
+        let appSupport = Self.appSupportDirectory
+        let edlEnv = Self.edlEnvDirectory
+        let edlRepo = Self.edlRepoDirectory
+        let venvPy = Self.edlVenvPython
+        let venvPip = Self.edlVenvPip
+        
+        try? FileManager.default.createDirectory(atPath: appSupport, withIntermediateDirectories: true)
+        
+        var isVenvReady = false
+        if FileManager.default.isExecutableFile(atPath: venvPy) && FileManager.default.isExecutableFile(atPath: venvPip) {
+            onOutput?("✅ [EDL] 检测到已有专属虚拟沙箱环境: \(edlEnv)")
+            isVenvReady = true
+        } else {
+            onOutput?("==> [EDL] 正在创建专属虚拟环境: \(edlEnv)...")
+            let venvRes = try await ProcessRunner.shared.execute(
+                executable: resolvedPy,
+                arguments: ["-m", "venv", edlEnv],
+                onOutput: onOutput
+            )
+            if venvRes.isSuccess && FileManager.default.isExecutableFile(atPath: venvPip) {
+                onOutput?("✅ [EDL] 虚拟沙箱环境创建成功！")
+                isVenvReady = true
+            } else {
+                onOutput?("⚠️ [EDL] 虚拟环境创建受阻，将使用全局 Python 并附带 --break-system-packages 参数。")
+                isVenvReady = false
+            }
+        }
+        
+        let targetPip = isVenvReady ? venvPip : resolvedPy
+        let isDirectPip = isVenvReady
+        
+        // Step 4: Install Python packages
+        onOutput?("==> [4/5] 正在安装 EDL 核心协议依赖套件 (pyusb, pyserial, docopt, pycryptodome, lxml, colorama)...")
+        let requiredPackages = ["pyusb", "pyserial", "docopt", "pycryptodome", "lxml", "colorama", "requests", "passlib"]
+        
+        var pipArgs: [String] = []
+        if isDirectPip {
+            pipArgs = ["install", "--upgrade", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple"] + requiredPackages
+        } else {
+            pipArgs = ["-m", "pip", "install", "--break-system-packages", "--upgrade", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple"] + requiredPackages
+        }
+        
+        var pipRes = try await ProcessRunner.shared.execute(
+            executable: targetPip,
+            arguments: pipArgs,
             onOutput: onOutput
         )
         
-        if pipRes.isSuccess {
-            onOutput?("🎉 [EDL] 依赖套件安装成功！正在重新自检环境...")
-            _ = await checkEnvironment()
+        if !pipRes.isSuccess {
+            onOutput?("⚠️ [EDL] 清华镜像连接异常，正在尝试官方 PyPI 源安装...")
+            let fallbackArgs = isDirectPip
+                ? ["install", "--upgrade"] + requiredPackages
+                : ["-m", "pip", "install", "--break-system-packages", "--upgrade"] + requiredPackages
+            
+            pipRes = try await ProcessRunner.shared.execute(
+                executable: targetPip,
+                arguments: fallbackArgs,
+                onOutput: onOutput
+            )
+        }
+        
+        if !pipRes.isSuccess {
+            onOutput?("⚠️ [EDL] 依赖包安装警告: \(pipRes.stderr.isEmpty ? pipRes.stdout : pipRes.stderr)")
+        } else {
+            onOutput?("✅ [EDL] 核心依赖库安装完成！")
+        }
+        
+        // Step 5: Setup bkerler/edl repository
+        onOutput?("==> [5/5] 配置 bkerler/edl 官方源码套件...")
+        let gitCandidates = ["/opt/homebrew/bin/git", "/usr/bin/git", ToolConfig.autoDetectPath(binary: "git")]
+        var effectiveGit: String? = nil
+        for g in gitCandidates {
+            if FileManager.default.isExecutableFile(atPath: g) {
+                effectiveGit = g
+                break
+            }
+        }
+        
+        let repoScript = Self.edlRepoScript
+        if FileManager.default.fileExists(atPath: repoScript) {
+            onOutput?("==> [EDL] 检测到已有 EDL 仓库源码，尝试检查更新...")
+            if let git = effectiveGit {
+                _ = try? await ProcessRunner.shared.execute(
+                    executable: git,
+                    arguments: ["-C", edlRepo, "pull"],
+                    onOutput: onOutput
+                )
+            }
+        } else if let git = effectiveGit {
+            onOutput?("==> [EDL] 正在从 GitHub 克隆 bkerler/edl 仓库 (深度为 1)...")
+            var cloneRes = try await ProcessRunner.shared.execute(
+                executable: git,
+                arguments: ["clone", "--depth", "1", "https://github.com/bkerler/edl.git", edlRepo],
+                onOutput: onOutput
+            )
+            if !cloneRes.isSuccess {
+                onOutput?("⚠️ [EDL] GitHub 直连受阻，正在尝试加速镜像通道...")
+                cloneRes = try await ProcessRunner.shared.execute(
+                    executable: git,
+                    arguments: ["clone", "--depth", "1", "https://ghproxy.net/https://github.com/bkerler/edl.git", edlRepo],
+                    onOutput: onOutput
+                )
+            }
+            if cloneRes.isSuccess {
+                onOutput?("✅ [EDL] bkerler/edl 仓库克隆成功！")
+            }
+        }
+        
+        // If repo exists, install in editable mode so 'edl' CLI entry point is created in venv
+        if FileManager.default.fileExists(atPath: "\(edlRepo)/pyproject.toml") {
+            onOutput?("==> [EDL] 正在注册 edl CLI 命令...")
+            let installArgs = isDirectPip
+                ? ["install", "-e", edlRepo, "--no-deps"]
+                : ["-m", "pip", "install", "--break-system-packages", "-e", edlRepo, "--no-deps"]
+            let installRes = try await ProcessRunner.shared.execute(
+                executable: targetPip,
+                arguments: installArgs,
+                onOutput: onOutput
+            )
+            if installRes.isSuccess {
+                onOutput?("✅ [EDL] edl CLI 命令行程序注册成功！")
+            }
+        }
+        
+        // Update tool configurations
+        let venvEdl = Self.edlVenvEdlBinary
+        if FileManager.default.isExecutableFile(atPath: venvEdl) {
+            ToolConfig.shared.edlPath = venvEdl
+        } else if FileManager.default.fileExists(atPath: repoScript) {
+            ToolConfig.shared.edlPath = repoScript
+        }
+        
+        if isVenvReady {
+            ToolConfig.shared.python3Path = venvPy
+        } else {
+            ToolConfig.shared.python3Path = resolvedPy
+        }
+        
+        ToolConfig.shared.checkTools()
+        let finalStatus = await checkEnvironment()
+        
+        if finalStatus.isEdlAvailable {
+            onOutput?("🎉 [EDL] 运行环境配置完毕，EDL 工具链已就绪！")
             return true
         } else {
-            onOutput?("⚠️ [EDL] pip3 安装失败: \(pipRes.stderr.isEmpty ? pipRes.stdout : pipRes.stderr)")
-            return false
+            onOutput?("⚠️ [EDL] 环境安装流程结束。若未能自动识别，您可在界面中手动选择 edl.py 脚本。")
+            return true
         }
     }
     
     // MARK: - Command Execution Helper
     
-    private func buildEdlInvocation(args: [String]) -> (executable: String, arguments: [String]) {
+    public func buildEdlInvocation(args: [String]) -> (executable: String, arguments: [String], environment: [String: String]?) {
         let config = ToolConfig.shared
-        let edlPath = config.edlPath
+        var edlPath = config.edlPath
+        var pyPath = config.python3Path
+        
+        let venvEdl = Self.edlVenvEdlBinary
+        let repoScript = Self.edlRepoScript
+        let venvPy = Self.edlVenvPython
+        
+        if !FileManager.default.fileExists(atPath: edlPath) {
+            if FileManager.default.isExecutableFile(atPath: venvEdl) {
+                edlPath = venvEdl
+            } else if FileManager.default.fileExists(atPath: repoScript) {
+                edlPath = repoScript
+            }
+        }
+        
+        if !FileManager.default.isExecutableFile(atPath: pyPath) && FileManager.default.isExecutableFile(atPath: venvPy) {
+            pyPath = venvPy
+        }
+        
+        let env = ["PYTHONPATH": "\(Self.edlRepoDirectory):" + (ProcessInfo.processInfo.environment["PYTHONPATH"] ?? "")]
         
         if FileManager.default.isExecutableFile(atPath: edlPath) && !edlPath.hasSuffix(".py") {
-            return (executable: edlPath, arguments: args)
+            return (executable: edlPath, arguments: args, environment: env)
         } else if edlPath.hasSuffix(".py") && FileManager.default.fileExists(atPath: edlPath) {
-            return (executable: config.python3Path, arguments: [edlPath] + args)
+            return (executable: pyPath, arguments: [edlPath] + args, environment: env)
         } else {
-            // Default to running as python module or system command
-            return (executable: config.python3Path, arguments: ["-m", "edl"] + args)
+            return (executable: edlPath.isEmpty ? "edl" : edlPath, arguments: args, environment: env)
         }
     }
     
@@ -310,6 +585,7 @@ public final class EDLService: ObservableObject {
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
             arguments: invocation.arguments,
+            environment: invocation.environment,
             onOutput: onOutput
         )
         
@@ -351,7 +627,8 @@ public final class EDLService: ObservableObject {
         let invocation = buildEdlInvocation(args: cmdArgs)
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
-            arguments: invocation.arguments
+            arguments: invocation.arguments,
+            environment: invocation.environment
         )
         
         guard res.isSuccess else {
@@ -392,7 +669,8 @@ public final class EDLService: ObservableObject {
         let invocation = buildEdlInvocation(args: cmdArgs)
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
-            arguments: invocation.arguments
+            arguments: invocation.arguments,
+            environment: invocation.environment
         )
         
         return res.isSuccess
@@ -427,7 +705,8 @@ public final class EDLService: ObservableObject {
         let invocation = buildEdlInvocation(args: cmdArgs)
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
-            arguments: invocation.arguments
+            arguments: invocation.arguments,
+            environment: invocation.environment
         )
         
         return res.isSuccess
@@ -461,7 +740,8 @@ public final class EDLService: ObservableObject {
         let invocation = buildEdlInvocation(args: cmdArgs)
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
-            arguments: invocation.arguments
+            arguments: invocation.arguments,
+            environment: invocation.environment
         )
         
         return res.isSuccess
@@ -493,7 +773,8 @@ public final class EDLService: ObservableObject {
         let invocation = buildEdlInvocation(args: cmdArgs)
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
-            arguments: invocation.arguments
+            arguments: invocation.arguments,
+            environment: invocation.environment
         )
         
         return res.isSuccess
@@ -516,7 +797,8 @@ public final class EDLService: ObservableObject {
         let invocation = buildEdlInvocation(args: cmdArgs)
         let res = try await ProcessRunner.shared.execute(
             executable: invocation.executable,
-            arguments: invocation.arguments
+            arguments: invocation.arguments,
+            environment: invocation.environment
         )
         
         return res.isSuccess
