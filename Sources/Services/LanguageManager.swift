@@ -39,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.1"
-    public let appBuild = "20261009_154"
+    public let appBuild = "20261009_155"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -1672,6 +1672,292 @@ public final class LanguageManager: ObservableObject {
             .ko: "대상 파티션:",
             .ru: "Целевой раздел:",
             .uk: "Цільовий розділ:"
+        ],
+        "part_boot_title": [
+            .zhHant: "Boot (引導分區)",
+            .zhHans: "Boot (引导分区)",
+            .en: "Boot (Kernel Partition)",
+            .fr: "Boot (Noyau et démarrage)",
+            .ja: "Boot (ブート/カーネル領域)",
+            .es: "Boot (Núcleo y arranque)",
+            .ko: "Boot (부팅/커널 파티션)",
+            .ru: "Boot (Ядро и загрузка)",
+            .uk: "Boot (Ядро та завантаження)"
+        ],
+        "part_boot_desc": [
+            .zhHant: "包含核心 (Kernel) 與 ramdisk，常規 Root (Magisk/KernelSU/APatch) 刷寫此分區",
+            .zhHans: "包含内核 (Kernel) 与 ramdisk，常规 Root (Magisk/KernelSU/APatch) 刷写此分区",
+            .en: "Contains Kernel and ramdisk; standard partition for Root (Magisk/KernelSU/APatch)",
+            .fr: "Contient le noyau et le ramdisk ; partition standard pour Root (Magisk/KernelSU/APatch)",
+            .ja: "カーネル (Kernel) と ramdisk を格納。一般的な Root (Magisk/KernelSU/APatch) 導入時に書き込みます",
+            .es: "Contiene el kernel y ramdisk; partición estándar para Root (Magisk/KernelSU/APatch)",
+            .ko: "커널(Kernel) 및 ramdisk 포함. 일반적인 Root (Magisk/KernelSU/APatch) 플래시 대상 파티션",
+            .ru: "Содержит ядро (Kernel) и ramdisk; стандартный раздел для Root (Magisk/KernelSU/APatch)",
+            .uk: "Містить ядро (Kernel) та ramdisk; стандартний розділ для Root (Magisk/KernelSU/APatch)"
+        ],
+        "part_init_boot_title": [
+            .zhHant: "Init Boot (新版引導分區)",
+            .zhHans: "Init Boot (新版引导分区)",
+            .en: "Init Boot (Android 13+ Boot)",
+            .fr: "Init Boot (Démarrage Android 13+)",
+            .ja: "Init Boot (Android 13+ 新型ブート)",
+            .es: "Init Boot (Arranque Android 13+)",
+            .ko: "Init Boot (Android 13+ 신형 부팅)",
+            .ru: "Init Boot (Загрузка Android 13+)",
+            .uk: "Init Boot (Завантаження Android 13+)"
+        ],
+        "part_init_boot_desc": [
+            .zhHant: "Android 13+ 機型專用 ramdisk 引導分區，新機 Root 請刷此分區",
+            .zhHans: "Android 13+ 机型专用 ramdisk 引导分区，新机 Root 请刷此分区",
+            .en: "Android 13+ dedicated ramdisk boot partition; flash here for modern device root",
+            .fr: "Partition ramdisk dédiée à Android 13+ ; flashez ici pour rooter les appareils récents",
+            .ja: "Android 13+ 端末専用の ramdisk ブート領域。新型機種の Root 化時はここを書き込みます",
+            .es: "Partición ramdisk dedicada a Android 13+; flashee aquí para root en dispositivos recientes",
+            .ko: "Android 13+ 기기 전용 ramdisk 부팅 파티션. 최신 기기 Root 시 플래시",
+            .ru: "Выделенный раздел ramdisk для Android 13+; прошивается для Root на новых устройствах",
+            .uk: "Виділений розділ ramdisk для Android 13+; прошивається для Root на нових пристроях"
+        ],
+        "part_recovery_title": [
+            .zhHant: "Recovery (恢復分區)",
+            .zhHans: "Recovery (恢复分区)",
+            .en: "Recovery (Rescue & Flashing)",
+            .fr: "Recovery (Récupération)",
+            .ja: "Recovery (リカバリ領域)",
+            .es: "Recovery (Recuperación)",
+            .ko: "Recovery (복구 모드)",
+            .ru: "Recovery (Рекавери)",
+            .uk: "Recovery (Рекавері)"
+        ],
+        "part_recovery_desc": [
+            .zhHant: "第三方 TWRP / OrangeFox 或原廠恢復系統",
+            .zhHans: "第三方 TWRP / OrangeFox 或原厂恢复系统",
+            .en: "Custom Recovery (TWRP / OrangeFox) or stock recovery system",
+            .fr: "Recovery personnalisé (TWRP / OrangeFox) ou recovery officiel",
+            .ja: "サードパーティ製 TWRP / OrangeFox または純正リカバリシステム",
+            .es: "Recovery personalizado (TWRP / OrangeFox) o sistema original",
+            .ko: "커스텀 TWRP / OrangeFox 또는 순정 복구 시스템",
+            .ru: "Кастомное рекавери (TWRP / OrangeFox) или стоковая система",
+            .uk: "Кастомне рекавері (TWRP / OrangeFox) або стокова система"
+        ],
+        "part_vbmeta_title": [
+            .zhHant: "VBMeta (驗證元數據)",
+            .zhHans: "VBMeta (验证元数据)",
+            .en: "VBMeta (AVB Verification Metadata)",
+            .fr: "VBMeta (Métadonnées de vérification AVB)",
+            .ja: "VBMeta (署名検証メタデータ)",
+            .es: "VBMeta (Metadatos de verificación AVB)",
+            .ko: "VBMeta (AVB 검증 메타데이터)",
+            .ru: "VBMeta (Метаданные верификации AVB)",
+            .uk: "VBMeta (Метадані верифікації AVB)"
+        ],
+        "part_vbmeta_desc": [
+            .zhHant: "Android 簽名驗證分區，刷寫自訂 ROM 時常需禁用驗證",
+            .zhHans: "Android 签名验证分区，刷写自定义 ROM 时常需禁用验证",
+            .en: "Android Verified Boot signature partition; often disabled when flashing custom ROMs",
+            .fr: "Partition de vérification de signature Android ; souvent désactivée lors du flash de ROMs",
+            .ja: "Android 署名検証領域。カスタム ROM 導入時に検証無効化が必要になる場合があります",
+            .es: "Partición de firma Android; suele deshabilitarse al flashear ROMs personalizadas",
+            .ko: "안드로이드 서명 검증 파티션. 커스텀 롬 플래시 시 검증 비활성화 필요",
+            .ru: "Раздел цифровой подписи AVB; часто отключается при прошивке кастомных ROM",
+            .uk: "Розділ цифрового підпису AVB; часто вимикається при прошивці кастомних ROM"
+        ],
+        "part_vbmeta_system_title": [
+            .zhHant: "VBMeta System (系統驗證)",
+            .zhHans: "VBMeta System (系统验证)",
+            .en: "VBMeta System (System Verification)",
+            .fr: "VBMeta System (Vérification système)",
+            .ja: "VBMeta System (システム署名検証)",
+            .es: "VBMeta System (Verificación de sistema)",
+            .ko: "VBMeta System (시스템 검증)",
+            .ru: "VBMeta System (Верификация системы)",
+            .uk: "VBMeta System (Верифікація системи)"
+        ],
+        "part_vbmeta_system_desc": [
+            .zhHant: "系統簽名驗證子分區",
+            .zhHans: "系统签名验证子分区",
+            .en: "System partition signature verification sub-partition",
+            .fr: "Sous-partition de vérification de signature système",
+            .ja: "システム署名検証サブパーティション",
+            .es: "Subpartición de verificación de firma del sistema",
+            .ko: "시스템 서명 검증 서브 파티션",
+            .ru: "Подраздел проверки подписи системы",
+            .uk: "Підрозділ перевірки підпису системи"
+        ],
+        "part_vbmeta_vendor_title": [
+            .zhHant: "VBMeta Vendor (廠商驗證)",
+            .zhHans: "VBMeta Vendor (厂商验证)",
+            .en: "VBMeta Vendor (Vendor Verification)",
+            .fr: "VBMeta Vendor (Vérification constructeur)",
+            .ja: "VBMeta Vendor (ベンダー署名検証)",
+            .es: "VBMeta Vendor (Verificación de fabricante)",
+            .ko: "VBMeta Vendor (제조사 검증)",
+            .ru: "VBMeta Vendor (Верификация вендора)",
+            .uk: "VBMeta Vendor (Верифікація виробника)"
+        ],
+        "part_vbmeta_vendor_desc": [
+            .zhHant: "廠商簽名驗證子分區",
+            .zhHans: "厂商签名验证子分区",
+            .en: "Vendor partition signature verification sub-partition",
+            .fr: "Sous-partition de vérification de signature constructeur",
+            .ja: "ベンダー署名検証サブパーティション",
+            .es: "Subpartición de verificación de firma del fabricante",
+            .ko: "제조사 서명 검증 서브 파티션",
+            .ru: "Подраздел проверки подписи вендора",
+            .uk: "Підрозділ перевірки підпису виробника"
+        ],
+        "part_vendor_boot_title": [
+            .zhHant: "Vendor Boot (廠商引導)",
+            .zhHans: "Vendor Boot (厂商引导)",
+            .en: "Vendor Boot (Vendor Bootloader)",
+            .fr: "Vendor Boot (Démarrage constructeur)",
+            .ja: "Vendor Boot (ベンダーブート)",
+            .es: "Vendor Boot (Arranque de fabricante)",
+            .ko: "Vendor Boot (제조사 부팅)",
+            .ru: "Vendor Boot (Загрузка вендора)",
+            .uk: "Vendor Boot (Завантаження виробника)"
+        ],
+        "part_vendor_boot_desc": [
+            .zhHant: "廠商引導配置分區",
+            .zhHans: "厂商引导配置分区",
+            .en: "Vendor boot configuration and modules partition",
+            .fr: "Partition de configuration et modules de démarrage constructeur",
+            .ja: "ベンダーブート構成およびモジュール領域",
+            .es: "Partición de configuración y módulos de arranque del fabricante",
+            .ko: "제조사 부팅 구성 및 모듈 파티션",
+            .ru: "Раздел конфигурации загрузки вендора",
+            .uk: "Розділ конфігурації завантаження виробника"
+        ],
+        "part_dtbo_title": [
+            .zhHant: "DTBO (設備樹)",
+            .zhHans: "DTBO (设备树)",
+            .en: "DTBO (Device Tree Overlay)",
+            .fr: "DTBO (Device Tree Overlay)",
+            .ja: "DTBO (デバイスツリー)",
+            .es: "DTBO (Superposición Device Tree)",
+            .ko: "DTBO (디바이스 트리)",
+            .ru: "DTBO (Дерево устройств)",
+            .uk: "DTBO (Дерево пристроїв)"
+        ],
+        "part_dtbo_desc": [
+            .zhHant: "設備樹覆蓋分區",
+            .zhHans: "设备树覆盖分区",
+            .en: "Device Tree Blob Overlay partition",
+            .fr: "Partition de superposition Device Tree Blob",
+            .ja: "Device Tree Blob オーバーレイパーティション",
+            .es: "Partición Device Tree Blob Overlay",
+            .ko: "디바이스 트리 오버레이 파티션",
+            .ru: "Раздел Device Tree Blob Overlay",
+            .uk: "Розділ Device Tree Blob Overlay"
+        ],
+        "part_system_title": [
+            .zhHant: "System (系統分區)",
+            .zhHans: "System (系统分区)",
+            .en: "System (System OS Partition)",
+            .fr: "System (Système principal)",
+            .ja: "System (システム本体)",
+            .es: "System (Sistema principal)",
+            .ko: "System (시스템 파티션)",
+            .ru: "System (Системный раздел)",
+            .uk: "System (Системний розділ)"
+        ],
+        "part_system_desc": [
+            .zhHant: "Android 核心操作系統檔案",
+            .zhHans: "Android 核心操作系统文件",
+            .en: "Android core operating system files",
+            .fr: "Fichiers système Android principaux",
+            .ja: "Android コア OS システムファイル",
+            .es: "Archivos centrales del sistema operativo Android",
+            .ko: "Android 핵심 운영체제 시스템 파일",
+            .ru: "Основные файлы операционной системы Android",
+            .uk: "Основні файли операційної системи Android"
+        ],
+        "part_vendor_title": [
+            .zhHant: "Vendor (廠商分區)",
+            .zhHans: "Vendor (厂商分区)",
+            .en: "Vendor (Vendor Drivers Partition)",
+            .fr: "Vendor (Pilotes constructeur)",
+            .ja: "Vendor (ベンダー領域)",
+            .es: "Vendor (Controladores del fabricante)",
+            .ko: "Vendor (제조사 드라이버)",
+            .ru: "Vendor (Раздел вендора)",
+            .uk: "Vendor (Розділ виробника)"
+        ],
+        "part_vendor_desc": [
+            .zhHant: "晶片廠商驅動與專屬二進位檔案",
+            .zhHans: "芯片厂商驱动与专属二进制文件",
+            .en: "Chipset vendor HAL drivers and proprietary binaries",
+            .fr: "Pilotes matériels et binaires propriétaires constructeur",
+            .ja: "チップセットベンダー製ドライバおよびバイナリ",
+            .es: "Controladores de hardware y binarios propietarios",
+            .ko: "칩셋 제조사 드라이버 및 바이너리 파일",
+            .ru: "Драйверы чипсета и проприетарные бинарные файлы",
+            .uk: "Драйвери чипсета та пропрієтарні бінарні файли"
+        ],
+        "part_super_title": [
+            .zhHant: "Super (動態分區集合)",
+            .zhHans: "Super (动态分区集合)",
+            .en: "Super (Dynamic Partitions)",
+            .fr: "Super (Partitions dynamiques)",
+            .ja: "Super (動的パーティション)",
+            .es: "Super (Particiones dinámicas)",
+            .ko: "Super (동적 파티션)",
+            .ru: "Super (Динамические разделы)",
+            .uk: "Super (Динамічні розділи)"
+        ],
+        "part_super_desc": [
+            .zhHant: "Android 10+ 動態分區 (包含 system/vendor/product)",
+            .zhHans: "Android 10+ 动态分区 (包含 system/vendor/product)",
+            .en: "Android 10+ dynamic partitions container (system, vendor, product, etc.)",
+            .fr: "Conteneur de partitions dynamiques Android 10+ (system, vendor, product)",
+            .ja: "Android 10+ 動的パーティション (system/vendor/product 等を統合)",
+            .es: "Contenedor dinámico Android 10+ (system, vendor, product)",
+            .ko: "Android 10+ 동적 파티션 (system/vendor/product 등 통합)",
+            .ru: "Контейнер динамических разделов Android 10+ (system, vendor, product)",
+            .uk: "Контейнер динамічних розділів Android 10+ (system, vendor, product)"
+        ],
+        "part_radio_title": [
+            .zhHant: "Radio / Modem (基帶通訊)",
+            .zhHans: "Radio / Modem (基带通讯)",
+            .en: "Radio / Modem (Baseband & Cellular)",
+            .fr: "Radio / Modem (Bande de base / Cellulaire)",
+            .ja: "Radio / Modem (ベースバンド通信)",
+            .es: "Radio / Modem (Banda base y módem)",
+            .ko: "Radio / Modem (베이스밴드 통신)",
+            .ru: "Radio / Modem (Модем и связь)",
+            .uk: "Radio / Modem (Модем та зв'язок)"
+        ],
+        "part_radio_desc": [
+            .zhHant: "行動通訊基帶與信號射頻韌體",
+            .zhHans: "蜂窝网络基带与射频固件",
+            .en: "Cellular modem baseband firmware and RF configuration",
+            .fr: "Firmware modem cellulaire et configuration radiofréquence",
+            .ja: "モバイル通信モデムベースバンドおよび高周波 (RF) ファームウェア",
+            .es: "Firmware de módem celular y configuración de radiofrecuencia",
+            .ko: "이동통신 모뎀 베이스밴드 및 RF 펌웨어",
+            .ru: "Прошивка модема сотовой связи и радиочастотные параметры",
+            .uk: "Прошивка модема стільникового зв'язку та радіочастотні параметри"
+        ],
+        "part_userdata_title": [
+            .zhHant: "Userdata (用戶資料)",
+            .zhHans: "Userdata (用户数据)",
+            .en: "Userdata (User Data Partition)",
+            .fr: "Userdata (Données utilisateur)",
+            .ja: "Userdata (ユーザー領域)",
+            .es: "Userdata (Datos de usuario)",
+            .ko: "Userdata (사용자 데이터)",
+            .ru: "Userdata (Данные пользователя)",
+            .uk: "Userdata (Дані користувача)"
+        ],
+        "part_userdata_desc": [
+            .zhHant: "使用者所有個人資料與應用安裝目錄 (注意：抹除會遺失資料)",
+            .zhHans: "用户个人数据与应用存储目录 (警告：抹除将清空所有数据)",
+            .en: "User personal storage and installed apps (Warning: Wiping erases all data)",
+            .fr: "Stockage personnel et applications (Attention : l'effacement supprime tout)",
+            .ja: "ユーザーの個人データおよびアプリ保存領域 (注意: 消去するとデータが消失します)",
+            .es: "Almacenamiento de usuario y apps (Advertencia: Borrar eliminará todo)",
+            .ko: "사용자 개인 데이터 및 앱 저장 공간 (경고: 삭제 시 모든 데이터 영구 소실)",
+            .ru: "Пользовательские файлы и приложения (Внимание: Очистка удалит все данные)",
+            .uk: "Файли користувача та додатки (Увага: Очищення видалить усі дані)"
         ],
         "fb_target_slot_picker": [
             .zhHant: "寫入槽位",
