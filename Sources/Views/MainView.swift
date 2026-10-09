@@ -363,23 +363,21 @@ public struct MainView: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 34)
             .background(
-                ZStack {
-                    if isSelected {
-                        // Vibrant selection capsule with specular top highlight
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.accentColor)
-                            .shadow(color: Color.accentColor.opacity(0.35), radius: 4, x: 0, y: 1.5)
-                    } else if isHovered {
-                        // Subtle interactive hover highlight
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.primary.opacity(0.06))
-                    }
-                }
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(
+                        isSelected ? Color.accentColor :
+                        isHovered ? Color.primary.opacity(0.06) :
+                        Color.clear
+                    )
+                    .shadow(color: isSelected ? Color.accentColor.opacity(0.35) : Color.clear, radius: 4, x: 0, y: 1.5)
             )
+            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
+        .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .onHover { hovering in
             hoveredSection = hovering ? section : nil
         }
@@ -453,12 +451,15 @@ public struct MainView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(deviceManager.selectedDevice?.serial == dev.serial ? Color.primary.opacity(0.06) : Color.clear)
                     )
+                    .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }
                 .buttonStyle(.plain)
+                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
         }
     }
