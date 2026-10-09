@@ -147,8 +147,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        // If Menu Bar icon is enabled, keep app alive in background
-        return !GeneralSettingsManager.shared.isShowMenuBarIconEnabled
+        if GeneralSettingsManager.shared.windowCloseAction == .quit {
+            return true
+        }
+        return false
     }
 }
 

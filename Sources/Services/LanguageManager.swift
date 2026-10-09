@@ -39,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.1"
-    public let appBuild = "20261009_162"
+    public let appBuild = "20261009_163"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -5797,6 +5797,50 @@ public final class LanguageManager: ObservableObject {
             .ko: "시스템 설정",
             .ru: "Как в системе",
             .uk: "Як у системі"
+        ],
+        "settings_close_action_title": [
+            .zhHant: "點擊關閉按鈕時",
+            .zhHans: "点击关闭按钮时",
+            .en: "When Clicking Close Button",
+            .fr: "En cliquant sur Fermer",
+            .ja: "閉じるボタンをクリックした時",
+            .es: "Al hacer clic en Cerrar",
+            .ko: "닫기 버튼 클릭 시",
+            .ru: "При нажатии кнопки закрытия",
+            .uk: "При натисканні кнопки закриття"
+        ],
+        "settings_close_action_desc": [
+            .zhHant: "設定點擊視窗左上角紅色退出按鈕時，是完全退出軟體還是最小化隱藏視窗保留後台",
+            .zhHans: "设置点击窗口左上角红色退出按钮时，是完全退出软件还是最小化隐藏窗口保留后台",
+            .en: "Choose whether clicking the red close button fully terminates the app or minimizes it to the background",
+            .fr: "Définir si le bouton rouge quitte complètement l'application ou la minimise en arrière-plan",
+            .ja: "ウィンドウ左上の赤いボタンを押した時に、アプリを完全に終了するか最小化して常駐するかを設定します",
+            .es: "Definir si el botón rojo cierra completamente la aplicación o la minimiza en segundo plano",
+            .ko: "창 왼쪽 상단의 빨간색 닫기 버튼을 클릭했을 때 앱을 완전히 종료할지 최소화하여 백그라운드에 유지할지 설정합니다",
+            .ru: "Выбрать: полностью закрывать приложение или сворачивать в фон при нажатии красной кнопки",
+            .uk: "Вибрати: повністю закривати програму чи згортати у фон при натисканні червоної кнопки"
+        ],
+        "settings_close_action_quit": [
+            .zhHant: "完全退出軟體",
+            .zhHans: "完全退出软件",
+            .en: "Quit Application",
+            .fr: "Quitter l'application",
+            .ja: "完全に終了",
+            .es: "Cerrar aplicación",
+            .ko: "완전 종료",
+            .ru: "Завершить работу",
+            .uk: "Повністю вийти"
+        ],
+        "settings_close_action_minimize": [
+            .zhHant: "最小化（現在這樣）",
+            .zhHans: "最小化（现在这样）",
+            .en: "Minimize (Default)",
+            .fr: "Minimiser (Par défaut)",
+            .ja: "最小化（現在の動作）",
+            .es: "Minimizar (Por defecto)",
+            .ko: "최소화 (기본값)",
+            .ru: "Свернуть (По умолчанию)",
+            .uk: "Згорнути (За замовчуванням)"
         ]
     ]
 }

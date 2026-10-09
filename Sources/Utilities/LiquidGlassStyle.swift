@@ -402,10 +402,14 @@ public struct MacOS27StoplightsView: View {
                 glyphSize: 7,
                 glyphColor: Color(red: 0.45, green: 0.05, blue: 0.08)
             ) {
-                if let window = NSApp.keyWindow {
-                    window.performClose(nil)
-                } else {
+                if GeneralSettingsManager.shared.windowCloseAction == .quit {
                     NSApp.terminate(nil)
+                } else {
+                    if let window = NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first {
+                        window.performClose(nil)
+                    } else {
+                        NSApp.terminate(nil)
+                    }
                 }
             }
             

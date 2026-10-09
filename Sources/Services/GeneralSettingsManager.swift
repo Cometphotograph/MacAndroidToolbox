@@ -61,6 +61,28 @@ public enum AppTheme: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+public enum WindowCloseAction: String, CaseIterable, Identifiable, Sendable {
+    case quit = "quit"
+    case minimize = "minimize"
+    
+    public var id: String { rawValue }
+    
+    public var icon: String {
+        switch self {
+        case .quit: return "power"
+        case .minimize: return "minus.circle"
+        }
+    }
+    
+    @MainActor
+    public var title: String {
+        switch self {
+        case .quit: return L10n("settings_close_action_quit")
+        case .minimize: return L10n("settings_close_action_minimize")
+        }
+    }
+}
+
 @MainActor
 public final class GeneralSettingsManager: ObservableObject {
     public static let shared = GeneralSettingsManager()
@@ -69,6 +91,7 @@ public final class GeneralSettingsManager: ObservableObject {
     private let kLaunchAtLoginKey = "kLaunchAtLoginKey"
     private let kShowMenuBarIconKey = "kShowMenuBarIconKey"
     private let kShowPollingLogsKey = "kShowPollingLogsKey"
+    private let kWindowCloseActionKey = "kWindowCloseActionKey"
     private let kHasAcceptedDisclaimerKey = "kHasAcceptedDisclaimerKey"
     private let kNeverShowDisclaimerKey = "kNeverShowDisclaimerKey"
     private let kHasCompletedOnboardingKey = "kHasCompletedOnboardingKey"
@@ -111,6 +134,13 @@ public final class GeneralSettingsManager: ObservableObject {
         }
     }
     
+    @Published public var windowCloseAction: WindowCloseAction {
+        didSet {
+            UserDefaults.standard.set(windowCloseAction.rawValue, forKey: kWindowCloseActionKey)
+            objectWillChange.send()
+        }
+    }
+    
     @Published public var hasAcceptedDisclaimer: Bool {
         didSet {
             UserDefaults.standard.set(hasAcceptedDisclaimer, forKey: kHasAcceptedDisclaimerKey)
@@ -136,6 +166,8 @@ public final class GeneralSettingsManager: ObservableObject {
         let savedLaunchAtLogin = UserDefaults.standard.bool(forKey: kLaunchAtLoginKey)
         let savedShowMenuBar = UserDefaults.standard.object(forKey: kShowMenuBarIconKey) == nil ? true : UserDefaults.standard.bool(forKey: kShowMenuBarIconKey)
         let savedShowPollingLogs = UserDefaults.standard.bool(forKey: kShowPollingLogsKey)
+        let savedCloseActionRaw = UserDefaults.standard.string(forKey: kWindowCloseActionKey) ?? WindowCloseAction.minimize.rawValue
+        let closeAction = WindowCloseAction(rawValue: savedCloseActionRaw) ?? .minimize
         let savedAcceptedDisclaimer = UserDefaults.standard.bool(forKey: kHasAcceptedDisclaimerKey)
         let savedNeverShowDisclaimer = UserDefaults.standard.bool(forKey: kNeverShowDisclaimerKey)
         let savedCompletedOnboarding = UserDefaults.standard.bool(forKey: kHasCompletedOnboardingKey)
@@ -144,6 +176,7 @@ public final class GeneralSettingsManager: ObservableObject {
         self.isLaunchAtLoginEnabled = savedLaunchAtLogin
         self.isShowMenuBarIconEnabled = savedShowMenuBar
         self.isShowPollingLogsEnabled = savedShowPollingLogs
+        self.windowCloseAction = closeAction
         self.hasAcceptedDisclaimer = savedAcceptedDisclaimer
         self.neverShowDisclaimer = savedNeverShowDisclaimer
         self.hasCompletedOnboarding = savedCompletedOnboarding

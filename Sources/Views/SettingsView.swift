@@ -247,6 +247,60 @@ public struct SettingsView: View {
                 
                 Divider().opacity(0.4)
                 
+                // Window Close Action Switcher (点击红色退出按钮时：完全退出软件 / 最小化隐藏窗口)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Label(L10n("settings_close_action_title"), systemImage: "xmark.circle.fill")
+                            .font(.subheadline.bold())
+                        Spacer()
+                        
+                        // Unified Segmented Control (Icon + Text combined)
+                        HStack(spacing: 2) {
+                            ForEach(WindowCloseAction.allCases) { action in
+                                let isSelected = generalSettings.windowCloseAction == action
+                                Button {
+                                    generalSettings.windowCloseAction = action
+                                } label: {
+                                    HStack(spacing: 5) {
+                                        Image(systemName: action.icon)
+                                            .font(.system(size: 11, weight: isSelected ? .bold : .medium))
+                                            .foregroundColor(isSelected ? .white : .secondary)
+                                        
+                                        Text(action.title)
+                                            .font(.system(size: 12, weight: isSelected ? .bold : .medium))
+                                            .foregroundColor(isSelected ? .white : .primary)
+                                    }
+                                    .padding(.vertical, 5)
+                                    .padding(.horizontal, 10)
+                                    .contentShape(Rectangle())
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                            .fill(isSelected ? Color.blue : Color.primary.opacity(0.001))
+                                    )
+                                    .shadow(color: isSelected ? Color.blue.opacity(0.3) : .clear, radius: 2, y: 1)
+                                }
+                                .buttonStyle(.plain)
+                                .contentShape(Rectangle())
+                                .withoutFocusRing()
+                            }
+                        }
+                        .padding(3)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color(NSColor.controlBackgroundColor))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                        )
+                    }
+                    Text(L10n("settings_close_action_desc"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Divider().opacity(0.4)
+                
                 // Show Polling Logs Toggle
                 VStack(alignment: .leading, spacing: 6) {
                     Toggle(isOn: $generalSettings.isShowPollingLogsEnabled) {
