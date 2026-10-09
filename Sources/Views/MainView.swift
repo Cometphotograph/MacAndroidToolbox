@@ -62,6 +62,62 @@ public enum NavigationSection: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Sidebar Row Button Style (Full-Width Interactive Surface)
+public struct SidebarRowButtonStyle: ButtonStyle {
+    let isSelected: Bool
+    var minHeight: CGFloat = 34
+    var isSubtleSelection: Bool = false
+    
+    public init(isSelected: Bool, minHeight: CGFloat = 34, isSubtleSelection: Bool = false) {
+        self.isSelected = isSelected
+        self.minHeight = minHeight
+        self.isSubtleSelection = isSubtleSelection
+    }
+    
+    public func makeBody(configuration: Configuration) -> some View {
+        SidebarRowButtonBody(
+            configuration: configuration,
+            isSelected: isSelected,
+            minHeight: minHeight,
+            isSubtleSelection: isSubtleSelection
+        )
+    }
+}
+
+private struct SidebarRowButtonBody: View {
+    let configuration: ButtonStyle.Configuration
+    let isSelected: Bool
+    let minHeight: CGFloat
+    let isSubtleSelection: Bool
+    @State private var isHovered: Bool = false
+    
+    var body: some View {
+        configuration.label
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(minHeight: minHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(
+                        isSelected ? (isSubtleSelection ? Color.primary.opacity(0.08) : Color.accentColor) :
+                        (isHovered || configuration.isPressed) ? Color.primary.opacity(0.06) :
+                        Color.black.opacity(0.0001)
+                    )
+                    .shadow(
+                        color: (isSelected && !isSubtleSelection) ? Color.accentColor.opacity(0.35) : Color.clear,
+                        radius: 4,
+                        x: 0,
+                        y: 1.5
+                    )
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .onHover { hovering in
+                isHovered = hovering
+            }
+    }
+}
+
 public struct MainView: View {
     @ObservedObject var deviceManager = DeviceManager.shared
     @ObservedObject var languageManager = LanguageManager.shared
@@ -73,7 +129,6 @@ public struct MainView: View {
     @State private var isConsoleExpanded: Bool = true
     @State private var showOnboarding: Bool = false
     @State private var showSearchPalette: Bool = false
-    @State private var hoveredSection: NavigationSection? = nil
     
     public init() {}
     
@@ -317,7 +372,6 @@ public struct MainView: View {
     // MARK: - Navigation Item Row (macOS 27 Row Height 34pt, Corner Radius 8pt)
     private func navigationItemRow(_ section: NavigationSection) -> some View {
         let isSelected = selectedSection == section
-        let isHovered = hoveredSection == section
         
         return Button {
             withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
@@ -364,27 +418,8 @@ public struct MainView: View {
                         .foregroundColor(isSelected ? .white : .purple)
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 34)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(
-                        isSelected ? Color.accentColor :
-                        isHovered ? Color.primary.opacity(0.06) :
-                        Color.black.opacity(0.0001)
-                    )
-                    .shadow(color: isSelected ? Color.accentColor.opacity(0.35) : Color.clear, radius: 4, x: 0, y: 1.5)
-            )
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
-        .onHover { hovering in
-            hoveredSection = hovering ? section : nil
-        }
+        .buttonStyle(SidebarRowButtonStyle(isSelected: isSelected, minHeight: 34))
     }
     
     // MARK: - Connected Devices Section Header
@@ -426,6 +461,7 @@ public struct MainView: View {
             .padding(.vertical, 8)
         } else {
             ForEach(deviceManager.devices) { dev in
+                let isDevSelected = deviceManager.selectedDevice?.serial == dev.serial
                 Button {
                     deviceManager.selectedDevice = dev
                 } label: {
@@ -447,24 +483,14 @@ public struct MainView: View {
                         
                         Spacer(minLength: 0)
                         
-                        if deviceManager.selectedDevice?.serial == dev.serial {
+                        if isDevSelected {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(.accentColor)
                         }
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(deviceManager.selectedDevice?.serial == dev.serial ? Color.primary.opacity(0.06) : Color.black.opacity(0.0001))
-                    )
-                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
+                .buttonStyle(SidebarRowButtonStyle(isSelected: isDevSelected, minHeight: 38, isSubtleSelection: true))
             }
         }
     }

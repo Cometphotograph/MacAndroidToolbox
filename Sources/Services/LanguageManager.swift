@@ -39,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.1"
-    public let appBuild = "20261009_160"
+    public let appBuild = "20261009_161"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
