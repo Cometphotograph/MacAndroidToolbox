@@ -283,22 +283,32 @@ public struct EDLView: View {
     
     // MARK: - Firehose Loader & Sahara Handshake Card
     private var firehoseLoaderCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Header with Count Badge and Notice Button
+        VStack(alignment: .leading, spacing: 16) {
+            // 1. Header with Count Badge and Notice Button
             HStack {
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     Image(systemName: "bolt.shield.fill")
+                        .font(.title3)
                         .foregroundColor(.orange)
-                    Text(L10n("edl_loader_file"))
-                        .font(.headline)
                     
-                    Text("192 款引导库")
-                        .font(.caption2.bold())
-                        .foregroundColor(.orange)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.orange.opacity(0.12))
-                        .clipShape(Capsule())
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text(L10n("edl_loader_file"))
+                                .font(.headline)
+                            
+                            Text("192 款引导库")
+                                .font(.caption2.bold())
+                                .foregroundColor(.orange)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.orange.opacity(0.12))
+                                .clipShape(Capsule())
+                        }
+                        
+                        Text(L10n("edl_loader_desc"))
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
@@ -318,7 +328,7 @@ public struct EDLView: View {
                 .buttonStyle(.plain)
             }
             
-            // Expandable Notice Banner
+            // 2. Expandable Notice Banner
             if showLoaderNotice {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
@@ -348,7 +358,9 @@ public struct EDLView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
             
-            // Brand Chips Horizontal Scroll
+            Divider().opacity(0.3)
+            
+            // 3. Brand Chips Horizontal Scroll
             VStack(alignment: .leading, spacing: 6) {
                 Text("\(L10n("edl_loader_brand")):")
                     .font(.caption.bold())
@@ -399,78 +411,84 @@ public struct EDLView: View {
                 }
             }
             
-            // Model / Chipset Picker & Search Bar
-            HStack(spacing: 12) {
-                // Search filter
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
-                    TextField(L10n("edl_filter_loaders"), text: $loaderSearchText)
-                        .textFieldStyle(.plain)
-                        .font(.caption)
-                    if !loaderSearchText.isEmpty {
-                        Button {
-                            loaderSearchText = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
-                                .font(.caption)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(6)
-                .background(Color.primary.opacity(0.05))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .frame(width: 220)
+            // 4. Model Selection & Search Row
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(L10n("edl_loader_chip_or_model")):")
+                    .font(.caption.bold())
+                    .foregroundColor(.secondary)
                 
-                // Model Dropdown
-                Picker("", selection: $selectedModelId) {
-                    ForEach(filteredModels) { model in
-                        Text(model.displayName).tag(model.id)
-                    }
-                }
-                .pickerStyle(.menu)
-                .onChange(of: selectedModelId) { newId in
-                    if let model = currentBrandGroup?.models.first(where: { $0.id == newId }) {
-                        selectedProgrammerPath = model.primaryLoader?.fullPath ?? ""
-                        firehoseLoaderPath = selectedProgrammerPath
-                        if selectedProgrammerPath.contains("_emmc") {
-                            selectedMemoryType = "emmc"
-                        } else if selectedProgrammerPath.contains("_ufs") {
-                            selectedMemoryType = "ufs"
+                HStack(spacing: 12) {
+                    // Search filter
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                        TextField(L10n("edl_filter_loaders"), text: $loaderSearchText)
+                            .textFieldStyle(.plain)
+                            .font(.caption)
+                        if !loaderSearchText.isEmpty {
+                            Button {
+                                loaderSearchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                }
-                
-                // Programmer binary dropdown (if current model has > 1 loaders)
-                if let model = currentSelectedModel, model.loaders.count > 1 {
-                    Picker("", selection: $selectedProgrammerPath) {
-                        ForEach(model.loaders) { loader in
-                            Text("\(loader.fileName) (\(loader.fileSizeString))").tag(loader.fullPath)
+                    .padding(6)
+                    .background(Color.primary.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .frame(width: 240)
+                    
+                    // Model Dropdown
+                    Picker("", selection: $selectedModelId) {
+                        ForEach(filteredModels) { model in
+                            Text(model.displayName).tag(model.id)
                         }
                     }
                     .pickerStyle(.menu)
-                    .frame(maxWidth: 220)
-                    .onChange(of: selectedProgrammerPath) { newPath in
-                        firehoseLoaderPath = newPath
+                    .onChange(of: selectedModelId) { newId in
+                        if let model = currentBrandGroup?.models.first(where: { $0.id == newId }) {
+                            selectedProgrammerPath = model.primaryLoader?.fullPath ?? ""
+                            firehoseLoaderPath = selectedProgrammerPath
+                            if selectedProgrammerPath.contains("_emmc") {
+                                selectedMemoryType = "emmc"
+                            } else if selectedProgrammerPath.contains("_ufs") {
+                                selectedMemoryType = "ufs"
+                            }
+                        }
+                    }
+                    
+                    // Programmer binary dropdown (if current model has > 1 loaders)
+                    if let model = currentSelectedModel, model.loaders.count > 1 {
+                        Picker("", selection: $selectedProgrammerPath) {
+                            ForEach(model.loaders) { loader in
+                                Text("\(loader.fileName) (\(loader.fileSizeString))").tag(loader.fullPath)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .frame(maxWidth: 240)
+                        .onChange(of: selectedProgrammerPath) { newPath in
+                            firehoseLoaderPath = newPath
+                        }
                     }
                 }
             }
             
-            // Badges & Tag Info
+            // 5. Badges & Tag Info
             if let model = currentSelectedModel {
                 HStack(spacing: 8) {
                     if model.hasDigest || model.hasSign {
                         HStack(spacing: 4) {
                             Image(systemName: "checkmark.shield.fill")
                                 .foregroundColor(.green)
-                            Text("已附带签名凭证 (\(model.hasDigest ? "Digest " : "")\(model.hasSign ? "Sign" : ""))")
+                            Text("免授权签名已配备 (\(model.hasDigest ? "Digest.elf " : "")\(model.hasSign ? "Sign.bin" : ""))")
                                 .font(.caption2.bold())
                                 .foregroundColor(.green)
                         }
-                        .padding(.horizontal, 7)
+                        .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(Color.green.opacity(0.12))
                         .clipShape(Capsule())
@@ -484,7 +502,7 @@ public struct EDLView: View {
                                 .font(.caption2.monospaced())
                                 .foregroundColor(.secondary)
                         }
-                        .padding(.horizontal, 7)
+                        .padding(.horizontal, 8)
                         .padding(.vertical, 3)
                         .background(Color.primary.opacity(0.06))
                         .clipShape(Capsule())
@@ -496,10 +514,10 @@ public struct EDLView: View {
             
             Divider().opacity(0.3)
             
-            // Manual File Path Input (Allows pasting custom external loader or editing)
-            VStack(alignment: .leading, spacing: 4) {
+            // 6. Manual File Path Input
+            VStack(alignment: .leading, spacing: 6) {
                 Text("当前加载的 Firehose 引导文件绝对路径:")
-                    .font(.caption2.bold())
+                    .font(.caption.bold())
                     .foregroundColor(.secondary)
                 
                 HStack(spacing: 10) {
@@ -514,37 +532,42 @@ public struct EDLView: View {
                 }
             }
             
-            // Memory & LUN Selectors + Prominent SEND LOADER Button
-            HStack(spacing: 16) {
-                HStack(spacing: 6) {
+            Divider().opacity(0.3)
+            
+            // 7. Storage Parameters & Action Button Row (Generous spacing, non-overlapping)
+            HStack(alignment: .center, spacing: 20) {
+                // Storage Type (Menu style, eliminates cramping)
+                HStack(spacing: 8) {
                     Text("\(L10n("edl_memory_type")):")
-                        .font(.caption)
+                        .font(.caption.bold())
                         .foregroundColor(.secondary)
                     
                     Picker("", selection: $selectedMemoryType) {
                         Text("UFS (高通主流旗舰)").tag("ufs")
-                        Text("eMMC (入门/早期机型)").tag("emmc")
+                        Text("eMMC (早期机型)").tag("emmc")
                         Text("Auto (自动侦测)").tag("auto")
                     }
-                    .pickerStyle(.segmented)
-                    .frame(width: 220)
+                    .pickerStyle(.menu)
+                    .frame(width: 175)
                 }
                 
+                // LUN Selection (only shown for UFS)
                 if selectedMemoryType == "ufs" {
-                    HStack(spacing: 6) {
-                        Text("LUN:")
-                            .font(.caption)
+                    HStack(spacing: 8) {
+                        Text("LUN 分区:")
+                            .font(.caption.bold())
                             .foregroundColor(.secondary)
                         
                         Picker("", selection: $selectedLun) {
-                            Text("LUN 0 (用户区)").tag(0)
-                            Text("LUN 1 (引导A)").tag(1)
-                            Text("LUN 2 (引导B)").tag(2)
-                            Text("LUN 3").tag(3)
-                            Text("LUN 4").tag(4)
-                            Text("LUN 5").tag(5)
+                            Text("LUN 0 (用户数据区)").tag(0)
+                            Text("LUN 1 (引导槽位 A)").tag(1)
+                            Text("LUN 2 (引导槽位 B)").tag(2)
+                            Text("LUN 3 (系统配置)").tag(3)
+                            Text("LUN 4 (厂商保留)").tag(4)
+                            Text("LUN 5 (厂商保留)").tag(5)
                         }
-                        .frame(width: 130)
+                        .pickerStyle(.menu)
+                        .frame(width: 165)
                     }
                 }
                 
@@ -565,14 +588,14 @@ public struct EDLView: View {
                         }
                     }
                     .font(.subheadline.bold())
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 7)
                 }
                 .liquidGlassButton(tint: .orange, prominent: true)
                 .disabled(isSendingLoader || edlService.isFlashing || firehoseLoaderPath.isEmpty)
             }
         }
-        .liquidGlassCard(cornerRadius: 16, padding: 16)
+        .liquidGlassCard(cornerRadius: 16, padding: 18)
     }
     
     // MARK: - Tab Picker Bar

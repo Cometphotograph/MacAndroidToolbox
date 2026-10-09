@@ -38,8 +38,8 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
 public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
-    public let appVersion = "v1.4.1"
-    public let appBuild = "20261009_151"
+    public let appVersion = "v1.3.1"
+    public let appBuild = "20261009_152"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     

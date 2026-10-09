@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.md)
 
-[![Version](https://img.shields.io/badge/Version-v1.4.1-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.3.1-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
