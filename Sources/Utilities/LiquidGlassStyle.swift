@@ -241,6 +241,7 @@ public struct SidebarGlassBackgroundView: View {
                     .frame(width: 1)
             }
         }
+        .allowsHitTesting(false)
         .ignoresSafeArea()
     }
 }
@@ -294,7 +295,10 @@ public struct LiquidDetailGlassBackgroundView: View {
                     .position(x: w * 0.15, y: h * 0.75)
                     .blur(radius: 70)
             }
+            .allowsHitTesting(false)
         }
+        .clipped()
+        .allowsHitTesting(false)
         .ignoresSafeArea()
     }
 }
@@ -727,6 +731,7 @@ public struct MacOS27HeaderBackgroundView: View {
                     .frame(height: 0.5)
             }
         }
+        .allowsHitTesting(false)
     }
 }
 

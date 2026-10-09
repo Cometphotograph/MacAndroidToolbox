@@ -140,12 +140,14 @@ public struct MainView: View {
                 if isSidebarVisible {
                     sidebarView
                         .frame(width: 240)
+                        .zIndex(1)
                         .transition(.move(edge: .leading).combined(with: .opacity))
                 }
                 
                 // MARK: - Right Pane: Detail View + Unified Header
                 detailView
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             
