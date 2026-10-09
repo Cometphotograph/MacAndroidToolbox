@@ -230,7 +230,8 @@ public struct MainView: View {
                         }
                     })
                     .frame(height: 195)
-                    .padding(.horizontal, 40)
+                    .padding(.leading, 26)
+                    .padding(.trailing, 40)
                     .padding(.bottom, 20)
                 }
                 .transition(.asymmetric(
