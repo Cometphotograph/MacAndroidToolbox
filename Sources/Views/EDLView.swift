@@ -195,25 +195,29 @@ public struct EDLView: View {
     // MARK: - Header Status Card
     private var statusHeaderCard: some View {
         HStack(spacing: 16) {
-            // Glowing Chipset Avatar
+            // Glowing Chipset Avatar (54x54)
             ZStack {
                 Circle()
                     .fill(
                         RadialGradient(
                             colors: [
-                                (isDeviceIn9008 ? Color.red : Color.gray).opacity(0.35),
+                                (isDeviceIn9008 ? Color.red : Color.secondary).opacity(0.32),
                                 Color.clear
                             ],
                             center: .center,
                             startRadius: 8,
-                            endRadius: 36
+                            endRadius: 32
                         )
                     )
-                    .frame(width: 64, height: 64)
+                    .frame(width: 54, height: 54)
+                
+                Circle()
+                    .fill((isDeviceIn9008 ? Color.red : Color.secondary).opacity(0.12))
+                    .frame(width: 44, height: 44)
                 
                 Image(systemName: "cpu.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(isDeviceIn9008 ? Color.red : Color.secondary)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(isDeviceIn9008 ? .red : .secondary)
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -221,63 +225,75 @@ public struct EDLView: View {
                     Text(L10n("edl_title"))
                         .font(.title3.bold())
                     
-                    // Status Badge
-                    HStack(spacing: 4) {
+                    // Unified Status Capsule Badge
+                    HStack(spacing: 5) {
                         Circle()
                             .fill(isDeviceIn9008 ? Color.red : Color.secondary)
-                            .frame(width: 8, height: 8)
+                            .frame(width: 7, height: 7)
                         Text(isDeviceIn9008 ? L10n("edl_device_connected") : L10n("edl_no_device"))
                             .font(.caption.bold())
-                            .foregroundColor(isDeviceIn9008 ? .red : .secondary)
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 3.5)
                     .background((isDeviceIn9008 ? Color.red : Color.secondary).opacity(0.12))
+                    .foregroundColor(isDeviceIn9008 ? .red : .secondary)
                     .clipShape(Capsule())
                 }
                 
-                if let dev = edlService.connectedDevice {
-                    Text("\(dev.name) • VID: \(dev.vendorId) PID: \(dev.productId)\(dev.serialPort != nil ? " • " + dev.serialPort! : "")")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text(L10n("edl_header_guide_tip"))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                Group {
+                    if let dev = edlService.connectedDevice {
+                        Text("\(dev.name) • VID: \(dev.vendorId) PID: \(dev.productId)\(dev.serialPort != nil ? " • " + dev.serialPort! : "")")
+                    } else {
+                        Text(L10n("edl_header_guide_tip"))
+                    }
                 }
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .lineLimit(2)
             }
             
             Spacer()
             
-            // Quick Action: Reboot / Reset Device
-            VStack(spacing: 6) {
-                Button {
-                    executeRebootDevice()
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                        Text(L10n("edl_btn_reset_device"))
+            // Trailing Action Button
+            if isDeviceIn9008 {
+                HStack(spacing: 8) {
+                    Button {
+                        executeRebootDevice()
+                    } label: {
+                        Label(L10n("edl_btn_reset_device"), systemImage: "arrow.triangle.2.circlepath")
                     }
+                    .liquidGlassButton(tint: .red, prominent: true)
+                    .disabled(edlService.isFlashing)
+                    
+                    Button {
+                        Task {
+                            _ = await edlService.detectConnected9008Device()
+                            DeviceManager.shared.refreshDevices()
+                        }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 13, weight: .semibold))
+                            .frame(width: 32, height: 32)
+                            .background(Circle().fill(Color.primary.opacity(0.06)))
+                    }
+                    .buttonStyle(.plain)
+                    .help(L10n("common_refresh"))
+                    .disabled(edlService.isFlashing)
                 }
-                .liquidGlassButton(tint: .orange)
-                .disabled(edlService.isFlashing)
-                
+            } else {
                 Button {
                     Task {
                         _ = await edlService.detectConnected9008Device()
                         DeviceManager.shared.refreshDevices()
                     }
                 } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.clockwise")
-                        Text(L10n("common_refresh"))
-                    }
+                    Label(L10n("edl_btn_refresh"), systemImage: "arrow.clockwise")
                 }
-                .buttonStyle(.plain)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .liquidGlassButton(tint: .red, prominent: true)
+                .disabled(edlService.isFlashing)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .liquidGlassCard(cornerRadius: 16, padding: 16)
     }
     

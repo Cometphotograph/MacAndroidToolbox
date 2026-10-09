@@ -39,7 +39,7 @@ public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
     public let appVersion = "v1.3.1"
-    public let appBuild = "20261009_155"
+    public let appBuild = "20261009_156"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -550,6 +550,17 @@ public final class LanguageManager: ObservableObject {
             .ko: "확인",
             .ru: "ОК",
             .uk: "ОК"
+        ],
+        "common_refresh": [
+            .zhHant: "重新整理",
+            .zhHans: "刷新",
+            .en: "Refresh",
+            .fr: "Actualiser",
+            .ja: "更新",
+            .es: "Actualizar",
+            .ko: "새로고침",
+            .ru: "Обновить",
+            .uk: "Оновити"
         ],
         "common_unknown": [
             .zhHant: "未知",
@@ -1496,6 +1507,61 @@ public final class LanguageManager: ObservableObject {
             .ko: "파티션 플래시, 부트로더 언락 및 슬롯 전환은 Fastboot / Bootloader 모드가 필요합니다.",
             .ru: "Прошивка разделов, разблокировка и переключение слотов требуют режима Fastboot / Bootloader.",
             .uk: "Прошивка розділів, розблокування та перемикання слотів потребують режиму Fastboot / Bootloader."
+        ],
+        "fb_badge_current_mode": [
+            .zhHant: "當前為 %@",
+            .zhHans: "当前为 %@",
+            .en: "Current: %@",
+            .fr: "Actuel : %@",
+            .ja: "現在: %@",
+            .es: "Actual: %@",
+            .ko: "현재: %@",
+            .ru: "Текущий: %@",
+            .uk: "Поточний: %@"
+        ],
+        "fb_badge_no_device": [
+            .zhHant: "Fastboot 未連接",
+            .zhHans: "Fastboot 未连接",
+            .en: "Fastboot Not Connected",
+            .fr: "Fastboot non connecté",
+            .ja: "Fastboot 未接続",
+            .es: "Fastboot no conectado",
+            .ko: "Fastboot 미연결",
+            .ru: "Fastboot не подключен",
+            .uk: "Fastboot не підключено"
+        ],
+        "fb_header_ready_desc": [
+            .zhHant: "設備已處於 Fastboot 模式，可執行分區刷寫、引導臨時鏡像或解鎖 Bootloader。",
+            .zhHans: "设备已处于 Fastboot 模式，可执行分区刷写、引导临时镜像或解锁 Bootloader。",
+            .en: "Device is in Fastboot mode. Ready for partition flashing, temporary booting, or bootloader unlocking.",
+            .fr: "L'appareil est en mode Fastboot. Prêt pour le flash de partitions et le déverrouillage du bootloader.",
+            .ja: "デバイスは Fastboot モードです。パーティションのフラッシュやアンロックが可能です。",
+            .es: "El dispositivo está en modo Fastboot. Listo para flashear particiones o desbloquear el bootloader.",
+            .ko: "기기가 Fastboot 모드입니다. 파티션 플래시, 임시 부팅 또는 부트로더 언락이 가능합니다.",
+            .ru: "Устройство в режиме Fastboot. Доступна прошивка разделов и разблокировка загрузчика.",
+            .uk: "Пристрій у режимі Fastboot. Доступна прошивка розділів та розблокування завантажувача."
+        ],
+        "fb_header_need_reboot_desc": [
+            .zhHant: "分區刷寫、解鎖與槽位切換需要設備處於 Fastboot / Bootloader 模式。請重啟設備以繼續。",
+            .zhHans: "分区刷写、解锁与槽位切换需要设备处于 Fastboot / Bootloader 模式。请重启设备以继续。",
+            .en: "Partition flashing and bootloader operations require Fastboot mode. Please reboot device to continue.",
+            .fr: "Le flash de partitions nécessite le mode Fastboot. Veuillez redémarrer l'appareil pour continuer.",
+            .ja: "パーティションフラッシュやアンロックには Fastboot モードが必要です。再起動して続行してください。",
+            .es: "El flasheo de particiones requiere el modo Fastboot. Reinicie el dispositivo para continuar.",
+            .ko: "파티션 플래시 및 언락 작업을 수행하려면 Fastboot 모드가 필요합니다. 기기를 재부팅하세요.",
+            .ru: "Для прошивки разделов требуется режим Fastboot. Пожалуйста, перезагрузите устройство.",
+            .uk: "Для прошивки розділів потрібен режим Fastboot. Будь ласка, перезавантажте пристрій."
+        ],
+        "fb_header_no_device_desc": [
+            .zhHant: "請將 Android 設備連接至 Mac，或長按【電源鍵 + 音量減鍵】手動開機進入 Fastboot 模式。",
+            .zhHans: "请将 Android 设备连接至 Mac，或长按【电源键 + 音量减键】手动开机进入 Fastboot 模式。",
+            .en: "Please connect an Android device to Mac, or hold Power + Volume Down to enter Fastboot mode manually.",
+            .fr: "Veuillez connecter un appareil Android au Mac ou maintenir Marche/Arrêt + Volume Bas pour le mode Fastboot.",
+            .ja: "Android 端末を Mac に接続するか、電源＋音量ダウン長押しで手動で Fastboot モードに入ってください。",
+            .es: "Conecte un dispositivo Android al Mac o mantenga presionado Encendido + Bajar volumen para entrar en Fastboot.",
+            .ko: "Android 기기를 Mac에 연결하거나 전원 + 볼륨 다운 버튼을 길게 눌러 수동으로 Fastboot 모드로 진입하세요.",
+            .ru: "Подключите устройство к Mac или удерживайте кнопки Питание + Уменьшение громкости для входа в Fastboot.",
+            .uk: "Підключіть пристрій до Mac або утримуйте кнопки Живлення + Зменшення гучності для входу в Fastboot."
         ],
         "fb_part_boot": [
             .zhHant: "boot (核心引導)",
@@ -2860,6 +2926,17 @@ public final class LanguageManager: ObservableObject {
             .ko: "9008 종료 / 재부팅",
             .ru: "Выход из 9008 / Перезагрузка",
             .uk: "Вихід з 9008 / Перезавантаження"
+        ],
+        "edl_btn_refresh": [
+            .zhHant: "檢測 9008 設備",
+            .zhHans: "检测 9008 设备",
+            .en: "Detect 9008 Device",
+            .fr: "Détecter l'appareil 9008",
+            .ja: "9008 デバイスを検出",
+            .es: "Detectar dispositivo 9008",
+            .ko: "9008 기기 감지",
+            .ru: "Поиск устройства 9008",
+            .uk: "Пошук пристрою 9008"
         ],
         "edl_btn_send_loader": [
             .zhHant: "發送引導 (Sahara 握手)",
@@ -4246,6 +4323,28 @@ public final class LanguageManager: ObservableObject {
             .ko: "기기가 현재 Recovery 모드가 아닙니다. 플래시나 초기화를 하려면 먼저 Recovery로 재부팅하세요.",
             .ru: "Устройство не в режиме Recovery. Для прошивки или сброса сначала перезагрузитесь в Recovery.",
             .uk: "Пристрій не в режимі Recovery. Для прошивки або скидання спочатку перезавантажтеся в Recovery."
+        ],
+        "rec_badge_no_device": [
+            .zhHant: "Recovery 未連接",
+            .zhHans: "Recovery 未连接",
+            .en: "Recovery Not Connected",
+            .fr: "Recovery non connecté",
+            .ja: "Recovery 未接続",
+            .es: "Recovery no conectado",
+            .ko: "Recovery 미연결",
+            .ru: "Recovery не подключен",
+            .uk: "Recovery не підключено"
+        ],
+        "rec_header_no_device_desc": [
+            .zhHant: "請將 Android 設備連接至 Mac，或長按【電源鍵 + 音量加鍵】手動開機進入 Recovery 模式。",
+            .zhHans: "请将 Android 设备连接至 Mac，或长按【电源键 + 音量加键】手动开机进入 Recovery 模式。",
+            .en: "Please connect an Android device to Mac, or hold Power + Volume Up to enter Recovery mode manually.",
+            .fr: "Veuillez connecter un appareil Android au Mac ou maintenir Marche/Arrêt + Volume Haut pour le mode Recovery.",
+            .ja: "Android 端末を Mac に接続するか、電源＋音量アップ長押しで手動で Recovery モードに入ってください。",
+            .es: "Conecte un dispositivo Android al Mac o mantenga presionado Encendido + Subir volumen para entrar en Recovery.",
+            .ko: "Android 기기를 Mac에 연결하거나 전원 + 볼륨 업 버튼을 길게 눌러 수동으로 Recovery 모드로 진입하세요.",
+            .ru: "Подключите устройство к Mac или удерживайте кнопки Питание + Увеличение громкости для входа в Recovery.",
+            .uk: "Підключіть пристрій до Mac або утримуйте кнопки Живлення + Збільшення гучності для входу в Recovery."
         ],
         "rec_actions_title": [
             .zhHant: "Recovery 常用電源與維護指令",

@@ -71,40 +71,69 @@ public struct RecoveryView: View {
     // MARK: - Recovery Status Banner
     private var recoveryStatusBanner: some View {
         HStack(spacing: 16) {
+            // Glowing Mode Avatar (54x54)
             ZStack {
                 Circle()
-                    .fill(isDeviceInRecovery ? Color.purple.opacity(0.15) : Color.orange.opacity(0.15))
-                    .frame(width: 48, height: 48)
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                (isDeviceInRecovery ? Color.purple : Color.secondary).opacity(0.32),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 8,
+                            endRadius: 32
+                        )
+                    )
+                    .frame(width: 54, height: 54)
                 
-                Image(systemName: isDeviceInRecovery ? "cross.case.fill" : "exclamationmark.triangle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(isDeviceInRecovery ? .purple : .orange)
+                Circle()
+                    .fill((isDeviceInRecovery ? Color.purple : Color.secondary).opacity(0.12))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: "cross.case.fill")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(isDeviceInRecovery ? .purple : .secondary)
             }
             
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                    Text(L10n("rec_status_title"))
-                        .font(.headline)
+                    Text(L10n("rec_title"))
+                        .font(.title3.bold())
                     
-                    if let dev = deviceManager.selectedDevice {
-                        Text(dev.mode.title)
+                    // Unified Status Capsule Badge
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(recoveryStatusColor)
+                            .frame(width: 7, height: 7)
+                        Text(recoveryStatusBadgeText)
                             .font(.caption.bold())
-                            .foregroundColor(dev.mode.color)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(dev.mode.color.opacity(0.15))
-                            .clipShape(Capsule())
                     }
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 3.5)
+                    .background(recoveryStatusColor.opacity(0.12))
+                    .foregroundColor(recoveryStatusColor)
+                    .clipShape(Capsule())
                 }
                 
-                Text(isDeviceInRecovery ? L10n("rec_status_ready") : L10n("rec_status_not_ready"))
+                Text(recoveryStatusDescription)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .lineLimit(2)
             }
             
             Spacer()
             
-            if !isDeviceInRecovery {
+            // Trailing Action Button
+            if isDeviceInRecovery {
+                Button {
+                    rebootToSystem()
+                } label: {
+                    Label(L10n("rec_reboot_to_sys"), systemImage: "arrow.clockwise")
+                }
+                .liquidGlassButton(tint: .purple, prominent: true)
+                .disabled(isOperating)
+            } else {
                 Button {
                     rebootToRecovery()
                 } label: {
@@ -116,6 +145,36 @@ public struct RecoveryView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .liquidGlassCard(cornerRadius: 16, padding: 16)
+    }
+    
+    private var recoveryStatusColor: Color {
+        if isDeviceInRecovery {
+            return .purple
+        } else if deviceManager.selectedDevice != nil {
+            return .orange
+        } else {
+            return .secondary
+        }
+    }
+    
+    private var recoveryStatusBadgeText: String {
+        if isDeviceInRecovery {
+            return deviceManager.selectedDevice?.mode == .sideload ? "Sideload" : L10n("mode_recovery")
+        } else if let dev = deviceManager.selectedDevice {
+            return String(format: L10n("fb_badge_current_mode"), dev.mode.title)
+        } else {
+            return L10n("rec_badge_no_device")
+        }
+    }
+    
+    private var recoveryStatusDescription: String {
+        if isDeviceInRecovery {
+            return L10n("rec_status_ready")
+        } else if deviceManager.selectedDevice != nil {
+            return L10n("rec_status_not_ready")
+        } else {
+            return L10n("rec_header_no_device_desc")
+        }
     }
     
     // MARK: - Sideload Card

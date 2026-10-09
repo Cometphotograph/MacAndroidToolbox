@@ -49,10 +49,8 @@ public struct FastbootView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Warning / Switch to Fastboot if currently in ADB mode
-                if !isDeviceInFastboot {
-                    notInFastbootBanner
-                }
+                // Unified Fastboot Header Status Card
+                fastbootHeaderCard
                 
                 // Device Fastboot Status & Slot Control
                 fastbootStatusCard
@@ -128,38 +126,111 @@ public struct FastbootView: View {
     }
     
     // MARK: - Subviews
-    private var notInFastbootBanner: some View {
-        HStack(spacing: 14) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
-                .font(.title2)
+    private var fastbootHeaderCard: some View {
+        HStack(spacing: 16) {
+            // Glowing Mode Avatar (54x54)
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                (isDeviceInFastboot ? Color.orange : Color.secondary).opacity(0.32),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 8,
+                            endRadius: 32
+                        )
+                    )
+                    .frame(width: 54, height: 54)
+                
+                Circle()
+                    .fill((isDeviceInFastboot ? Color.orange : Color.secondary).opacity(0.12))
+                    .frame(width: 44, height: 44)
+                
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(isDeviceInFastboot ? .orange : .secondary)
+            }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(L10n("fb_not_in_fastboot"))
-                    .font(.headline)
-                Text(L10n("fb_not_in_fastboot_desc"))
+                HStack(spacing: 8) {
+                    Text(L10n("nav_fastboot"))
+                        .font(.title3.bold())
+                    
+                    // Unified Status Capsule Badge
+                    HStack(spacing: 5) {
+                        Circle()
+                            .fill(fastbootStatusColor)
+                            .frame(width: 7, height: 7)
+                        Text(fastbootStatusBadgeText)
+                            .font(.caption.bold())
+                    }
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 3.5)
+                    .background(fastbootStatusColor.opacity(0.12))
+                    .foregroundColor(fastbootStatusColor)
+                    .clipShape(Capsule())
+                }
+                
+                Text(fastbootStatusDescription)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .lineLimit(2)
             }
             
             Spacer()
             
-            Button {
-                rebootToBootloader()
-            } label: {
-                Label(L10n("fb_reboot_to_fastboot"), systemImage: "bolt.fill")
+            // Trailing Action Button
+            if isDeviceInFastboot {
+                Button {
+                    rebootToSystem()
+                } label: {
+                    Label(L10n("rec_reboot_to_sys"), systemImage: "arrow.clockwise")
+                }
+                .liquidGlassButton(tint: .orange, prominent: true)
+            } else {
+                Button {
+                    rebootToBootloader()
+                } label: {
+                    Label(L10n("fb_reboot_to_fastboot"), systemImage: "bolt.fill")
+                }
+                .liquidGlassButton(tint: .orange, prominent: true)
+                .disabled(deviceManager.selectedDevice == nil)
             }
-            .liquidGlassButton(tint: .orange, prominent: true)
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.orange.opacity(0.4), lineWidth: 1)
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .liquidGlassCard(cornerRadius: 16, padding: 16)
+    }
+    
+    private var fastbootStatusColor: Color {
+        if isDeviceInFastboot {
+            return .orange
+        } else if deviceManager.selectedDevice != nil {
+            return .orange
+        } else {
+            return .secondary
+        }
+    }
+    
+    private var fastbootStatusBadgeText: String {
+        if isDeviceInFastboot {
+            return deviceManager.selectedDevice?.mode == .fastbootd ? "FastbootD" : L10n("mode_fastboot")
+        } else if let dev = deviceManager.selectedDevice {
+            return String(format: L10n("fb_badge_current_mode"), dev.mode.title)
+        } else {
+            return L10n("fb_badge_no_device")
+        }
+    }
+    
+    private var fastbootStatusDescription: String {
+        if isDeviceInFastboot {
+            return L10n("fb_header_ready_desc")
+        } else if deviceManager.selectedDevice != nil {
+            return L10n("fb_header_need_reboot_desc")
+        } else {
+            return L10n("fb_header_no_device_desc")
+        }
     }
     
     private var fastbootStatusCard: some View {
@@ -669,6 +740,20 @@ public struct FastbootView: View {
                 deviceManager.appendLog(level: .info, text: "正在重啟設備進入 Bootloader...")
                 try await ADBService.shared.reboot(serial: dev.serial, target: .bootloader)
                 deviceManager.appendLog(level: .success, text: "已發送進入 Bootloader 指令")
+            } catch {
+                deviceManager.appendLog(level: .error, text: "重啟失敗: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func rebootToSystem() {
+        guard let dev = deviceManager.selectedDevice else { return }
+        Task {
+            do {
+                deviceManager.appendLog(level: .info, text: "正在重啟設備進入系統...")
+                try await FastbootService.shared.reboot(serial: dev.serial, target: .system)
+                deviceManager.appendLog(level: .success, text: "已發送重啟至系統指令")
+                deviceManager.refreshDevices()
             } catch {
                 deviceManager.appendLog(level: .error, text: "重啟失敗: \(error.localizedDescription)")
             }
