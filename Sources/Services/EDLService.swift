@@ -282,6 +282,48 @@ public final class EDLService: ObservableObject {
     
     // MARK: - Core Operations
     
+    /// Sends Firehose Loader to device via Sahara protocol
+    public func sendLoader(
+        loader: String,
+        memoryType: String = "ufs",
+        onOutput: (@Sendable (String) -> Void)? = nil
+    ) async throws -> Bool {
+        isFlashing = true
+        statusMessage = "正在向设备发送 Firehose 引导文件 (Sahara 握手)..."
+        defer {
+            isFlashing = false
+            statusMessage = "就绪"
+        }
+        
+        guard !loader.isEmpty else {
+            throw NSError(domain: "EDLError", code: 1, userInfo: [NSLocalizedDescriptionKey: "引导文件路径不能为空，请先选择 Firehose 引导文件。"])
+        }
+        
+        var cmdArgs: [String] = []
+        cmdArgs.append("--loader=\(loader)")
+        if !memoryType.isEmpty && memoryType.lowercased() != "auto" {
+            cmdArgs.append("--memory=\(memoryType.lowercased())")
+        }
+        
+        onOutput?("==> [EDL/Sahara] 开始通过 Sahara 协议握手并发送 Firehose 引导: \(loader)")
+        let invocation = buildEdlInvocation(args: cmdArgs)
+        let res = try await ProcessRunner.shared.execute(
+            executable: invocation.executable,
+            arguments: invocation.arguments,
+            onOutput: onOutput
+        )
+        
+        let fullOutput = (res.stdout + "\n" + res.stderr)
+        let isSuccess = res.isSuccess || fullOutput.contains("Successfully uploaded programmer") || fullOutput.contains("Firehose mode") || fullOutput.contains("Target:")
+        
+        if isSuccess {
+            onOutput?("🎉 [EDL/Sahara] 引导文件加载成功！Firehose 协议握手完成。")
+            return true
+        } else {
+            let errText = res.stderr.isEmpty ? res.stdout : res.stderr
+            throw NSError(domain: "EDLError", code: 2, userInfo: [NSLocalizedDescriptionKey: errText.isEmpty ? "Sahara 引导发送失败，请检查连接或更换引导程序。" : errText])
+        }
+    }
     /// Reads GPT Partition Table (Print GPT)
     public func printGPT(
         loader: String,

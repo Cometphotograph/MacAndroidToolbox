@@ -1,0 +1,1 @@
+8sGen4引导发送失败时，尝试更换8Elite的Digest。

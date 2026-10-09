@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.md)
 
-[![Version](https://img.shields.io/badge/Version-v1.4.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.4.1-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
@@ -75,6 +75,12 @@ A modern native Android flashing and debugging graphical toolbox tailored for **
 
 ### 🧯 3. Qualcomm 9008 Emergency Flasher (Qualcomm EDL 9008)
 * **USB Hardware 9008 Mode Auto-Detection**: Uses macOS low-level IOKit to rapidly detect Qualcomm devices in Emergency Download mode (VID `0x05c6` PID `0x9008` / `0x900e`).
+* **Built-in 192 Firehose Loader Library**:
+  - Comprehensive collection across 8 major phone brands: **Xiaomi, OPlus (OPPO/OnePlus/Realme), Meizu, Black Shark, Nubia (RedMagic/ZTE), Lenovo (Legion/Moto), ASUS (ROG), and LG**.
+  - Supports chipsets from Snapdragon 625/835 to Snapdragon 8 Gen 1/2/3/4 and Snapdragon 8 Elite with automated auth signature matching (`Digest.elf` and `Sign.bin`).
+* **One-Click "Send Loader (Sahara Handshake)"**:
+  - Instantly uploads the Firehose programmer into device memory via Sahara protocol to establish communication.
+  - Includes troubleshooting hints (alternative programmer switching, power-cycle port reset, and signature exclusion).
 * **QFIL Emulation Full Firmware Flashing**:
   - Full support for Qualcomm factory `rawprogram*.xml` partition mappings and `patch*.xml` sector patches.
   - Supports modern UFS and eMMC storage types with automated firmware folder matching.

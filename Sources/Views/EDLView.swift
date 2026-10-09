@@ -6,6 +6,7 @@ public struct EDLView: View {
     @ObservedObject var deviceManager = DeviceManager.shared
     @ObservedObject var toolConfig = ToolConfig.shared
     @ObservedObject var languageManager = LanguageManager.shared
+    @ObservedObject var loaderLibrary = EDLLoaderLibrary.shared
     
     // Sub-view tab selection: 0: QFIL, 1: Partition Ops, 2: GPT Explorer, 3: Guide & Env
     @State private var selectedTab: Int = 0
@@ -14,6 +15,14 @@ public struct EDLView: View {
     @State private var firehoseLoaderPath: String = ""
     @State private var selectedMemoryType: String = "ufs" // "ufs", "emmc", "auto"
     @State private var selectedLun: Int = 0
+    
+    // Built-in 9008 Loader Library Selection
+    @State private var selectedBrand: String = "小米"
+    @State private var selectedModelId: String = ""
+    @State private var selectedProgrammerPath: String = ""
+    @State private var loaderSearchText: String = ""
+    @State private var isSendingLoader: Bool = false
+    @State private var showLoaderNotice: Bool = false
     
     // Tab 1: QFIL
     @State private var rawprogramPath: String = ""
@@ -51,11 +60,36 @@ public struct EDLView: View {
         return edlService.connectedDevice != nil || deviceManager.selectedDevice?.mode == .edl
     }
     
+    var currentBrandGroup: EDLBrandGroup? {
+        loaderLibrary.brandGroups.first { $0.brandName == selectedBrand }
+    }
+    
+    var filteredModels: [EDLTargetModel] {
+        guard let group = currentBrandGroup else { return [] }
+        let query = loaderSearchText.trimmingCharacters(in: .whitespaces).lowercased()
+        if query.isEmpty {
+            return group.models
+        }
+        return group.models.filter { model in
+            model.displayName.lowercased().contains(query) ||
+            model.rawFolderName.lowercased().contains(query) ||
+            model.loaders.contains { $0.fileName.lowercased().contains(query) }
+        }
+    }
+    
+    var currentSelectedModel: EDLTargetModel? {
+        currentBrandGroup?.models.first { $0.id == selectedModelId }
+            ?? filteredModels.first
+    }
+    
     public var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 // Header: Qualcomm 9008 Status & Quick Reset
                 statusHeaderCard
+                
+                // Firehose Loader & Sahara Handshake Card
+                firehoseLoaderCard
                 
                 // Liquid Glass Segmented Navigation Tab
                 tabPickerBar
@@ -83,6 +117,41 @@ public struct EDLView: View {
             Task {
                 _ = await edlService.checkEnvironment()
                 _ = await edlService.detectConnected9008Device()
+                loaderLibrary.reloadLibrary()
+                
+                // Auto match brand if device is available
+                if let dev = deviceManager.selectedDevice {
+                    let brand = dev.brand.lowercased()
+                    if brand.contains("xiaomi") || brand.contains("redmi") {
+                        selectedBrand = "小米"
+                    } else if brand.contains("oppo") || brand.contains("oneplus") || brand.contains("realme") {
+                        selectedBrand = "欧加"
+                    } else if brand.contains("meizu") {
+                        selectedBrand = "魅族"
+                    } else if brand.contains("blackshark") {
+                        selectedBrand = "黑鲨"
+                    } else if brand.contains("nubia") || brand.contains("zte") || brand.contains("redmagic") {
+                        selectedBrand = "努比亚"
+                    } else if brand.contains("lenovo") || brand.contains("motorola") || brand.contains("moto") {
+                        selectedBrand = "联想"
+                    } else if brand.contains("asus") || brand.contains("rog") {
+                        selectedBrand = "华硕"
+                    } else if brand.contains("lg") {
+                        selectedBrand = "LG"
+                    }
+                }
+                
+                // Auto select first model in brand if path is empty
+                if firehoseLoaderPath.isEmpty, let group = currentBrandGroup, let firstModel = group.models.first {
+                    selectedModelId = firstModel.id
+                    selectedProgrammerPath = firstModel.primaryLoader?.fullPath ?? ""
+                    firehoseLoaderPath = selectedProgrammerPath
+                    if selectedProgrammerPath.contains("_emmc") {
+                        selectedMemoryType = "emmc"
+                    } else if selectedProgrammerPath.contains("_ufs") {
+                        selectedMemoryType = "ufs"
+                    }
+                }
             }
         }
         .confirmationDialog(
@@ -125,154 +194,382 @@ public struct EDLView: View {
     
     // MARK: - Header Status Card
     private var statusHeaderCard: some View {
-        VStack(spacing: 14) {
-            HStack(spacing: 16) {
-                // Glowing Chipset Avatar
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    (isDeviceIn9008 ? Color.red : Color.gray).opacity(0.35),
-                                    Color.clear
-                                ],
-                                center: .center,
-                                startRadius: 8,
-                                endRadius: 36
-                            )
+        HStack(spacing: 16) {
+            // Glowing Chipset Avatar
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                (isDeviceIn9008 ? Color.red : Color.gray).opacity(0.35),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 8,
+                            endRadius: 36
                         )
-                        .frame(width: 64, height: 64)
+                    )
+                    .frame(width: 64, height: 64)
+                
+                Image(systemName: "cpu.fill")
+                    .font(.system(size: 28))
+                    .foregroundColor(isDeviceIn9008 ? Color.red : Color.secondary)
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Text(L10n("edl_title"))
+                        .font(.title3.bold())
                     
-                    Image(systemName: "cpu.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(isDeviceIn9008 ? Color.red : Color.secondary)
+                    // Status Badge
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(isDeviceIn9008 ? Color.red : Color.secondary)
+                            .frame(width: 8, height: 8)
+                        Text(isDeviceIn9008 ? L10n("edl_device_connected") : L10n("edl_no_device"))
+                            .font(.caption.bold())
+                            .foregroundColor(isDeviceIn9008 ? .red : .secondary)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background((isDeviceIn9008 ? Color.red : Color.secondary).opacity(0.12))
+                    .clipShape(Capsule())
                 }
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
-                        Text(L10n("edl_title"))
-                            .font(.title3.bold())
-                        
-                        // Status Badge
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(isDeviceIn9008 ? Color.red : Color.secondary)
-                                .frame(width: 8, height: 8)
-                            Text(isDeviceIn9008 ? L10n("edl_device_connected") : L10n("edl_no_device"))
-                                .font(.caption.bold())
-                                .foregroundColor(isDeviceIn9008 ? .red : .secondary)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background((isDeviceIn9008 ? Color.red : Color.secondary).opacity(0.12))
-                        .clipShape(Capsule())
+                if let dev = edlService.connectedDevice {
+                    Text("\(dev.name) • VID: \(dev.vendorId) PID: \(dev.productId)\(dev.serialPort != nil ? " • " + dev.serialPort! : "")")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                } else {
+                    Text(L10n("edl_header_guide_tip"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            // Quick Action: Reboot / Reset Device
+            VStack(spacing: 6) {
+                Button {
+                    executeRebootDevice()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                        Text(L10n("edl_btn_reset_device"))
                     }
+                }
+                .liquidGlassButton(tint: .orange)
+                .disabled(edlService.isFlashing)
+                
+                Button {
+                    Task {
+                        _ = await edlService.detectConnected9008Device()
+                        DeviceManager.shared.refreshDevices()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.clockwise")
+                        Text(L10n("common_refresh"))
+                    }
+                }
+                .buttonStyle(.plain)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            }
+        }
+        .liquidGlassCard(cornerRadius: 16, padding: 16)
+    }
+    
+    // MARK: - Firehose Loader & Sahara Handshake Card
+    private var firehoseLoaderCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            // Header with Count Badge and Notice Button
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "bolt.shield.fill")
+                        .foregroundColor(.orange)
+                    Text(L10n("edl_loader_file"))
+                        .font(.headline)
                     
-                    if let dev = edlService.connectedDevice {
-                        Text("\(dev.name) • VID: \(dev.vendorId) PID: \(dev.productId)\(dev.serialPort != nil ? " • " + dev.serialPort! : "")")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text(L10n("edl_header_guide_tip"))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    Text("192 款引导库")
+                        .font(.caption2.bold())
+                        .foregroundColor(.orange)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.orange.opacity(0.12))
+                        .clipShape(Capsule())
                 }
                 
                 Spacer()
                 
-                // Quick Action: Reboot / Reset Device
-                VStack(spacing: 6) {
-                    Button {
-                        executeRebootDevice()
-                    } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                            Text(L10n("edl_btn_reset_device"))
-                        }
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showLoaderNotice.toggle()
                     }
-                    .liquidGlassButton(tint: .orange)
-                    .disabled(edlService.isFlashing)
-                    
-                    Button {
-                        Task {
-                            _ = await edlService.detectConnected9008Device()
-                            DeviceManager.shared.refreshDevices()
-                        }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.clockwise")
-                            Text(L10n("common_refresh"))
-                        }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: showLoaderNotice ? "chevron.up.circle.fill" : "info.circle")
+                        Text(L10n("edl_loader_notice_title"))
                     }
-                    .buttonStyle(.plain)
                     .font(.caption)
+                    .foregroundColor(.orange)
+                }
+                .buttonStyle(.plain)
+            }
+            
+            // Expandable Notice Banner
+            if showLoaderNotice {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("9008 引导握手与签名避坑须知")
+                            .font(.caption.bold())
+                            .foregroundColor(.orange)
+                    }
+                    Text(loaderLibrary.globalNotice)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    if let modelNotice = currentSelectedModel?.noticeText, !modelNotice.isEmpty {
+                        Divider().opacity(0.3)
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .foregroundColor(.blue)
+                            Text("当前机型专属提示: \(modelNotice)")
+                                .font(.caption.bold())
+                                .foregroundColor(.blue)
+                        }
+                    }
+                }
+                .padding(10)
+                .background(Color.orange.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+            
+            // Brand Chips Horizontal Scroll
+            VStack(alignment: .leading, spacing: 6) {
+                Text("\(L10n("edl_loader_brand")):")
+                    .font(.caption.bold())
                     .foregroundColor(.secondary)
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(loaderLibrary.brandGroups) { group in
+                            Button {
+                                selectedBrand = group.brandName
+                                if let firstModel = group.models.first {
+                                    selectedModelId = firstModel.id
+                                    selectedProgrammerPath = firstModel.primaryLoader?.fullPath ?? ""
+                                    firehoseLoaderPath = selectedProgrammerPath
+                                    if selectedProgrammerPath.contains("_emmc") {
+                                        selectedMemoryType = "emmc"
+                                    } else if selectedProgrammerPath.contains("_ufs") {
+                                        selectedMemoryType = "ufs"
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: group.iconSystemName)
+                                        .font(.system(size: 11))
+                                    Text(group.brandName)
+                                        .font(.system(size: 12, weight: .semibold))
+                                    Text("\(group.models.count)")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .padding(.horizontal, 5)
+                                        .padding(.vertical, 1)
+                                        .background((selectedBrand == group.brandName ? Color.white : Color.primary).opacity(0.15))
+                                        .clipShape(Capsule())
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(
+                                    selectedBrand == group.brandName
+                                        ? Color.orange.opacity(0.85)
+                                        : Color.primary.opacity(0.07)
+                                )
+                                .foregroundColor(selectedBrand == group.brandName ? .white : .primary)
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 2)
                 }
             }
             
-            // Common Firehose Programmer Selector
-            Divider().opacity(0.4)
-            
-            VStack(alignment: .leading, spacing: 6) {
+            // Model / Chipset Picker & Search Bar
+            HStack(spacing: 12) {
+                // Search filter
                 HStack {
-                    Label(L10n("edl_loader_file"), systemImage: "bolt.shield.fill")
-                        .font(.caption.bold())
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                    TextField(L10n("edl_filter_loaders"), text: $loaderSearchText)
+                        .textFieldStyle(.plain)
+                        .font(.caption)
+                    if !loaderSearchText.isEmpty {
+                        Button {
+                            loaderSearchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(6)
+                .background(Color.primary.opacity(0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .frame(width: 220)
+                
+                // Model Dropdown
+                Picker("", selection: $selectedModelId) {
+                    ForEach(filteredModels) { model in
+                        Text(model.displayName).tag(model.id)
+                    }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: selectedModelId) { newId in
+                    if let model = currentBrandGroup?.models.first(where: { $0.id == newId }) {
+                        selectedProgrammerPath = model.primaryLoader?.fullPath ?? ""
+                        firehoseLoaderPath = selectedProgrammerPath
+                        if selectedProgrammerPath.contains("_emmc") {
+                            selectedMemoryType = "emmc"
+                        } else if selectedProgrammerPath.contains("_ufs") {
+                            selectedMemoryType = "ufs"
+                        }
+                    }
+                }
+                
+                // Programmer binary dropdown (if current model has > 1 loaders)
+                if let model = currentSelectedModel, model.loaders.count > 1 {
+                    Picker("", selection: $selectedProgrammerPath) {
+                        ForEach(model.loaders) { loader in
+                            Text("\(loader.fileName) (\(loader.fileSizeString))").tag(loader.fullPath)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .frame(maxWidth: 220)
+                    .onChange(of: selectedProgrammerPath) { newPath in
+                        firehoseLoaderPath = newPath
+                    }
+                }
+            }
+            
+            // Badges & Tag Info
+            if let model = currentSelectedModel {
+                HStack(spacing: 8) {
+                    if model.hasDigest || model.hasSign {
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.shield.fill")
+                                .foregroundColor(.green)
+                            Text("已附带签名凭证 (\(model.hasDigest ? "Digest " : "")\(model.hasSign ? "Sign" : ""))")
+                                .font(.caption2.bold())
+                                .foregroundColor(.green)
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Color.green.opacity(0.12))
+                        .clipShape(Capsule())
+                    }
+                    
+                    if let loader = model.loaders.first(where: { $0.fullPath == firehoseLoaderPath }) ?? model.primaryLoader {
+                        HStack(spacing: 4) {
+                            Image(systemName: "doc.fill")
+                                .foregroundColor(.blue)
+                            Text("\(loader.fileName) • \(loader.fileSizeString)")
+                                .font(.caption2.monospaced())
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Color.primary.opacity(0.06))
+                        .clipShape(Capsule())
+                    }
                     
                     Spacer()
-                    
-                    Text(L10n("edl_loader_desc"))
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
                 }
+            }
+            
+            Divider().opacity(0.3)
+            
+            // Manual File Path Input (Allows pasting custom external loader or editing)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("当前加载的 Firehose 引导文件绝对路径:")
+                    .font(.caption2.bold())
+                    .foregroundColor(.secondary)
                 
                 HStack(spacing: 10) {
                     TextField(L10n("edl_loader_placeholder"), text: $firehoseLoaderPath)
                         .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 11, design: .monospaced))
                     
                     Button(L10n("fb_browse")) {
                         chooseFirehoseLoader()
                     }
                     .liquidGlassButton()
                 }
+            }
+            
+            // Memory & LUN Selectors + Prominent SEND LOADER Button
+            HStack(spacing: 16) {
+                HStack(spacing: 6) {
+                    Text("\(L10n("edl_memory_type")):")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Picker("", selection: $selectedMemoryType) {
+                        Text("UFS (高通主流旗舰)").tag("ufs")
+                        Text("eMMC (入门/早期机型)").tag("emmc")
+                        Text("Auto (自动侦测)").tag("auto")
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 220)
+                }
                 
-                // Memory & LUN Selectors
-                HStack(spacing: 16) {
+                if selectedMemoryType == "ufs" {
                     HStack(spacing: 6) {
-                        Text("\(L10n("edl_memory_type")):")
+                        Text("LUN:")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         
-                        Picker("", selection: $selectedMemoryType) {
-                            Text("UFS (高通主流旗舰)").tag("ufs")
-                            Text("eMMC (入门/早期机型)").tag("emmc")
-                            Text("Auto (自动侦测)").tag("auto")
+                        Picker("", selection: $selectedLun) {
+                            Text("LUN 0 (用户区)").tag(0)
+                            Text("LUN 1 (引导A)").tag(1)
+                            Text("LUN 2 (引导B)").tag(2)
+                            Text("LUN 3").tag(3)
+                            Text("LUN 4").tag(4)
+                            Text("LUN 5").tag(5)
                         }
-                        .pickerStyle(.segmented)
-                        .frame(width: 240)
+                        .frame(width: 130)
                     }
-                    
-                    if selectedMemoryType == "ufs" {
-                        HStack(spacing: 6) {
-                            Text("LUN:")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Picker("", selection: $selectedLun) {
-                                Text("LUN 0 (用户区)").tag(0)
-                                Text("LUN 1 (引导A)").tag(1)
-                                Text("LUN 2 (引导B)").tag(2)
-                                Text("LUN 3").tag(3)
-                                Text("LUN 4").tag(4)
-                                Text("LUN 5").tag(5)
-                            }
-                            .frame(width: 140)
-                        }
-                    }
-                    
-                    Spacer()
                 }
-                .padding(.top, 4)
+                
+                Spacer()
+                
+                // Prominent SEND LOADER Action Button
+                Button {
+                    executeSendLoader()
+                } label: {
+                    HStack(spacing: 6) {
+                        if isSendingLoader {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text(L10n("edl_sending_loader"))
+                        } else {
+                            Image(systemName: "bolt.badge.automatic.fill")
+                            Text(L10n("edl_btn_send_loader"))
+                        }
+                    }
+                    .font(.subheadline.bold())
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 4)
+                }
+                .liquidGlassButton(tint: .orange, prominent: true)
+                .disabled(isSendingLoader || edlService.isFlashing || firehoseLoaderPath.isEmpty)
             }
         }
         .liquidGlassCard(cornerRadius: 16, padding: 16)
@@ -806,6 +1103,38 @@ public struct EDLView: View {
     }
     
     // MARK: - Actions
+    
+    private func executeSendLoader() {
+        guard !firehoseLoaderPath.isEmpty else {
+            deviceManager.appendLog(level: .warning, text: "⚠️ 请先选择或指定 Firehose 引导文件。")
+            return
+        }
+        
+        isSendingLoader = true
+        Task {
+            deviceManager.appendLog(level: .info, text: "==> [Sahara] 准备向设备发送 Firehose 引导: \(firehoseLoaderPath)")
+            do {
+                let success = try await edlService.sendLoader(
+                    loader: firehoseLoaderPath,
+                    memoryType: selectedMemoryType,
+                    onOutput: { line in
+                        Task { @MainActor in
+                            deviceManager.appendLog(level: .info, text: line)
+                        }
+                    }
+                )
+                if success {
+                    deviceManager.appendLog(level: .success, text: "🎉 Firehose 引导发送成功！设备已建立 Firehose 握手并处于就绪状态。")
+                } else {
+                    deviceManager.appendLog(level: .error, text: "❌ Firehose 引导发送失败。")
+                }
+            } catch {
+                deviceManager.appendLog(level: .error, text: "❌ 发送引导异常: \(error.localizedDescription)")
+                deviceManager.appendLog(level: .warning, text: "💡 避坑提示：\n1. 若通讯握手失败，请尝试更换另一个引导文件（如 DevprgProgrammer2 等）；\n2. 若此前已发送过引导，必须先长按电源键重启手机重新进入 9008 端口释放连接；\n3. 欧加等带签名机型若失败，可尝试在目录排除 Digest.elf 与 Sign.bin 后重试。")
+            }
+            isSendingLoader = false
+        }
+    }
     
     private func chooseFirehoseLoader() {
         let panel = NSOpenPanel()

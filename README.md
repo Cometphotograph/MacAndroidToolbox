@@ -2,7 +2,7 @@
 
 [English](README_EN.md) | **简体中文**
 
-[![Version](https://img.shields.io/badge/Version-v1.4.0-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
+[![Version](https://img.shields.io/badge/Version-v1.4.1-blue.svg?style=flat)](https://github.com/Cometphotograph/MacAndroidToolbox)
 [![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%2026%2B-blue.svg?style=flat&logo=apple)](https://www.apple.com/macos)
 [![Arch](https://img.shields.io/badge/Arch-Apple%20Silicon%20(arm64)-purple.svg)](https://apple.com)
@@ -76,6 +76,12 @@
 
 ### 🧯 3. Qualcomm 9008 深度救砖与底层刷机 (Qualcomm EDL 9008)
 * **USB 硬件级 9008 模式自动侦测**：通过 macOS 底层 IOKit 毫秒级快速识别处于 Emergency Download（VID `0x05c6` PID `0x9008` / `0x900e`）状态的高通设备。
+* **内置 192 款高通免授权引导库 (Firehose Loaders)**：
+  - 内置覆盖 **小米、欧加 (OPPO/一加/真我)、魅族、黑鲨、努比亚 (红魔/中兴)、联想 (拯救者/Moto)、华硕 (ROG)、LG** 八大品牌，支持从骁龙 625/835 到骁龙 8 Gen 1/2/3/4 及 8 至尊版（8 Elite）的完整免授权 Firehose 编程器。
+  - 支持机型与芯片关键词秒级模糊搜索，自动识别并配置签名凭证（`Digest.elf` 与 `Sign.bin`）。
+* **一键「发送引导 (Sahara 握手)」**：
+  - 点击「发送引导」即可通过底层 Sahara 协议将 Firehose Programmer 加载至设备内存并切换至就绪模式。
+  - 内置握手避坑指南（多引导轮换、长按电源键释放端口连接、排除签名测试等）。
 * **QFIL 仿真全盘线刷**：
   - 完整支持高通官方原厂 `rawprogram*.xml` 分区表映射与 `patch*.xml` 扇区补丁。
   - 支持 UFS（现代主流）与 eMMC 闪存颗粒类型，支持自动关联整套固件镜像。

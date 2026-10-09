@@ -1,0 +1,5 @@
+DevprgProgrammer发送Firehose引导通讯握手失败时请尝试换另一个。
+
+若已发送过引导，要换其他DevprgProgrammer尝试时，需先将设备重启重新进入9008端口释放连接，否则Sahara通讯无法释放，若未重启，此时重新发送引导无效。
+
+还是不行，尝试去掉Digest.elf和Sign.bin，仅选择DevprgProgrammer发送引导。

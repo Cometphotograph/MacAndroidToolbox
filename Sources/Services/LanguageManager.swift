@@ -38,8 +38,8 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
 public final class LanguageManager: ObservableObject {
     public static let shared = LanguageManager()
     
-    public let appVersion = "v1.4.0"
-    public let appBuild = "20261009_150"
+    public let appVersion = "v1.4.1"
+    public let appBuild = "20261009_151"
     
     private let kSelectedLanguageKey = "kSelectedAppLanguage"
     
@@ -2497,6 +2497,105 @@ public final class LanguageManager: ObservableObject {
             .ko: "9008 종료 / 재부팅",
             .ru: "Выход из 9008 / Перезагрузка",
             .uk: "Вихід з 9008 / Перезавантаження"
+        ],
+        "edl_btn_send_loader": [
+            .zhHant: "發送引導 (Sahara 握手)",
+            .zhHans: "发送引导 (Sahara 握手)",
+            .en: "Send Loader (Sahara)",
+            .fr: "Envoyer le chargeur (Sahara)",
+            .ja: "ローダー送信 (Sahara)",
+            .es: "Enviar cargador (Sahara)",
+            .ko: "로더 전송 (Sahara)",
+            .ru: "Отправить загрузчик (Sahara)",
+            .uk: "Надіслати завантажувач (Sahara)"
+        ],
+        "edl_sending_loader": [
+            .zhHant: "正在發送引導...",
+            .zhHans: "正在发送引导...",
+            .en: "Sending Loader...",
+            .fr: "Envoi du chargeur...",
+            .ja: "ローダー送信中...",
+            .es: "Enviando cargador...",
+            .ko: "로더 전송 중...",
+            .ru: "Отправка загрузчика...",
+            .uk: "Надсилання завантажувача..."
+        ],
+        "edl_loader_library_title": [
+            .zhHant: "內建 9008 引導庫速選",
+            .zhHans: "内置 9008 引导库速选",
+            .en: "Built-in 9008 Loader Library",
+            .fr: "Bibliothèque de chargeurs 9008 intégrée",
+            .ja: "内蔵 9008 ローダーライブラリ",
+            .es: "Biblioteca de cargadores 9008 integrada",
+            .ko: "내장 9008 로더 라이브러리",
+            .ru: "Встроенная библиотека загрузчиков 9008",
+            .uk: "Вбудована бібліотека завантажувачів 9008"
+        ],
+        "edl_loader_brand": [
+            .zhHant: "品牌",
+            .zhHans: "品牌",
+            .en: "Brand",
+            .fr: "Marque",
+            .ja: "ブランド",
+            .es: "Marca",
+            .ko: "브랜드",
+            .ru: "Бренд",
+            .uk: "Бренд"
+        ],
+        "edl_loader_chip_or_model": [
+            .zhHant: "機型 / 晶片平台",
+            .zhHans: "机型 / 芯片平台",
+            .en: "Model / Chipset",
+            .fr: "Modèle / Chipset",
+            .ja: "モデル / チップセット",
+            .es: "Modelo / Chipset",
+            .ko: "모델 / 칩셋",
+            .ru: "Модель / Чипсет",
+            .uk: "Модель / Чіпсет"
+        ],
+        "edl_loader_programmer": [
+            .zhHant: "引導程式檔案",
+            .zhHans: "引导程序文件",
+            .en: "Programmer File",
+            .fr: "Fichier programmeur",
+            .ja: "プログラマーファイル",
+            .es: "Archivo programador",
+            .ko: "프로그래머 파일",
+            .ru: "Файл программатора",
+            .uk: "Файл програматора"
+        ],
+        "edl_btn_apply_loader": [
+            .zhHant: "套用引導",
+            .zhHans: "应用引导",
+            .en: "Apply Loader",
+            .fr: "Appliquer",
+            .ja: "適用",
+            .es: "Aplicar",
+            .ko: "적용",
+            .ru: "Применить",
+            .uk: "Застосувати"
+        ],
+        "edl_filter_loaders": [
+            .zhHant: "搜尋機型或晶片 (如 8Gen3, 红魔, 888)...",
+            .zhHans: "搜索机型或芯片 (如 8Gen3, 红魔, 888)...",
+            .en: "Search model or chip (e.g. 8Gen3, RedMagic)...",
+            .fr: "Rechercher un modèle ou une puce...",
+            .ja: "モデルやチップを検索...",
+            .es: "Buscar modelo o procesador...",
+            .ko: "모델 또는 칩 검색...",
+            .ru: "Поиск модели или процессора...",
+            .uk: "Пошук моделі або процесора..."
+        ],
+        "edl_loader_notice_title": [
+            .zhHant: "9008 引導通訊與簽名避坑須知",
+            .zhHans: "9008 引导通讯与签名避坑须知",
+            .en: "EDL Loader & Handshake Notes",
+            .fr: "Notes sur le chargeur EDL",
+            .ja: "9008 ローダー通信と署名の注意事項",
+            .es: "Notas sobre el cargador EDL",
+            .ko: "9008 로더 통신 및 서명 주의사항",
+            .ru: "Примечания к загрузчику 9008",
+            .uk: "Примітки до завантажувача 9008"
         ],
         "edl_loader_file": [
             .zhHant: "Firehose 引導檔案 (Loader)",
